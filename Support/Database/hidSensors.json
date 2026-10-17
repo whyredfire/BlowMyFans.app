@@ -1,0 +1,46 @@
+[
+  {
+    "models": ["all"],
+    "sensors": [
+      { "group": "GPU Proximity", "sensors": [
+        { "key": "GPU MTR Temp Sensor1", "type": "gpu", "label": "GPU Sensor 1" },
+        { "key": "GPU MTR Temp Sensor4", "type": "gpu", "label": "GPU Sensor 2" }
+      ] },
+      { "key": "gas gauge battery", "label": "Battery Gas Gauge" },
+      { "key": "NAND CH0 temp", "type": "ssd", "label": "SSD" },
+      { "key": "SOC MTR Temp Sensor0", "label": "M1 SOC Sensor 1" },
+      { "key": "SOC MTR Temp Sensor1", "label": "M1 SOC Sensor 2" },
+      { "key": "SOC MTR Temp Sensor2", "label": "M1 SOC Sensor 3" },
+      { "group": "CPU Efficiency Cores Average", "sensors": [
+        { "key": "eACC MTR Temp Sensor0", "type": "cpu", "label": "CPU Efficiency Cores Package 1" },
+        { "key": "eACC MTR Temp Sensor3", "type": "cpu", "label": "CPU Efficiency Cores Package 2" }
+      ] },
+      { "group": "CPU Performance Cores Average", "sensors": [
+        { "key": "pACC MTR Temp Sensor2", "type": "cpu", "label": "CPU Performance Cores Package 1" },
+        { "key": "pACC MTR Temp Sensor3", "type": "cpu", "label": "CPU Performance Cores Package 2" },
+        { "key": "pACC MTR Temp Sensor4", "type": "cpu", "label": "CPU Performance Cores Package 3" },
+        { "key": "pACC MTR Temp Sensor5", "type": "cpu", "label": "CPU Performance Cores Package 4" },
+        { "key": "pACC MTR Temp Sensor7", "type": "cpu", "label": "CPU Performance Cores Package 5" },
+        { "key": "pACC MTR Temp Sensor8", "type": "cpu", "label": "CPU Performance Cores Package 6" },
+        { "key": "pACC MTR Temp Sensor9", "type": "cpu", "label": "CPU Performance Cores Package 7" }
+      ] },
+      { "key": "ANE MTR Temp Sensor1", "label": "M1 Neural Engine" },
+      { "key": "ISP MTR Temp Sensor5", "label": "M1 Image Signal Processor" },
+      { "group": "Power Manager SOC Die Average", "sensors": [
+        { "key": "PMGR SOC Die Temp Sensor0", "type": "psu", "label": "Power Manager SOC Die 1" },
+        { "key": "PMGR SOC Die Temp Sensor1", "type": "psu", "label": "Power Manager SOC Die 2" },
+        { "key": "PMGR SOC Die Temp Sensor2", "type": "psu", "label": "Power Manager SOC Die 3" }
+      ] },
+      { "group": "Power Manager Die Average", "sensors": [
+        { "key": "PMU tdie1", "type": "psu", "label": "Power Manager Die 1" },
+        { "key": "PMU tdie2", "type": "psu", "label": "Power Manager Die 2" },
+        { "key": "PMU tdie4", "type": "psu", "label": "Power Manager Die 4" },
+        { "key": "PMU tdie5", "type": "psu", "label": "Power Manager Die 5" },
+        { "key": "PMU tdie6", "type": "psu", "label": "Power Manager Die 6" },
+        { "key": "PMU tdie7", "type": "psu", "label": "Power Manager Die 7" },
+        { "key": "PMU tdie8", "type": "psu", "label": "Power Manager Die 8" }
+      ] },
+      { "key": "Charger TQ0d", "type": "psu", "label": "Charger Proximity" }
+    ]
+  }
+]

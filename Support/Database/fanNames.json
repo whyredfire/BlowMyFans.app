@@ -1,0 +1,11 @@
+[
+  { "models": ["iMacPro1,1"], "fans": ["Dual-fan cooler"] },
+  { "models": ["MacBookPro15,1", "MacBookPro15,2", "MacBookPro15,3", "MacBookPro16,1", "MacBookPro16,2", "MacBookPro16,4", "MacBookPro18,1+"], "fans": ["Left side", "Right side"] },
+  { "models": ["MacBookPro15,4", "MacBookPro16,3", "MacBookPro17,1", "MacBookPro17,2"], "fans": ["Right side"] },
+  { "models": ["MacBookPro20,1"], "fans": ["Left side"] },
+  { "models": ["MacBookAir8,1", "MacBookAir8,2", "MacBookAir9,1", "ADP3,2", "Macmini8,1+"], "fans": ["Exhaust"] },
+  { "models": ["MacPro7,1"], "fans": ["Exhaust", "Intake 1", "Intake 2", "Intake 3"] },
+  { "models": ["iMac20,1", "iMac20,2"], "fans": ["Main"] },
+  { "models": ["iMac21,1+"], "fans": ["Left side", "Right side"] },
+  { "models": ["MacStudio1,1+"], "fans": ["Dual-fan exhaust"] }
+]

@@ -1,0 +1,68 @@
+import AppKit
+import SwiftUI
+
+/// Borderless glass panel shown beneath the status item, sized to its SwiftUI content.
+final class MenuBarPanel: NSPanel {
+    private static let cornerRadius: CGFloat = 22
+
+    var onClose: (() -> Void)?
+
+    init(rootView: some View) {
+        super.init(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
+        isFloatingPanel = true
+        level = .statusBar
+        backgroundColor = .clear
+        isOpaque = false
+        hasShadow = true
+        collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
+
+        // The content reports its size and the panel follows on the next run loop turn;
+        // letting constraints resize the window mid-layout makes AppKit throw.
+        let content = rootView
+            .fixedSize()
+            .onGeometryChange(for: CGSize.self, of: \.size) { [weak self] size in
+                DispatchQueue.main.async { self?.fit(size) }
+            }
+        let hostingView = NSHostingView(rootView: content)
+        hostingView.sizingOptions = []
+        hostingView.safeAreaRegions = []
+
+        let glass = NSGlassEffectView()
+        glass.cornerRadius = Self.cornerRadius
+        glass.contentView = hostingView
+
+        // Clipping the content to the glass shape gives the window a matching rounded shadow.
+        let container = NSView()
+        container.wantsLayer = true
+        container.layer?.cornerRadius = Self.cornerRadius
+        container.layer?.cornerCurve = .continuous
+        container.layer?.masksToBounds = true
+        glass.translatesAutoresizingMaskIntoConstraints = true
+        glass.autoresizingMask = [.width, .height]
+        container.addSubview(glass)
+        contentView = container
+    }
+
+    override var canBecomeKey: Bool { true }
+
+    override func makeKeyAndOrderFront(_ sender: Any?) {
+        super.makeKeyAndOrderFront(sender)
+        invalidateShadow()
+    }
+
+    override func cancelOperation(_ sender: Any?) {
+        onClose?()
+    }
+
+    /// Opening Settings or clicking elsewhere in the app dismisses the panel, like a menu.
+    override func resignKey() {
+        super.resignKey()
+        onClose?()
+    }
+
+    private func fit(_ size: CGSize) {
+        guard size.width > 0, size.height > 0, frame.size != size else { return }
+        setContentSize(size)
+        invalidateShadow()
+    }
+}

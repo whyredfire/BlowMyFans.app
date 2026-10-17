@@ -1,0 +1,418 @@
+[
+  {
+    "models": ["all"],
+    "sensors": [
+      { "key": "TA0P", "label": "Ambient" },
+      { "key": "TB0T", "label": "Battery" },
+      { "key": "Th1H", "label": "Heatsink Proximity" },
+      { "key": "TPMP", "type": "psu", "label": "Power Supply Proximity" },
+      { "key": "TW0P", "type": "airport", "label": "Airport Proximity" }
+    ]
+  },
+  {
+    "models": ["MacBookPro17,1+", "MacBookAir10,1+"],
+    "sensors": [
+      { "key": "Ts0P", "label": "Trackpad" },
+      { "key": "Ts1P", "label": "Trackpad Actuator" }
+    ]
+  },
+  {
+    "models": ["iMac21,1+"],
+    "sensors": [
+      { "key": "TL0p", "label": "LCD Proximity" },
+      { "key": "TL1P", "label": "LCD Proximity 2" }
+    ]
+  },
+  {
+    "models": ["Macmini9,1"],
+    "sensors": [
+      { "key": "TIOP", "label": "Thunderbolt Proximity" }
+    ]
+  },
+  {
+    "models": ["MacBookPro18,1", "MacBookPro18,2", "MacBookPro18,3", "MacBookPro18,4", "MacStudio1,1", "MacStudio1,2"],
+    "sensors": [
+      { "group": "GPU Cluster Average", "hideSensors": false, "sensors": [
+        { "key": "Tg05", "type": "gpu", "label": "GPU Cluster 1" },
+        { "key": "Tg0D", "type": "gpu", "label": "GPU Cluster 2" },
+        { "key": "Tg0L", "type": "gpu", "label": "GPU Cluster 3" },
+        { "key": "Tg0T", "type": "gpu", "label": "GPU Cluster 4" },
+        { "key": "Tg0b", "type": "gpu", "label": "GPU Cluster 5" },
+        { "key": "Tg0j", "type": "gpu", "label": "GPU Cluster 6" },
+        { "key": "Tg0r", "type": "gpu", "label": "GPU Cluster 7" },
+        { "key": "Tg0z", "type": "gpu", "label": "GPU Cluster 8" }
+      ] },
+      { "group": "CPU Core Average", "hideSensors": false, "sensors": [
+        { "key": "Tp01", "type": "cpu", "label": "CPU Performance Core 1" },
+        { "key": "Tp05", "type": "cpu", "label": "CPU Performance Core 2" },
+        { "key": "Tp0D", "type": "cpu", "label": "CPU Performance Core 3" },
+        { "key": "Tp0H", "type": "cpu", "label": "CPU Performance Core 4" },
+        { "key": "Tp0L", "type": "cpu", "label": "CPU Performance Core 5" },
+        { "key": "Tp0P", "type": "cpu", "label": "CPU Performance Core 6" },
+        { "key": "Tp0X", "type": "cpu", "label": "CPU Performance Core 7" },
+        { "key": "Tp0b", "type": "cpu", "label": "CPU Performance Core 8" },
+        { "key": "Tp09", "type": "cpu", "label": "CPU Efficiency Core 1" },
+        { "key": "Tp0T", "type": "cpu", "label": "CPU Efficiency Core 2" },
+        { "key": "Tp21", "type": "cpu", "label": "CPU Performance Core 9" },
+        { "key": "Tp25", "type": "cpu", "label": "CPU Performance Core 10" },
+        { "key": "Tp2D", "type": "cpu", "label": "CPU Performance Core 11" },
+        { "key": "Tp2H", "type": "cpu", "label": "CPU Performance Core 12" },
+        { "key": "Tp2L", "type": "cpu", "label": "CPU Performance Core 13" },
+        { "key": "Tp2P", "type": "cpu", "label": "CPU Performance Core 14" },
+        { "key": "Tp2X", "type": "cpu", "label": "CPU Performance Core 15" },
+        { "key": "Tp2b", "type": "cpu", "label": "CPU Performance Core 16" },
+        { "key": "Tp29", "type": "cpu", "label": "CPU Efficiency Core 3" },
+        { "key": "Tp2T", "type": "cpu", "label": "CPU Efficiency Core 4" }
+      ] },
+      { "key": "Tm00", "label": "Memory Bank 1" },
+      { "key": "Tm04", "label": "Memory Bank 2" },
+      { "key": "Tm08", "label": "Memory Bank 3" },
+      { "key": "Tm0C", "label": "Memory Bank 4" }
+    ]
+  },
+  {
+    "models": ["MacStudio1,1+"],
+    "sensors": [
+      { "key": "TaFL", "label": "Airflow Front Left" },
+      { "key": "TaFR", "label": "Airflow Front Right" },
+      { "key": "TaRL", "label": "Airflow Rear Left" },
+      { "key": "TaRR", "label": "Airflow Rear Right" }
+    ]
+  },
+  {
+    "models": ["MacBookPro17,2", "MacBookAir11,1", "MacBookAir11,2", "Macmini10,1"],
+    "sensors": [
+      { "key": "Tg0f", "type": "gpu", "label": "GPU Cluster 1" },
+      { "key": "Tg0n", "type": "gpu", "label": "GPU Cluster 2" },
+      { "group": "CPU Core Average", "hideSensors": false, "sensors": [
+        { "key": "Tp01", "type": "cpu", "label": "CPU Performance Core 1" },
+        { "key": "Tp09", "type": "cpu", "label": "CPU Performance Core 2" },
+        { "key": "Tp0f", "type": "cpu", "label": "CPU Performance Core 3" },
+        { "key": "Tp0n", "type": "cpu", "label": "CPU Performance Core 4" },
+        { "key": "Tp05", "type": "cpu", "label": "CPU Efficiency Core 1" },
+        { "key": "Tp0D", "type": "cpu", "label": "CPU Efficiency Core 2" },
+        { "key": "Tp0j", "type": "cpu", "label": "CPU Efficiency Core 3" },
+        { "key": "Tp0r", "type": "cpu", "label": "CPU Efficiency Core 4" }
+      ] }
+    ]
+  },
+  {
+    "models": ["MacBookPro19,1", "MacBookPro19,2", "MacBookPro19,3", "MacBookPro19,4", "Macmini10,2", "MacStudio2,1", "MacStudio2,2", "MacPro8,1"],
+    "sensors": [
+      { "group": "GPU Cluster Average", "hideSensors": false, "sensors": [
+        { "key": "Tg0f", "type": "gpu", "label": "GPU Cluster 1" },
+        { "key": "Tg0j", "type": "gpu", "label": "GPU Cluster 2" },
+        { "key": "Tg1h", "type": "gpu", "label": "GPU Cluster 3" },
+        { "key": "Tg1l", "type": "gpu", "label": "GPU Cluster 4" },
+        { "key": "Tg2f", "type": "gpu", "label": "GPU Cluster 5" }
+      ] },
+      { "group": "CPU Core Average", "hideSensors": false, "sensors": [
+        { "key": "Tp01", "type": "cpu", "label": "CPU Performance Core 1" },
+        { "key": "Tp09", "type": "cpu", "label": "CPU Performance Core 2" },
+        { "key": "Tp0X", "type": "cpu", "label": "CPU Performance Core 3" },
+        { "key": "Tp0f", "type": "cpu", "label": "CPU Performance Core 4" },
+        { "key": "Tp1B", "type": "cpu", "label": "CPU Performance Core 5" },
+        { "key": "Tp1J", "type": "cpu", "label": "CPU Performance Core 6" },
+        { "key": "Tp1h", "type": "cpu", "label": "CPU Performance Core 7" },
+        { "key": "Tp1p", "type": "cpu", "label": "CPU Performance Core 8" },
+        { "key": "Tp05", "type": "cpu", "label": "CPU Efficiency Core 1" },
+        { "key": "Tp0b", "type": "cpu", "label": "CPU Efficiency Core 2" },
+        { "key": "Tp0D", "type": "cpu", "label": "CPU Efficiency Core 3" },
+        { "key": "Tp0j", "type": "cpu", "label": "CPU Efficiency Core 4" }
+      ] }
+    ]
+  },
+  {
+    "models": ["MacBookPro19,1", "MacBookPro19,2", "MacBookPro19,3", "MacBookPro19,4"],
+    "sensors": [
+      { "key": "TaLP", "label": "Airflow Left" },
+      { "key": "TaRF", "label": "Airflow Right" }
+    ]
+  },
+  {
+    "models": ["MacBookPro20,1", "iMac22,1", "iMac22,2", "MacBookAir12,1", "MacBookAir12,2"],
+    "sensors": [
+      { "group": "CPU Core Average", "hideSensors": false, "sensors": [
+        { "key": "Tp01", "type": "cpu", "label": "CPU Performance Core 1" },
+        { "key": "Tp09", "type": "cpu", "label": "CPU Performance Core 2" },
+        { "key": "Tp0X", "type": "cpu", "label": "CPU Performance Core 3" },
+        { "key": "Tp0f", "type": "cpu", "label": "CPU Performance Core 4" },
+        { "key": "Tp05", "type": "cpu", "label": "CPU Efficiency Core 1" },
+        { "key": "Tp0b", "type": "cpu", "label": "CPU Efficiency Core 2" },
+        { "key": "Tp0D", "type": "cpu", "label": "CPU Efficiency Core 3" },
+        { "key": "Tp0j", "type": "cpu", "label": "CPU Efficiency Core 4" }
+      ] },
+      { "group": "GPU Core Average", "hideSensors": true, "sensors": [
+        { "key": "Tg0D", "type": "gpu", "label": "GPU Cores" },
+        { "key": "Tg0P", "type": "gpu", "label": "GPU Cores" },
+        { "key": "Tg0X", "type": "gpu", "label": "GPU Cores" },
+        { "key": "Tg0b", "type": "gpu", "label": "GPU Cores" },
+        { "key": "Tg0j", "type": "gpu", "label": "GPU Cores" },
+        { "key": "Tg0v", "type": "gpu", "label": "GPU Cores" }
+      ] }
+    ]
+  },
+  {
+    "models": ["MacBookPro20,2", "MacBookPro20,5"],
+    "sensors": [
+      { "group": "CPU Core Average", "hideSensors": false, "sensors": [
+        { "key": "Tp05", "type": "cpu", "label": "CPU Performance Core 1" },
+        { "key": "Tp0D", "type": "cpu", "label": "CPU Performance Core 2" },
+        { "key": "Tp0L", "type": "cpu", "label": "CPU Performance Core 3" },
+        { "key": "Tp0S", "type": "cpu", "label": "CPU Performance Core 4" },
+        { "key": "Tp17", "type": "cpu", "label": "CPU Performance Core 5" },
+        { "key": "Tp1F", "type": "cpu", "label": "CPU Performance Core 6" },
+        { "key": "Te05", "type": "cpu", "label": "CPU Efficiency Core 1" },
+        { "key": "Te0P", "type": "cpu", "label": "CPU Efficiency Core 2" },
+        { "key": "Te0H", "type": "cpu", "label": "CPU Efficiency Core 3" },
+        { "key": "Te04", "type": "cpu", "label": "CPU Efficiency Core 4" },
+        { "key": "Te0S", "type": "cpu", "label": "CPU Efficiency Core 5" },
+        { "key": "Te0U", "type": "cpu", "label": "CPU Efficiency Core 6" }
+      ] },
+      { "group": "GPU Clusters Average", "hideSensors": false, "sensors": [
+        { "key": "Tg05", "type": "gpu", "label": "GPU Cluster 1" },
+        { "key": "Tg0D", "type": "gpu", "label": "GPU Cluster 2" },
+        { "key": "Tg0v", "type": "gpu", "label": "GPU Cluster 3" },
+        { "key": "Tg1B", "type": "gpu", "label": "GPU Cluster 4" }
+      ] }
+    ]
+  },
+  {
+    "models": ["MacBookPro20,3", "MacBookPro20,4", "MacBookPro20,6", "MacBookPro20,7"],
+    "sensors": [
+      { "group": "CPU Core Average", "hideSensors": false, "sensors": [
+        { "key": "Tp05", "type": "cpu", "label": "CPU Performance Core 1" },
+        { "key": "Tp0D", "type": "cpu", "label": "CPU Performance Core 2" },
+        { "key": "Tp0L", "type": "cpu", "label": "CPU Performance Core 3" },
+        { "key": "Tp1F", "type": "cpu", "label": "CPU Performance Core 4" },
+        { "key": "Tp17", "type": "cpu", "label": "CPU Performance Core 5" },
+        { "key": "Tp0S", "type": "cpu", "label": "CPU Performance Core 6" },
+        { "key": "Tp1h", "type": "cpu", "label": "CPU Performance Core 7" },
+        { "key": "Tp1p", "type": "cpu", "label": "CPU Performance Core 8" },
+        { "key": "Tp1y", "type": "cpu", "label": "CPU Performance Core 9" },
+        { "key": "Tp30", "type": "cpu", "label": "CPU Performance Core 10" },
+        { "key": "Tp26", "type": "cpu", "label": "CPU Performance Core 11" },
+        { "key": "Tp3s", "type": "cpu", "label": "CPU Performance Core 12" },
+        { "key": "Te05", "type": "cpu", "labels": ["CPU Efficiency Core 1", "CPU Efficiency Core 2"] },
+        { "key": "Te0L", "type": "cpu", "labels": ["CPU Efficiency Core 3", "CPU Efficiency Core 4"] }
+      ] },
+      { "group": "GPU Clusters Average", "hideSensors": false, "sensors": [
+        { "key": "Tg05", "type": "gpu", "addNoFail": true, "label": "GPU Cluster 1" },
+        { "key": "Tg0z", "type": "gpu", "addNoFail": true, "label": "GPU Cluster 2" },
+        { "key": "Tg34", "type": "gpu", "addNoFail": true, "label": "GPU Cluster 3" },
+        { "key": "Tg3y", "type": "gpu", "addNoFail": true, "label": "GPU Cluster 4" }
+      ] }
+    ]
+  },
+  {
+    "models": ["MacStudio3,2"],
+    "sensors": [
+      { "group": "CPU Core Average", "hideSensors": false, "sensors": [
+        { "key": "Tp06", "type": "cpu", "labels": ["CPU Performance Core 1", "CPU Performance Core 9"] },
+        { "key": "Tp0E", "type": "cpu", "labels": ["CPU Performance Core 2", "CPU Performance Core 10"] },
+        { "key": "Tp0M", "type": "cpu", "labels": ["CPU Performance Core 3", "CPU Performance Core 11"] },
+        { "key": "Tp0T", "type": "cpu", "labels": ["CPU Performance Core 4", "CPU Performance Core 12"] },
+        { "key": "Tp0W", "type": "cpu", "labels": ["CPU Performance Core 5", "CPU Performance Core 13"] },
+        { "key": "Tp0c", "type": "cpu", "labels": ["CPU Performance Core 6", "CPU Performance Core 14"] },
+        { "key": "Tp0i", "type": "cpu", "labels": ["CPU Performance Core 7", "CPU Performance Core 15"] },
+        { "key": "Tp0o", "type": "cpu", "labels": ["CPU Performance Core 8", "CPU Performance Core 16"] },
+        { "key": "Tp18", "type": "cpu", "labels": ["CPU Performance Core 17", "CPU Performance Core 21"] },
+        { "key": "Tp1G", "type": "cpu", "labels": ["CPU Performance Core 18", "CPU Performance Core 22"] },
+        { "key": "Tp1K", "type": "cpu", "labels": ["CPU Performance Core 19", "CPU Performance Core 23"] },
+        { "key": "Tp1S", "type": "cpu", "labels": ["CPU Performance Core 20", "CPU Performance Core 24"] },
+        { "key": "Te06", "type": "cpu", "labels": ["CPU Efficiency Core 1", "CPU Efficiency Core 5"] },
+        { "key": "Te0M", "type": "cpu", "labels": ["CPU Efficiency Core 2", "CPU Efficiency Core 6"] },
+        { "key": "Te0Q", "type": "cpu", "labels": ["CPU Efficiency Core 3", "CPU Efficiency Core 7"] },
+        { "key": "Te0T", "type": "cpu", "labels": ["CPU Efficiency Core 4", "CPU Efficiency Core 8"] }
+      ] },
+      { "group": "GPU Cluster Average", "hideSensors": false, "sensors": [
+        { "key": "Tg05", "type": "gpu", "label": "GPU Cluster 1" },
+        { "key": "Tg0z", "type": "gpu", "label": "GPU Cluster 2" },
+        { "key": "Tg22", "type": "gpu", "label": "GPU Cluster 3" },
+        { "key": "Tg2I", "type": "gpu", "label": "GPU Cluster 4" },
+        { "key": "Tg34", "type": "gpu", "label": "GPU Cluster 5" },
+        { "key": "Tg3K", "type": "gpu", "label": "GPU Cluster 6" }
+      ] }
+    ]
+  },
+  {
+    "models": ["Macmini11,1", "MacBookPro21,1", "iMac23,1", "iMac23,2", "MacBookAir13,1", "MacBookAir13,2"],
+    "sensors": [
+      { "group": "CPU Core Average", "hideSensors": false, "sensors": [
+        { "key": "Tp01", "type": "cpu", "label": "CPU Performance Core 1" },
+        { "key": "Tp05", "type": "cpu", "label": "CPU Performance Core 2" },
+        { "key": "Tp09", "type": "cpu", "label": "CPU Performance Core 3" },
+        { "key": "Tp0D", "type": "cpu", "label": "CPU Performance Core 4" },
+        { "key": "Te05", "type": "cpu", "label": "CPU Efficiency Core 1" },
+        { "key": "Te09", "type": "cpu", "label": "CPU Efficiency Core 2" },
+        { "key": "Te0H", "type": "cpu", "label": "CPU Efficiency Core 3" },
+        { "key": "Te0S", "type": "cpu", "label": "CPU Efficiency Core 4" },
+        { "key": "Te0U", "type": "cpu", "label": "CPU Efficiency Core 5" },
+        { "key": "Te0V", "type": "cpu", "label": "CPU Efficiency Core 6" }
+      ] },
+      { "group": "GPU Cluster Average", "hideSensors": false, "sensors": [
+        { "key": "Tg04", "type": "gpu", "label": "GPU Cluster 1" },
+        { "key": "Tg12", "type": "gpu", "label": "GPU Cluster 2" }
+      ] }
+    ]
+  },
+  {
+    "models": ["Macmini11,1"],
+    "sensors": [
+      { "key": "Tm1p", "label": "Memory Proximity" }
+    ]
+  },
+  {
+    "models": ["MacStudio3,1", "Macmini11,2", "MacBookPro21,2", "MacBookPro21,3", "MacBookPro21,4", "MacBookPro21,5"],
+    "sensors": [
+      { "group": "CPU Core Average", "hideSensors": false, "sensors": [
+        { "key": "Tp01", "type": "cpu", "labels": ["CPU Performance Core 1", "CPU Performance Core 7"] },
+        { "key": "Tp09", "type": "cpu", "labels": ["CPU Performance Core 2", "CPU Performance Core 8"] },
+        { "key": "Tp0H", "type": "cpu", "labels": ["CPU Performance Core 3", "CPU Performance Core 9"] },
+        { "key": "Tp0P", "type": "cpu", "labels": ["CPU Performance Core 4", "CPU Performance Core 10"] },
+        { "key": "Tp0X", "type": "cpu", "labels": ["CPU Performance Core 5", "CPU Performance Core 11"] },
+        { "key": "Tp0Y", "type": "cpu", "labels": ["CPU Performance Core 6", "CPU Performance Core 12"] },
+        { "key": "Te05", "type": "cpu", "labels": ["CPU Efficiency Core 1", "CPU Efficiency Core 2"] },
+        { "key": "Te0S", "type": "cpu", "labels": ["CPU Efficiency Core 3", "CPU Efficiency Core 4"] }
+      ] },
+      { "group": "GPU Cluster Average", "hideSensors": false, "sensors": [
+        { "key": "Tg05", "type": "gpu", "label": "GPU Cluster 1" },
+        { "key": "Tg0S", "type": "gpu", "label": "GPU Cluster 2" },
+        { "key": "Tg0Y", "type": "gpu", "label": "GPU Cluster 3" },
+        { "key": "Tg0k", "type": "gpu", "label": "GPU Cluster 4" },
+        { "key": "Tg0z", "type": "gpu", "label": "GPU Cluster 5" }
+      ] }
+    ]
+  },
+  {
+    "models": ["MacBookPro21,2", "MacBookPro21,3", "MacBookPro21,4", "MacBookPro21,5"],
+    "sensors": [
+      { "key": "TaLT", "label": "Thunderbolt Left Proximity" },
+      { "key": "TaRT", "label": "Thunderbolt Right Proximity" }
+    ]
+  },
+  {
+    "models": ["MacBookPro22,1", "MacBookAir14,1", "MacBookAir14,2"],
+    "sensors": [
+      { "group": "CPU Core Average", "hideSensors": false, "sensors": [
+        { "key": "Tp00", "type": "cpu", "label": "CPU Super Core 1" },
+        { "key": "Tp0C", "type": "cpu", "label": "CPU Super Core 2" },
+        { "key": "Tp0O", "type": "cpu", "label": "CPU Super Core 3" },
+        { "key": "Tp0X", "type": "cpu", "label": "CPU Super Core 4" },
+        { "key": "Te04", "type": "cpu", "labels": ["CPU Efficiency Core 1", "CPU Efficiency Core 4"] },
+        { "key": "Te08", "type": "cpu", "labels": ["CPU Efficiency Core 2", "CPU Efficiency Core 5"] },
+        { "key": "Te0C", "type": "cpu", "labels": ["CPU Efficiency Core 3", "CPU Efficiency Core 6"] }
+      ] },
+      { "group": "GPU Cluster Average", "hideSensors": false, "sensors": [
+        { "key": "Tg0K", "type": "gpu", "label": "GPU Cluster 1" },
+        { "key": "Tg1M", "type": "gpu", "label": "GPU Cluster 2" }
+      ] }
+    ]
+  },
+  {
+    "models": ["MacBookPro22,1"],
+    "sensors": [
+      { "key": "TPMP", "exclude": true },
+      { "key": "TPSP", "type": "psu", "label": "Power Supply Proximity" },
+      { "key": "TCHP", "type": "psu", "label": "Charger Proximity" },
+      { "key": "TsOP", "label": "Trackpad" },
+      { "key": "TIOP", "label": "Thunderbolt Proximity" }
+    ]
+  },
+  {
+    "models": ["MacBookPro22,2", "MacBookPro22,3", "MacBookPro22,4", "MacBookPro22,5", "Macmini12,2", "MacStudio4,1", "MacStudio4,2"],
+    "sensors": [
+      { "group": "CPU Core Average", "hideSensors": false, "sensors": [
+        { "key": "Tm04", "type": "cpu", "label": "CPU Performance Core 1" },
+        { "key": "Tm0G", "type": "cpu", "label": "CPU Performance Core 2" },
+        { "key": "Tm0R", "type": "cpu", "label": "CPU Performance Core 3" },
+        { "key": "Tm0a", "type": "cpu", "label": "CPU Performance Core 4" },
+        { "key": "Tm0j", "type": "cpu", "label": "CPU Performance Core 5" },
+        { "key": "Tm1Q", "type": "cpu", "label": "CPU Performance Core 6" },
+        { "key": "Tm1c", "type": "cpu", "label": "CPU Performance Core 7" },
+        { "key": "Tm1o", "type": "cpu", "label": "CPU Performance Core 8" },
+        { "key": "Tm21", "type": "cpu", "label": "CPU Performance Core 9" },
+        { "key": "Tm2D", "type": "cpu", "label": "CPU Performance Core 10" },
+        { "key": "Tm2P", "type": "cpu", "label": "CPU Performance Core 11" },
+        { "key": "Tm2n", "type": "cpu", "label": "CPU Performance Core 12" },
+        { "key": "Tp04", "type": "cpu", "label": "CPU Super Core 1" },
+        { "key": "Tp0G", "type": "cpu", "label": "CPU Super Core 2" },
+        { "key": "Tp0R", "type": "cpu", "label": "CPU Super Core 3" },
+        { "key": "Tp0a", "type": "cpu", "label": "CPU Super Core 4" },
+        { "key": "Tp0j", "type": "cpu", "label": "CPU Super Core 5" },
+        { "key": "Tp0u", "type": "cpu", "label": "CPU Super Core 6" }
+      ] },
+      { "group": "GPU Cluster Average", "hideSensors": false, "sensors": [
+        { "key": "Tg08", "type": "gpu", "label": "GPU Cluster 1" },
+        { "key": "Tg12", "type": "gpu", "label": "GPU Cluster 2" },
+        { "key": "Tg1x", "type": "gpu", "label": "GPU Cluster 3" },
+        { "key": "Tg29", "type": "gpu", "label": "GPU Cluster 4" }
+      ] }
+    ]
+  },
+  {
+    "models": ["Macmini12,2"],
+    "sensors": [
+      { "key": "TPMP", "exclude": true },
+      { "key": "TPSP", "type": "psu", "label": "Power Supply Proximity" },
+      { "key": "TPSD", "type": "psu", "label": "Power Supply" },
+      { "key": "TMVR", "label": "Memory Voltage Regulator" },
+      { "key": "TIED", "label": "Ethernet" },
+      { "key": "Ta0p", "label": "Internal Ambient" }
+    ]
+  },
+  {
+    "models": ["MacBookNeo1,1"],
+    "sensors": [
+      { "group": "CPU Core Average", "hideSensors": false, "sensors": [
+        { "key": "Tp01", "type": "cpu", "label": "CPU Performance Core 1" },
+        { "key": "Tp09", "type": "cpu", "label": "CPU Performance Core 2" },
+        { "key": "Te05", "type": "cpu", "label": "CPU Efficiency Core 1" },
+        { "key": "Te06", "type": "cpu", "label": "CPU Efficiency Core 2" },
+        { "key": "Tex0", "type": "cpu", "label": "CPU Efficiency Core 3" },
+        { "key": "Tex1", "type": "cpu", "label": "CPU Efficiency Core 4" }
+      ] },
+      { "group": "GPU Cluster Average", "hideSensors": false, "sensors": [
+        { "key": "Tg05", "type": "gpu", "label": "GPU Cluster 1" },
+        { "key": "Tg0D", "type": "gpu", "label": "GPU Cluster 2" }
+      ] }
+    ]
+  },
+  {
+    "models": ["MacBookNeo1,1"],
+    "sensors": [
+      { "key": "TW0p", "type": "airport", "label": "Airport Proximity" }
+    ]
+  },
+  {
+    "models": ["Macmini12,1"],
+    "sensors": [
+      { "group": "CPU Core Average", "hideSensors": false, "sensors": [
+        { "key": "Tp0g", "type": "cpu", "label": "CPU Super Core 1" },
+        { "key": "Tp0j", "type": "cpu", "label": "CPU Super Core 2" },
+        { "key": "Tp0L", "type": "cpu", "label": "CPU Performance Core 1" },
+        { "key": "Tp0I", "type": "cpu", "label": "CPU Performance Core 2" },
+        { "key": "Tp0d", "type": "cpu", "label": "CPU Performance Core 3" },
+        { "key": "Tp0m", "type": "cpu", "label": "CPU Performance Core 4" },
+        { "key": "Te07", "type": "cpu", "labels": ["CPU Efficiency Core 1", "CPU Efficiency Core 4"] },
+        { "key": "Te08", "type": "cpu", "labels": ["CPU Efficiency Core 2", "CPU Efficiency Core 5"] },
+        { "key": "Te09", "type": "cpu", "labels": ["CPU Efficiency Core 3", "CPU Efficiency Core 6"] }
+      ] },
+      { "group": "GPU Cluster Average", "hideSensors": false, "sensors": [
+        { "key": "Tg0c", "type": "gpu", "label": "GPU Cluster 1" },
+        { "key": "Tg1d", "type": "gpu", "label": "GPU Cluster 2" }
+      ] }
+    ]
+  },
+  {
+    "models": ["Macmini12,1"],
+    "sensors": [
+      { "key": "TPMP", "exclude": true },
+      { "key": "TPSP", "type": "psu", "label": "Power Supply Proximity" },
+      { "key": "TPSD", "type": "psu", "label": "Power Supply" },
+      { "key": "TMVR", "label": "Memory Voltage Regulator" },
+      { "key": "TIED", "label": "Ethernet" },
+      { "key": "TT0P", "label": "Thunderbolt Controller Proximity" }
+    ]
+  }
+]

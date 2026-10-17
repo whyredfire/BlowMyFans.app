@@ -1,0 +1,311 @@
+import AppKit
+import HelperInterface
+import Observation
+import SMCKit
+
+enum HelperStatus {
+    case unknown, notInstalled, installing, installed
+}
+
+/// Owns the fan configuration and keeps the helper in sync with it.
+@MainActor @Observable
+final class FanController {
+    private static let configurationKey = "fanConfiguration"
+
+    var configuration: FanConfiguration {
+        didSet {
+            guard configuration != oldValue else { return }
+            UserDefaults.standard.setEncoded(configuration, forKey: Self.configurationKey)
+            // Any edit is the user acting, so give a paused mode another try.
+            resume()
+            scheduleSync()
+        }
+    }
+
+    private(set) var helperStatus: HelperStatus = .unknown
+    private(set) var errorMessage: String?
+    @ObservationIgnored private var isTakingControl = false
+    /// The saved mode is kept but not applied, after a failure or while the helper is missing.
+    /// macOS controls the fans meanwhile and `errorMessage` says why.
+    private(set) var isSuspended = false
+
+    var mode: FanMode { configuration.mode }
+
+    @ObservationIgnored private let monitor: HardwareMonitor
+    @ObservationIgnored private let settings: AppSettings
+    @ObservationIgnored private let helper = HelperClient()
+    /// Speeds last confirmed by the helper; nil while macOS controls the fans.
+    @ObservationIgnored private var appliedRPMs: [Double]?
+    /// Bumped whenever the helper may have dropped applied speeds, so replies to calls made
+    /// before that point aren't recorded as applied.
+    @ObservationIgnored private var appliedGeneration = 0
+    @ObservationIgnored private var isAsleep = false
+    @ObservationIgnored private var isUninstalling = false
+    @ObservationIgnored private var syncTask: Task<Void, Never>?
+    @ObservationIgnored private var needsAnotherSync = false
+    @ObservationIgnored private var debounceTask: Task<Void, Never>?
+    /// Consecutive monitor polls showing fans out of manual mode while speeds are applied.
+    @ObservationIgnored private var lostControlPolls = 0
+    @ObservationIgnored private var nextControlRecovery = ContinuousClock.now
+
+    init(monitor: HardwareMonitor, settings: AppSettings) {
+        self.monitor = monitor
+        self.settings = settings
+        let defaults = UserDefaults.standard
+        configuration = defaults.decoded(FanConfiguration.self, forKey: Self.configurationKey) ?? FanConfiguration()
+
+        monitor.onUpdate = { [weak self] in self?.monitorDidUpdate() }
+        helper.onConnectionLost = { [weak self] in self?.invalidateAppliedSpeeds() }
+
+        // The helper hands fans to macOS for sleep itself; the app pauses and re-sends on wake.
+        observeWorkspace(NSWorkspace.willSleepNotification) { controller in
+            controller.isAsleep = true
+            controller.debounceTask?.cancel()
+        }
+        observeWorkspace(NSWorkspace.didWakeNotification) { controller in
+            controller.isAsleep = false
+            controller.lostControlPolls = 0
+            controller.invalidateAppliedSpeeds()
+        }
+
+        Task {
+            await refreshHelperStatus()
+            // A saved mode must never trigger a password prompt at launch; wait for the user to act.
+            if helperStatus != .installed, configuration.mode != .automatic {
+                isSuspended = true
+                errorMessage = "The fan helper isn't installed. Install it or choose a mode to resume \(mode.title)."
+            }
+            sync()
+        }
+    }
+
+    func select(_ mode: FanMode) {
+        resume()
+        if configuration.mode == mode {
+            sync()
+        } else {
+            configuration.mode = mode
+        }
+    }
+
+    // MARK: Helper
+
+    func refreshHelperStatus() async {
+        let version = await helper.installedVersion()
+        helperStatus = version == HelperIdentity.version ? .installed : .notInstalled
+    }
+
+    func installHelper() async {
+        do {
+            try await ensureHelper()
+            errorMessage = nil
+            isSuspended = false
+            sync()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func uninstallHelper() async {
+        guard !isUninstalling else { return }
+        isUninstalling = true
+        debounceTask?.cancel()
+        // Let an in-flight sync finish so it can't re-apply speeds after the restore below.
+        while let syncTask { await syncTask.value }
+
+        if appliedRPMs != nil {
+            appliedRPMs = nil
+            try? await helper.restoreAutomatic()
+        }
+
+        var didUninstall = false
+        do {
+            try await HelperInstaller.uninstall()
+            didUninstall = true
+            errorMessage = nil
+        } catch HelperInstallerError.cancelled {
+            // Nothing changed; the current mode stays.
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+        if didUninstall { helper.disconnect() }
+        await refreshHelperStatus()
+        isUninstalling = false
+
+        if didUninstall, helperStatus != .installed {
+            // Fans are back with macOS; reflect that rather than offering to reinstall on the next sync.
+            isSuspended = false
+            configuration.mode = .automatic
+        }
+        sync()
+    }
+
+    // MARK: Syncing
+
+    private enum SyncTarget {
+        /// Leave the fans to macOS.
+        case automatic
+        /// Readings are unusable; keep whatever is applied.
+        case hold
+        case speeds([Double])
+    }
+
+    /// Clears a suspension so the saved mode is applied again on the next sync.
+    private func resume() {
+        guard isSuspended else { return }
+        isSuspended = false
+        errorMessage = nil
+    }
+
+    private func monitorDidUpdate() {
+        detectLostControl()
+        sync()
+    }
+
+    /// Re-sends the target if fans stay out of manual mode while we believe speeds are applied
+    /// (e.g. the helper gave up re-applying them). The helper's own watchdog gets the first few
+    /// seconds, and recovery is rate-limited.
+    private func detectLostControl() {
+        guard let applied = appliedRPMs, !isTakingControl, !isAsleep, syncTask == nil,
+              monitor.fans.count == applied.count,
+              monitor.fans.contains(where: { !$0.isManual }) else {
+            lostControlPolls = 0
+            return
+        }
+        lostControlPolls += 1
+        guard lostControlPolls >= 3, ContinuousClock.now >= nextControlRecovery else { return }
+        lostControlPolls = 0
+        nextControlRecovery = .now + .seconds(30)
+        invalidateAppliedSpeeds()
+    }
+
+    /// Forgets what the helper was told so the next sync re-sends it.
+    private func invalidateAppliedSpeeds() {
+        appliedRPMs = nil
+        appliedGeneration &+= 1
+        sync()
+    }
+
+    private func scheduleSync() {
+        debounceTask?.cancel()
+        debounceTask = Task {
+            try? await Task.sleep(for: .milliseconds(200))
+            guard !Task.isCancelled else { return }
+            sync()
+        }
+    }
+
+    /// Coalesces requests so only one sync talks to the helper at a time.
+    private func sync() {
+        guard !isUninstalling else { return }
+        guard syncTask == nil else {
+            needsAnotherSync = true
+            return
+        }
+        syncTask = Task {
+            repeat {
+                needsAnotherSync = false
+                await syncNow()
+            } while needsAnotherSync && !isUninstalling
+            syncTask = nil
+        }
+    }
+
+    private func desiredTarget() -> SyncTarget {
+        guard !isSuspended, configuration.mode != .automatic else { return .automatic }
+        let fans = monitor.fans
+        // A failed SMC read reports 0 RPM limits; never turn that into a speed (0 would stop the fan).
+        guard !fans.isEmpty, fans.allSatisfy(\.hasUsableSpeedRange) else { return .hold }
+        let target = configuration.targetRPMs(
+            for: fans,
+            temperatures: monitor.temperatures,
+            linkFans: monitor.visibleFans.count <= 1,
+            allowFanOff: settings.allowFanOff,
+            linkedMinimum: monitor.fanSpeedRange?.lowerBound
+        )
+        return target.map(SyncTarget.speeds) ?? .automatic
+    }
+
+    private func syncNow() async {
+        guard helperStatus != .unknown, !isAsleep, !isUninstalling else { return }
+        let generation = appliedGeneration
+
+        do {
+            switch desiredTarget() {
+            case .hold:
+                return
+            case .speeds(let target):
+                guard target != appliedRPMs else { return }
+                isTakingControl = appliedRPMs == nil
+                defer { isTakingControl = false }
+                try await ensureHelper()
+                try await helper.setFanSpeeds(target)
+                guard generation == appliedGeneration else {
+                    // The helper may have dropped these meanwhile; send them again.
+                    needsAnotherSync = true
+                    return
+                }
+                appliedRPMs = target
+            case .automatic:
+                guard appliedRPMs != nil else { return }
+                appliedRPMs = nil
+                try await helper.restoreAutomatic()
+            }
+            if !isSuspended { errorMessage = nil }
+        } catch {
+            await handleSyncFailure(error)
+        }
+    }
+
+    /// Pauses the mode without changing the saved configuration. The helper has already
+    /// handed the fans back to macOS (it rolls back failed writes and drops lost clients).
+    private func handleSyncFailure(_ error: Error) async {
+        appliedRPMs = nil
+        if configuration.mode != .automatic {
+            isSuspended = true
+            errorMessage = "\(error.localizedDescription) \(mode.title) is paused until you choose a mode."
+        } else {
+            errorMessage = error.localizedDescription
+        }
+        // Anything but an error reported by the helper itself means it may be gone; re-check so
+        // the UI offers to install it again.
+        switch error {
+        case HelperClientError.failed, is HelperInstallerError: break
+        default: await refreshHelperStatus()
+        }
+    }
+
+    private func ensureHelper() async throws {
+        if helperStatus != .installed { await refreshHelperStatus() }
+        guard helperStatus != .installed else { return }
+
+        helperStatus = .installing
+        do {
+            try await HelperInstaller.install()
+        } catch {
+            helperStatus = .notInstalled
+            throw error
+        }
+
+        // launchd may need a moment before the new mach service answers.
+        helper.disconnect()
+        for _ in 0..<10 {
+            if await helper.installedVersion() == HelperIdentity.version {
+                helperStatus = .installed
+                return
+            }
+            try await Task.sleep(for: .milliseconds(300))
+        }
+        helperStatus = .notInstalled
+        throw HelperClientError.unreachable
+    }
+
+    private func observeWorkspace(_ name: Notification.Name, handler: @escaping @MainActor @Sendable (FanController) -> Void) {
+        NSWorkspace.shared.notificationCenter.addObserver(forName: name, object: nil, queue: .main) { [weak self] _ in
+            MainActor.assumeIsolated {
+                guard let self else { return }
+                handler(self)
+            }
+        }
+    }
+}
