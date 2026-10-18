@@ -219,9 +219,8 @@ final class FanController {
         let target = configuration.targetRPMs(
             for: fans,
             temperatures: monitor.temperatures,
-            linkFans: monitor.visibleFans.count <= 1,
             allowFanOff: settings.allowFanOff,
-            linkedMinimum: monitor.fanSpeedRange?.lowerBound
+            sliderMinimum: monitor.fanSpeedRange?.lowerBound
         )
         return target.map(SyncTarget.speeds) ?? .automatic
     }

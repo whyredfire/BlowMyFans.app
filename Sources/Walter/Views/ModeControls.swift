@@ -34,32 +34,11 @@ private struct ManualControls: View {
 
     var body: some View {
         @Bindable var controller = controller
-        let canUnlink = monitor.visibleFans.count > 1
-        VStack(alignment: .leading, spacing: 14) {
-            if controller.configuration.manual.linked || !canUnlink {
-                if let range = monitor.fanSpeedRange {
-                    SpeedSlider(title: canUnlink ? "All fans" : "Speed", value: $controller.configuration.manual.rpm, range: range)
-                } else {
-                    UnavailableRange()
-                }
-            } else {
-                ForEach(monitor.visibleFans) { fan in
-                    if fan.hasUsableSpeedRange {
-                        SpeedSlider(title: fan.name, value: Binding(
-                            get: { controller.configuration.manual.rpm(forFan: fan.id) },
-                            set: { controller.configuration.manual.fanRPMs[fan.id] = $0 }
-                        ), range: fan.speedRange)
-                    } else {
-                        UnavailableRange()
-                    }
-                }
-            }
-            if canUnlink {
-                Toggle("Same speed for all fans", isOn: $controller.configuration.manual.linked)
-                    .toggleStyle(.switch)
-                    .controlSize(.mini)
-                    .foregroundStyle(.secondary)
-            }
+        if let range = monitor.fanSpeedRange {
+            SpeedSlider(title: monitor.visibleFans.count > 1 ? "All fans" : "Speed",
+                        value: $controller.configuration.manual.rpm, range: range)
+        } else {
+            UnavailableRange()
         }
     }
 }

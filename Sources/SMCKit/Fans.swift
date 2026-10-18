@@ -7,8 +7,6 @@ public struct Fan: Identifiable, Sendable, Equatable {
     public var targetRPM: Double
     public var isManual: Bool
 
-    public var speedRange: ClosedRange<Double> { minimumRPM...max(minimumRPM, maximumRPM) }
-
     /// False when the SMC reported unusable limits, e.g. 0 RPM after a failed read.
     public var hasUsableSpeedRange: Bool {
         minimumRPM.isFinite && maximumRPM.isFinite && minimumRPM >= 0 && maximumRPM > minimumRPM
