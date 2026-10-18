@@ -4,14 +4,16 @@ import Synchronization
 /// Serialises fan writes and remembers which client owns manual control,
 /// so fans return to automatic when that client disconnects.
 ///
-/// Any failure while applying speeds hands the fans back to macOS and forgets the
-/// request, so fans are never left half-configured.
+/// Any failure while applying speeds hands the fans back to macOS. If macOS refuses to take
+/// them back, they run at full speed and the hand-back is retried until it succeeds.
 final class FanSession: Sendable {
     typealias ClientID = ObjectIdentifier
 
     private struct State {
         var owner: ClientID?
         var targetRPMs: [Double]?
+        /// A hand-back macOS refused; `maintain()` retries it.
+        var releasePending = false
     }
 
     private let writer: FanWriter
@@ -38,8 +40,7 @@ final class FanSession: Sendable {
             } catch FanWriterError.interrupted where !isTerminating.load(ordering: .sequentiallyConsistent) {
                 // Sleep started mid-write: systemWillSleep restores automatic, and wake re-applies.
             } catch {
-                state = State()
-                try? writer.restoreAutomatic()
+                release(&state)
                 throw error
             }
         }
@@ -48,7 +49,12 @@ final class FanSession: Sendable {
     func restoreAutomatic() throws {
         try state.withLock { state in
             state = State()
-            try writer.restoreAutomatic()
+            do {
+                try writer.restoreAutomatic()
+            } catch {
+                state.releasePending = true
+                throw error
+            }
         }
     }
 
@@ -56,21 +62,27 @@ final class FanSession: Sendable {
     func releaseStaleControl() {
         state.withLock { state in
             guard state.owner == nil, writer.isManualActive else { return }
-            try? writer.restoreAutomatic()
+            release(&state)
         }
     }
 
-    func reassertIfNeeded() {
+    /// Runs every few seconds: re-applies requested speeds the system took back, and retries
+    /// hand-backs macOS refused.
+    func maintain() {
         state.withLock { state in
-            guard !shouldAbort, let rpms = state.targetRPMs, writer.needsReapply(rpms) else { return }
+            guard !shouldAbort else { return }
+            if state.releasePending {
+                release(&state)
+                return
+            }
+            guard let rpms = state.targetRPMs, writer.needsReapply(rpms) else { return }
             do {
                 try writer.setSpeeds(rpms) { self.shouldAbort }
             } catch FanWriterError.interrupted {
                 // The sleep or termination handler restores automatic control.
             } catch {
                 NSLog("Unable to re-apply fan speed, returning fans to macOS: %@", error.localizedDescription)
-                state = State()
-                try? writer.restoreAutomatic()
+                release(&state)
             }
         }
     }
@@ -78,8 +90,7 @@ final class FanSession: Sendable {
     func clientDisconnected(_ client: ClientID) {
         state.withLock { state in
             guard state.owner == client else { return }
-            state = State()
-            try? writer.restoreAutomatic()
+            release(&state)
         }
     }
 
@@ -89,16 +100,17 @@ final class FanSession: Sendable {
     func systemWillSleep() {
         isSleeping.store(true, ordering: .sequentiallyConsistent)
         state.withLock { state in
-            guard state.targetRPMs != nil || writer.isManualActive else { return }
+            guard state.targetRPMs != nil || state.releasePending || writer.isManualActive else { return }
             do {
                 try writer.restoreAutomatic()
             } catch {
+                state.releasePending = true
                 NSLog("Unable to restore automatic fan control before sleep: %@", error.localizedDescription)
             }
         }
     }
 
-    /// Re-enables writes; call `reassertIfNeeded()` afterwards to re-apply the stored targets.
+    /// Re-enables writes; call `maintain()` afterwards to re-apply the stored targets.
     func systemDidWake() {
         isSleeping.store(false, ordering: .sequentiallyConsistent)
     }
@@ -110,6 +122,17 @@ final class FanSession: Sendable {
             try restoreAutomatic()
         } catch {
             NSLog("Unable to restore automatic fan control on exit: %@", error.localizedDescription)
+        }
+    }
+
+    /// Forgets the request and hands the fans back, remembering a refusal for `maintain()`.
+    private func release(_ state: inout State) {
+        state = State()
+        do {
+            try writer.restoreAutomatic()
+        } catch {
+            state.releasePending = true
+            NSLog("macOS hasn't taken the fans back yet: %@", error.localizedDescription)
         }
     }
 }

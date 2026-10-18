@@ -27,14 +27,14 @@ let controlQueue = DispatchQueue(label: "\(HelperIdentity.label).control")
 // The system can silently take fans back (e.g. after wake); re-apply the requested speed.
 let watchdog = DispatchSource.makeTimerSource(queue: controlQueue)
 watchdog.schedule(deadline: .now() + 3, repeating: 3)
-watchdog.setEventHandler { @Sendable [session] in session.reassertIfNeeded() }
+watchdog.setEventHandler { @Sendable [session] in session.maintain() }
 watchdog.resume()
 
 let powerMonitor = PowerMonitor(
     willSleep: { @Sendable [session] in session.systemWillSleep() },
     didWake: { @Sendable [session, controlQueue] in
         session.systemDidWake()
-        controlQueue.async { @Sendable in session.reassertIfNeeded() }
+        controlQueue.async { @Sendable in session.maintain() }
     }
 )
 powerMonitor.start(on: .main)

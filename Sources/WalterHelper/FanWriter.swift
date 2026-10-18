@@ -10,6 +10,8 @@ struct FanWriter: Sendable {
     /// Longest wait for the SMC to accept manual mode, across all fans. Measured on M4:
     /// ~5 s from a settled state, ~11 s if macOS took the fans back a few seconds earlier.
     private static let takeoverTimeout = Duration.seconds(30)
+    /// How long a hand-back waits before falling back to full speed; the session retries it later.
+    private static let releaseTimeout = Duration.seconds(5)
 
     /// `rpms` holds one speed per fan; see `FanHelperProtocol.setFanSpeeds` for the encoding.
     /// `shouldAbort` is polled while waiting on the SMC; returning true throws `FanWriterError.interrupted`.
@@ -20,22 +22,37 @@ struct FanWriter: Sendable {
         // Resolve everything before touching the SMC so a bad reading never half-applies.
         let targets = try zip(fans, rpms).map { fan, rpm in try Self.target(for: rpm, fan: fan) }
 
-        try takeManualControl(of: fans, shouldAbort: shouldAbort)
+        try unlock()
+        let deadline = ContinuousClock.now + Self.takeoverTimeout
         for (fan, target) in zip(fans, targets) {
+            try writeMode(.manual, fan: fan.id, until: deadline, shouldAbort: shouldAbort)
+            // Set the target straight away: a manual fan otherwise keeps the system's last
+            // target, which is 0 when macOS had the fans stopped.
             try smc.write(FanKey.target(fan.id), value: target)
         }
     }
 
+    /// Hands fans in manual mode back to macOS. Any fan the SMC won't release yet is run at
+    /// full speed and the error is rethrown so the caller can retry.
     func restoreAutomatic() throws {
-        var firstError: Error?
-        for fan in 0..<smc.fanCount {
-            do { try smc.write(smc.modeKey(fan), value: Double(FanControlMode.automatic.rawValue)) }
-            catch { firstError = firstError ?? error }
+        let manualFans = smc.fans().filter(\.isManual)
+        if !manualFans.isEmpty {
+            try unlock()
+            let deadline = ContinuousClock.now + Self.releaseTimeout
+            var failure: Error?
+            for fan in manualFans {
+                do {
+                    try writeMode(.automatic, fan: fan.id, until: deadline)
+                } catch {
+                    failure = failure ?? FanWriterError.releaseRefused
+                    if fan.hasUsableSpeedRange { try? smc.write(FanKey.target(fan.id), value: fan.maximumRPM) }
+                }
+            }
+            if let failure { throw failure }
         }
         if smc.contains(FanKey.unlock) {
             try smc.write(FanKey.unlock, value: 0)
         }
-        if let firstError { throw firstError }
     }
 
     var isManualActive: Bool {
@@ -65,23 +82,24 @@ struct FanWriter: Sendable {
         return min(max(rpm, fan.minimumRPM), fan.maximumRPM)
     }
 
-    private func takeManualControl(of fans: [Fan], shouldAbort: () -> Bool) throws {
+    private func unlock() throws {
         if smc.contains(FanKey.unlock), smc.readDouble(FanKey.unlock) != 1 {
             try smc.write(FanKey.unlock, value: 1)
         }
-        let deadline = ContinuousClock.now + Self.takeoverTimeout
-        for fan in fans {
-            // After unlocking, the SMC rejects mode writes (0x82) until thermalmonitord
-            // releases control. Any other error is final.
-            while true {
-                if shouldAbort() { throw FanWriterError.interrupted }
-                do {
-                    try smc.write(smc.modeKey(fan.id), value: Double(FanControlMode.manual.rawValue))
-                    break
-                } catch SMCError.smc(key: _, code: Self.busyResult) {
-                    guard ContinuousClock.now < deadline else { throw FanWriterError.systemBusy }
-                    Thread.sleep(forTimeInterval: 0.1)
-                }
+    }
+
+    /// After unlocking, the SMC rejects mode writes (0x82) until thermalmonitord releases the
+    /// fans; how long that takes depends on its state. Any other error is final.
+    private func writeMode(
+        _ mode: FanControlMode, fan: Int, until deadline: ContinuousClock.Instant, shouldAbort: () -> Bool = { false }
+    ) throws {
+        while true {
+            if shouldAbort() { throw FanWriterError.interrupted }
+            do {
+                return try smc.write(smc.modeKey(fan), value: Double(mode.rawValue))
+            } catch SMCError.smc(key: _, code: Self.busyResult) {
+                guard ContinuousClock.now < deadline else { throw FanWriterError.systemBusy }
+                Thread.sleep(forTimeInterval: 0.1)
             }
         }
     }
@@ -92,11 +110,14 @@ enum FanWriterError: LocalizedError {
     case interrupted
     /// macOS didn't hand over the fans before the takeover timeout.
     case systemBusy
+    /// macOS didn't take the fans back yet; they run at full speed until it does.
+    case releaseRefused
 
     var errorDescription: String? {
         switch self {
         case .interrupted: "Fan control was interrupted by sleep or shutdown."
         case .systemBusy: "macOS is still managing the fans. Try again in a few seconds."
+        case .releaseRefused: "macOS hasn't taken the fans back yet, so they're running at full speed until it does."
         }
     }
 }
