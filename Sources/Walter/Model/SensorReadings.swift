@@ -10,9 +10,17 @@ extension [SensorGroupReading] {
         id == AppSettings.hottestCPU ? hottestCPU : first { $0.id == id }?.maximum
     }
 
-    /// The most useful readings for a short list: one each of CPU, GPU, SSD and battery,
+    var highlights: [SensorGroupReading] { highlights(by: \.group) }
+}
+
+extension [SensorGroup] {
+    var highlights: [SensorGroup] { highlights { $0 } }
+}
+
+extension Array {
+    /// The most useful entries for a short list: one each of CPU, GPU, SSD and battery,
     /// followed by the rest in database order.
-    var highlights: [SensorGroupReading] {
+    fileprivate func highlights(by group: (Element) -> SensorGroup) -> [Element] {
         func category(_ group: SensorGroup) -> Int? {
             if group.isCPU { return 0 }
             if group.isGPU { return 1 }
@@ -21,11 +29,11 @@ extension [SensorGroupReading] {
             return nil
         }
         var seen = Set<Int>()
-        let primary = filter { reading in
-            guard let category = category(reading.group) else { return false }
+        let primary = filter { element in
+            guard let category = category(group(element)) else { return false }
             return seen.insert(category).inserted
         }
-        let rest = filter { category($0.group) == nil }
-        return primary.sorted { category($0.group)! < category($1.group)! } + rest
+        let rest = filter { category(group($0)) == nil }
+        return primary.sorted { category(group($0))! < category(group($1))! } + rest
     }
 }

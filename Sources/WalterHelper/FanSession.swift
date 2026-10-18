@@ -23,9 +23,13 @@ final class FanSession: Sendable {
     /// Checked without the lock so a write blocked on the SMC gives up promptly.
     private let isSleeping = Atomic(false)
     private let isTerminating = Atomic(false)
+    /// Told whenever `maintain()` gains or runs out of work, so it's only scheduled while needed.
+    private let onMaintenanceNeeded: @Sendable (Bool) -> Void
+    private let isMaintenanceNeeded = Atomic(false)
 
-    init(writer: FanWriter) {
+    init(writer: FanWriter, onMaintenanceNeeded: @escaping @Sendable (Bool) -> Void) {
         self.writer = writer
+        self.onMaintenanceNeeded = onMaintenanceNeeded
     }
 
     private var shouldAbort: Bool {
@@ -33,7 +37,7 @@ final class FanSession: Sendable {
     }
 
     func setSpeeds(_ rpms: [Double], for client: ClientID) throws {
-        try state.withLock { state in
+        try update { state in
             state = State(owner: client, targetRPMs: rpms)
             // macOS keeps the fans while asleep; the request is applied on wake.
             guard !shouldAbort else { return }
@@ -49,7 +53,7 @@ final class FanSession: Sendable {
     }
 
     func restoreAutomatic() throws {
-        try state.withLock { state in
+        try update { state in
             state = State()
             do {
                 try writer.restoreAutomatic()
@@ -62,7 +66,7 @@ final class FanSession: Sendable {
 
     /// Hands back fans left in manual mode by a previous helper instance.
     func releaseStaleControl() {
-        state.withLock { state in
+        update { state in
             guard state.owner == nil, writer.isManualActive else { return }
             release(&state)
         }
@@ -71,7 +75,7 @@ final class FanSession: Sendable {
     /// Runs every few seconds: completes pending takeovers, re-applies requested speeds the system
     /// took back, and retries hand-backs macOS refused.
     func maintain() {
-        state.withLock { state in
+        update { state in
             guard !shouldAbort else { return }
             if state.releasePending {
                 release(&state)
@@ -90,7 +94,7 @@ final class FanSession: Sendable {
     }
 
     func clientDisconnected(_ client: ClientID) {
-        state.withLock { state in
+        update { state in
             guard state.owner == client else { return }
             release(&state)
         }
@@ -101,7 +105,7 @@ final class FanSession: Sendable {
     /// Lets macOS manage the fans while asleep. The owner and targets are kept for wake.
     func systemWillSleep() {
         isSleeping.store(true, ordering: .sequentiallyConsistent)
-        state.withLock { state in
+        update { state in
             guard state.targetRPMs != nil || state.releasePending || writer.isManualActive else { return }
             do {
                 try writer.restoreAutomatic()
@@ -124,6 +128,19 @@ final class FanSession: Sendable {
             try restoreAutomatic()
         } catch {
             NSLog("Unable to restore automatic fan control on exit: %@", error.localizedDescription)
+        }
+    }
+
+    /// Changes the state under the lock, then reports whether `maintain()` has work.
+    private func update<E: Error>(_ body: (inout State) throws(E) -> Void) throws(E) {
+        try state.withLock { state throws(E) in
+            defer {
+                let needed = state.targetRPMs != nil || state.releasePending
+                if isMaintenanceNeeded.exchange(needed, ordering: .sequentiallyConsistent) != needed {
+                    onMaintenanceNeeded(needed)
+                }
+            }
+            try body(&state)
         }
     }
 

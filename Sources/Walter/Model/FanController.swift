@@ -185,7 +185,11 @@ final class FanController {
     private func monitorDidUpdate() {
         updateCurveTemperature()
         detectLostControl()
-        sync()
+        // With macOS in charge and nothing applied there's nothing to send.
+        let isLeftToMacOS = isSuspended || configuration.mode == .automatic
+        if !isLeftToMacOS || appliedRPMs != nil {
+            sync()
+        }
     }
 
     /// Exponential smoothing per 2 s poll: ~75% of a rise within two polls, ~90% of a fall in about 30 s.

@@ -43,15 +43,24 @@ extension SMC {
 
     public func fans() -> [Fan] {
         (0..<fanCount).map { index in
-            Fan(
+            refreshed(Fan(
                 id: index,
                 name: "Fan \(index + 1)",
-                currentRPM: readDouble(FanKey.actual(index)) ?? 0,
+                currentRPM: 0,
                 minimumRPM: readDouble(FanKey.minimum(index)) ?? 0,
                 maximumRPM: readDouble(FanKey.maximum(index)) ?? 0,
-                targetRPM: readDouble(FanKey.target(index)) ?? 0,
-                isManual: readDouble(modeKey(index)).map(Int.init) == FanControlMode.manual.rawValue
-            )
+                targetRPM: 0,
+                isManual: false
+            ))
         }
+    }
+
+    /// `fan` with the values that change at runtime read again; its speed limits are fixed.
+    public func refreshed(_ fan: Fan) -> Fan {
+        var fan = fan
+        fan.currentRPM = readDouble(FanKey.actual(fan.id)) ?? 0
+        fan.targetRPM = readDouble(FanKey.target(fan.id)) ?? 0
+        fan.isManual = readDouble(modeKey(fan.id)).map(Int.init) == FanControlMode.manual.rawValue
+        return fan
     }
 }

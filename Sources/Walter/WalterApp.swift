@@ -34,6 +34,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             group.id == settings.menuBarItem
                 || group.isCPU && (settings.menuBarItem == AppSettings.hottestCPU || controller.mode == .curve)
         }
+        monitor.needsFans = { [controller] in controller.mode != .automatic }
         statusItem = StatusItemController(settings: settings, monitor: monitor, controller: controller)
         if !isLaunchingAtLogin {
             statusItem?.showPanel()

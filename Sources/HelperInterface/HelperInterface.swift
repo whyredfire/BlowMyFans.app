@@ -6,7 +6,7 @@ public enum HelperIdentity {
     public static let machServiceName = label
 
     /// Bump whenever the helper changes so the app knows to reinstall it.
-    public static let version = "9"
+    public static let version = "10"
 
     public static let clientRequirement = #"identifier "\#(appBundleID)""#
     public static let helperRequirement = #"identifier "\#(label)""#

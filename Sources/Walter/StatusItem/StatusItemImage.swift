@@ -40,37 +40,47 @@ enum StatusItemImage {
             }
             return true
         }
-        let trimmed = trimmedHorizontally(image) ?? image
-        trimmed.isTemplate = label.warningColor == nil
-        return trimmed
+        return trimmedHorizontally(image, isTemplate: label.warningColor == nil) ?? image
     }
 
     /// Crops the symbol's built-in side margins and the text's trailing advance so the item is
     /// only as wide as its visible pixels.
-    private static func trimmedHorizontally(_ image: NSImage) -> NSImage? {
-        let scale: CGFloat = 2
+    private static func trimmedHorizontally(_ image: NSImage, isTemplate: Bool) -> NSImage? {
+        let scale = 2
         guard let bitmap = NSBitmapImageRep(
-            bitmapDataPlanes: nil, pixelsWide: Int(image.size.width * scale), pixelsHigh: Int(image.size.height * scale),
+            bitmapDataPlanes: nil, pixelsWide: Int(image.size.width) * scale, pixelsHigh: Int(image.size.height) * scale,
             bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false,
             colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0
-        ) else { return nil }
+        ), let pixels = bitmap.bitmapData else { return nil }
         bitmap.size = image.size
         NSGraphicsContext.saveGraphicsState()
         NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: bitmap)
         image.draw(at: .zero, from: .zero, operation: .copy, fraction: 1)
         NSGraphicsContext.restoreGraphicsState()
 
-        let inkColumns = (0..<bitmap.pixelsWide).filter { x in
-            (0..<bitmap.pixelsHigh).contains { y in (bitmap.colorAt(x: x, y: y)?.alphaComponent ?? 0) > 0.05 }
+        let rowBytes = bitmap.bytesPerRow
+        func isInked(_ x: Int) -> Bool {
+            (0..<bitmap.pixelsHigh).contains { y in pixels[y * rowBytes + x * 4 + 3] > 12 }
         }
-        guard let first = inkColumns.first, let last = inkColumns.last else { return nil }
+        guard let first = (0..<bitmap.pixelsWide).first(where: isInked),
+              let last = (0..<bitmap.pixelsWide).last(where: isInked) else { return nil }
+        let width = ceil(CGFloat(last - first + 1) / CGFloat(scale))
+        let size = NSSize(width: width, height: image.size.height)
 
-        let left = CGFloat(first) / scale
-        let width = CGFloat(last - first + 1) / scale
-        let trimmed = NSImage(size: NSSize(width: ceil(width), height: image.size.height), flipped: false) { rect in
+        if isTemplate {
+            // Template images only use alpha, so the menu bar can draw these pixels as they are
+            // instead of rendering the symbol and text again on every redraw.
+            let crop = CGRect(x: first, y: 0, width: min(Int(width) * scale, bitmap.pixelsWide - first), height: bitmap.pixelsHigh)
+            guard let cropped = bitmap.cgImage?.cropping(to: crop) else { return nil }
+            let trimmed = NSImage(cgImage: cropped, size: size)
+            trimmed.isTemplate = true
+            return trimmed
+        }
+        // Dynamic colours resolve when the menu bar draws, so this stays vector.
+        let left = CGFloat(first) / CGFloat(scale)
+        return NSImage(size: size, flipped: false) { _ in
             image.draw(at: NSPoint(x: -left, y: 0), from: .zero, operation: .sourceOver, fraction: 1)
             return true
         }
-        return trimmed
     }
 }
