@@ -20,7 +20,8 @@ extension CurvePoint {
     }
 }
 
-/// Fan speed as a function of CPU temperature, linear between points sorted by temperature.
+/// Fan speed as a function of CPU temperature: linear between points sorted by temperature,
+/// and never lower at a higher temperature.
 struct FanCurve: Codable, Equatable {
     static let temperatureRange = 30.0...100.0
     /// Keeps neighbouring points apart so the curve stays a function of temperature.
@@ -44,13 +45,21 @@ struct FanCurve: Codable, Equatable {
         return a.speed + (celsius - a.temperature) / span * (b.speed - a.speed)
     }
 
-    /// Moves a point, keeping it between its neighbours.
+    /// Moves a point between its neighbours' temperatures. Raising it lifts later points to at
+    /// least its speed; lowering it brings earlier points down to at most its speed.
     mutating func move(_ id: CurvePoint.ID, temperature: Double, speed: Double) {
         guard let index = points.firstIndex(where: { $0.id == id }) else { return }
         let lower = index > 0 ? points[index - 1].temperature + Self.spacing : Self.temperatureRange.lowerBound
         let upper = index < points.count - 1 ? points[index + 1].temperature - Self.spacing : Self.temperatureRange.upperBound
+        let speed = min(max(speed, 0), 1)
         points[index].temperature = min(max(temperature, lower), upper).rounded()
-        points[index].speed = min(max(speed, 0), 1)
+        points[index].speed = speed
+        for later in points.indices.dropFirst(index + 1) {
+            points[later].speed = max(points[later].speed, speed)
+        }
+        for earlier in points.indices.prefix(index) {
+            points[earlier].speed = min(points[earlier].speed, speed)
+        }
     }
 
     mutating func add(temperature: Double, speed: Double) {
@@ -58,7 +67,9 @@ struct FanCurve: Codable, Equatable {
         guard Self.temperatureRange.contains(temperature),
               !points.contains(where: { abs($0.temperature - temperature) < Self.spacing }) else { return }
         let index = points.firstIndex { $0.temperature > temperature } ?? points.count
-        points.insert(CurvePoint(temperature: temperature, speed: min(max(speed, 0), 1)), at: index)
+        let floor = index > 0 ? points[index - 1].speed : 0
+        let ceiling = index < points.count ? points[index].speed : 1
+        points.insert(CurvePoint(temperature: temperature, speed: min(max(speed, floor), ceiling)), at: index)
     }
 
     mutating func remove(_ id: CurvePoint.ID) {
@@ -66,17 +77,20 @@ struct FanCurve: Codable, Equatable {
         points.removeAll { $0.id == id }
     }
 
-    /// Points sorted by temperature with unique ids, or nil unless there are at least two
-    /// points at distinct, finite temperatures with speeds in 0...1.
+    /// Points sorted by temperature with unique ids and non-decreasing speeds, or nil unless
+    /// there are at least two points at distinct, finite temperatures with speeds in 0...1.
     private static func validated(_ points: [CurvePoint]) -> [CurvePoint]? {
         let sorted = points.sorted { $0.temperature < $1.temperature }
         guard sorted.count >= 2,
               sorted.allSatisfy({ $0.temperature.isFinite && (0...1).contains($0.speed) }),
               zip(sorted, sorted.dropFirst()).allSatisfy({ $0.temperature < $1.temperature }) else { return nil }
         var seen = Set<CurvePoint.ID>()
+        var floor = 0.0
         return sorted.map { point in
             var point = point
             if !seen.insert(point.id).inserted { point.id = UUID() }
+            point.speed = max(point.speed, floor)
+            floor = point.speed
             return point
         }
     }
