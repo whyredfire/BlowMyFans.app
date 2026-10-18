@@ -82,15 +82,18 @@ jobs:
             --full-release-notes-url "$RELEASES_URL" \
             dist
 
-      # Notes list the commits since the previous release; GitHub adds the compare link
+      # Notes list the commits since the previous release; GitHub adds the compare link.
+      # Walter.zip is an unversioned copy for the website's download link, added after the
+      # appcast so Sparkle doesn't see the same version twice
       - name: Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           previous=$(git describe --tags --abbrev=0 --match 'v[0-9]*' 2>/dev/null || true)
+          cp "dist/Walter-${VERSION}.zip" dist/Walter.zip
           git tag "v${VERSION}"
           git push --atomic origin HEAD "v${VERSION}"
-          gh release create "v${VERSION}" "dist/Walter-${VERSION}.zip" dist/appcast.xml \
+          gh release create "v${VERSION}" "dist/Walter-${VERSION}.zip" dist/Walter.zip dist/appcast.xml \
             --title "Walter ${VERSION}" \
             --notes "$(git log --no-merges --pretty='- %s (%h)' "${previous:+$previous..}HEAD~1")" \
             --generate-notes

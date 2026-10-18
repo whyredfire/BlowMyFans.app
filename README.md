@@ -1,91 +1,58 @@
-# Walter
+<p align="center">
+  <img src="site/public/icon.png" width="128" alt="Walter's app icon">
+</p>
 
-Native menu bar app for monitoring temperatures and controlling fan speeds on Apple silicon Macs
-(macOS 26+).
+<h1 align="center">Walter</h1>
 
-- **Modes:** Auto (macOS-managed), Manual (one slider, or one per fan), Curve (an editable fan curve
-  driven by CPU temperature), Full Blast — all from the menu bar popover.
-- **Sensors:** per-model SMC and HID temperature sensors with readable names.
-- **Settings:** launch at login, °C/°F, choice of menu bar reading, optional fan-off in Manual,
-  and helper management.
+<p align="center">
+  Temperatures and fan control in your menu bar, for Apple silicon Macs.<br>
+  <a href="https://walter.whyredfire.dev">Website</a> ·
+  <a href="https://github.com/whyredfire/Walter.app/releases/latest/download/Walter.zip">Download</a> ·
+  <a href="https://github.com/whyredfire/Walter.app/releases">Releases</a>
+</p>
 
-## Build
+<p align="center">
+  <img src="site/public/screenshots/panel-curve.png" width="300" alt="The panel in Curve mode">
+  <img src="site/public/screenshots/panel-manual.png" width="300" alt="The panel in Manual mode">
+</p>
 
-```sh
-./scripts/build.sh          # → build/Walter.app (arm64, ad-hoc signed)
-```
+## Features
 
-Requires only the Xcode Command Line Tools. The version is `CFBundleShortVersionString` in `Support/Info.plist`, set by releases; the build number
-is the git commit count.
+- **Four modes:** Auto (macOS runs the fans), Manual (one slider for every fan), Curve (fans follow a
+  curve you draw against CPU temperature) and Full Blast. Browse them freely; nothing changes until
+  you press Apply.
+- **Fan curve editor:** drag points to shape the curve, double-click to add or remove them. The curve
+  stays smooth and never decreases, and follows a smoothed CPU temperature so short spikes don't make
+  the fans surge.
+- **Temperatures:** CPU, GPU, SSD, battery and more, with readable names for each Mac model. The menu
+  bar can show the hottest CPU, any sensor, or just the icon.
+- **Thermal pressure:** shown in the panel, with a coloured dot on the menu bar icon when macOS starts
+  throttling.
+- **Safe:** fans go back to macOS when Walter quits, crashes or the Mac sleeps. If macOS won't take
+  them back yet, they run at full speed until it does.
+- **Light:** reads only what's on screen; well under 1% CPU in the background, and the helper sleeps
+  while it has nothing to do.
+- **Updates itself** with signed [Sparkle](https://sparkle-project.org) updates.
+
+<p align="center">
+  <img src="site/public/screenshots/settings.png" width="460" alt="The Settings window">
+</p>
 
 ## Install
 
-Download `Walter-<version>.zip` from the latest GitHub Release, unzip it and move `Walter.app` to
-`/Applications`. Walter isn't notarized, so the first launch is blocked: open
-System Settings › Privacy & Security and choose **Open Anyway**. Updates installed by Walter itself
-aren't affected.
+Requires an Apple silicon Mac with macOS 26 or later.
 
-## Releasing
+1. Download [`Walter.zip`](https://github.com/whyredfire/Walter.app/releases/latest/download/Walter.zip),
+   unzip it and move Walter to `/Applications`.
+2. Walter isn't notarized, so macOS blocks the first launch. Choose **Open Anyway** in
+   System Settings › Privacy & Security, or run:
+   ```sh
+   xattr -dr com.apple.quarantine /Applications/Walter.app
+   ```
+3. Open Walter. The first time you apply a mode other than Auto, it installs its helper and asks for
+   your administrator password.
 
-Walter updates itself with [Sparkle](https://sparkle-project.org). Installed copies poll
-`releases/latest/download/appcast.xml` daily and offer new versions.
+Updates installed by Walter itself aren't blocked.
 
-Run the **release** workflow from the Actions tab, or:
-
-```sh
-gh workflow run release.yml -f version=0.2.0
-```
-
-It sets the version in `Support/Info.plist`, commits `chore: Release v0.2.0`, builds the app, signs
-the update archive and generates `appcast.xml` with Sparkle's `generate_appcast`, then pushes the tag
-and creates the GitHub Release with the commits since the previous release as notes.
-
-Updates are signed with the EdDSA key in your login Keychain; its public half is `SUPublicEDKey` in
-`Support/Info.plist`. Without the private key installed copies can't accept new updates, so export
-it once (after a build, which fetches Sparkle's tools), keep the file somewhere safe and give it to
-the workflow:
-
-```sh
-.build/artifacts/sparkle/Sparkle/bin/generate_keys -x walter-sparkle-private-key
-gh secret set SPARKLE_PRIVATE_KEY --repo whyredfire/Walter.app < walter-sparkle-private-key
-```
-
-## Layout
-
-| Path | Role |
-|---|---|
-| `Sources/SMCKit` | AppleSMC access, HID sensors, fan/sensor readers, model database parsing |
-| `Sources/HelperInterface` | XPC protocol and identifiers shared by app and helper |
-| `Sources/WalterHelper` | Root LaunchDaemon that performs fan writes |
-| `Sources/Walter` | Menu bar app (status item, panel, settings and updates) |
-| `.github/workflows` | Release workflow |
-| `Support` | Info.plist, entitlements, app icon, launchd plist, helper install script |
-| `Support/Database` | Per-model sensor, fan-name and model-ID tables |
-| `scripts` | `build.sh` (local app bundle), `make-icon.swift` (app icon) |
-
-Reading sensors needs no privileges. Fan control needs the helper, which the app installs on
-first use (admin password prompt) to `/Library/PrivilegedHelperTools` + `/Library/LaunchDaemons`.
-The helper only accepts fan commands, clamps speeds to each fan's range, re-applies them if the
-system takes control back, and returns fans to automatic when the app quits, crashes or the Mac
-sleeps.
-
-### Fan control per platform
-
-| Mac | Manual control |
-|---|---|
-| With `Ftst` (newer Apple silicon) | `Ftst=1`, then `F{n}Md=1` (accepted after a few seconds), then `F{n}Tg` |
-| Without `Ftst` | `F{n}Md` (or `F{n}md`) = 1, then `F{n}Tg` |
-
-### Model database
-
-`Support/Database` holds the per-model JSON tables: `smcSensors.json` and `hidSensors.json`
-(sensor keys and labels), `fanNames.json`, and `modelAliases.json` mapping new identifiers such as
-`Mac16,8` to `MacBookPro21,2`. Each table is a list of blocks whose `models` apply to the listed
-Macs, `all`, or a family from a given model onwards (`MacBookPro18,1+`). These tables were extracted
-from Macs Fan Control; replace or extend them before distributing this app. Macs missing from the tables fall back to generic sensor groups.
-
-Uninstall the helper from Settings, or manually:
-
-```sh
-sudo build/Walter.app/Contents/Resources/helper-tool.sh uninstall
-```
+To uninstall, remove the helper in Settings (or run
+`sudo /Applications/Walter.app/Contents/Resources/helper-tool.sh uninstall`), then delete Walter.
