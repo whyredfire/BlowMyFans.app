@@ -16,6 +16,8 @@ final class FanSession: Sendable {
         var releasePending = false
     }
 
+    private static let takeoverWait = Duration.seconds(10)
+
     private let writer: FanWriter
     private let state = Mutex(State())
     /// Checked without the lock so a write blocked on the SMC gives up promptly.
@@ -36,7 +38,7 @@ final class FanSession: Sendable {
             // macOS keeps the fans while asleep; the request is applied on wake.
             guard !shouldAbort else { return }
             do {
-                try writer.setSpeeds(rpms) { self.shouldAbort }
+                try writer.setSpeeds(rpms, waitingUpTo: Self.takeoverWait) { self.shouldAbort }
             } catch FanWriterError.interrupted where !isTerminating.load(ordering: .sequentiallyConsistent) {
                 // Sleep started mid-write: systemWillSleep restores automatic, and wake re-applies.
             } catch {
@@ -66,8 +68,8 @@ final class FanSession: Sendable {
         }
     }
 
-    /// Runs every few seconds: re-applies requested speeds the system took back, and retries
-    /// hand-backs macOS refused.
+    /// Runs every few seconds: completes pending takeovers, re-applies requested speeds the system
+    /// took back, and retries hand-backs macOS refused.
     func maintain() {
         state.withLock { state in
             guard !shouldAbort else { return }
@@ -77,7 +79,7 @@ final class FanSession: Sendable {
             }
             guard let rpms = state.targetRPMs, writer.needsReapply(rpms) else { return }
             do {
-                try writer.setSpeeds(rpms) { self.shouldAbort }
+                try writer.setSpeeds(rpms, waitingUpTo: .zero) { self.shouldAbort }
             } catch FanWriterError.interrupted {
                 // The sleep or termination handler restores automatic control.
             } catch {
