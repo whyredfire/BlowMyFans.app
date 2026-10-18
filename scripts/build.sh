@@ -20,7 +20,7 @@ cp Support/Info.plist "$APP/Contents/"
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" -c "Set :CFBundleVersion $BUILD" "$APP/Contents/Info.plist"
 cp "$BIN/Walter" "$APP/Contents/MacOS/"
 cp "$BIN/WalterHelper" "$APP/Contents/Library/LaunchServices/$HELPER_LABEL"
-cp "Support/$HELPER_LABEL.plist" Support/helper-tool.sh "$APP/Contents/Resources/"
+cp "Support/$HELPER_LABEL.plist" Support/helper-tool.sh Support/AppIcon.icns "$APP/Contents/Resources/"
 cp -R Support/Database "$APP/Contents/Resources/"
 ditto "$SPARKLE" "$APP/Contents/Frameworks/Sparkle.framework"
 

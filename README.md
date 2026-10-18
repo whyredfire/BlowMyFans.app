@@ -63,9 +63,9 @@ creates the GitHub Release.
 | `Sources/HelperInterface` | XPC protocol and identifiers shared by app and helper |
 | `Sources/WalterHelper` | Root LaunchDaemon that performs fan writes |
 | `Sources/Walter` | Menu bar app (status item, panel, settings and updates) |
-| `Support` | Info.plist, entitlements, launchd plist, helper install script |
+| `Support` | Info.plist, entitlements, app icon, launchd plist, helper install script |
 | `Support/Database` | Per-model sensor, fan-name and model-ID tables |
-| `scripts` | `build.sh` (app bundle) and `release.sh` (GitHub Release + update feed) |
+| `scripts` | `build.sh` (app bundle), `release.sh` (GitHub Release + update feed), `make-icon.swift` (app icon) |
 
 Reading sensors needs no privileges. Fan control needs the helper, which the app installs on
 first use (admin password prompt) to `/Library/PrivilegedHelperTools` + `/Library/LaunchDaemons`.
