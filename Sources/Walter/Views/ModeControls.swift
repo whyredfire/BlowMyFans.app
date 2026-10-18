@@ -69,9 +69,22 @@ private struct SpeedSlider: View {
             }
             // Snaps in the binding instead of using `step:`, which draws a tick mark per step
             // and makes the slider wider than the popover.
-            Slider(value: Binding(get: { value }, set: { value = ($0 / 50).rounded() * 50 }),
-                   in: (settings.allowFanOff ? 0 : range.lowerBound)...range.upperBound)
+            Slider(value: Binding(get: { max(value, start) }, set: { setSliderValue($0) }),
+                   in: start...range.upperBound)
                 .labelsHidden()
+        }
+    }
+
+    /// With fans allowed off, "Off" is one notch below the minimum rather than everything from 0 up to it.
+    private var start: Double {
+        settings.allowFanOff ? range.lowerBound - (range.upperBound - range.lowerBound) * 0.05 : range.lowerBound
+    }
+
+    private func setSliderValue(_ position: Double) {
+        if settings.allowFanOff, position < (start + range.lowerBound) / 2 {
+            value = 0
+        } else {
+            value = min(max((position / 50).rounded() * 50, range.lowerBound), range.upperBound)
         }
     }
 
