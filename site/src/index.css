@@ -2,7 +2,6 @@
 
 @theme {
   --color-accent: #b264e6;
-  --color-accent-soft: #d6a6f5;
 }
 
 html {
@@ -11,7 +10,7 @@ html {
 }
 
 body {
-  @apply bg-[#08080c] text-white/90 antialiased;
+  @apply bg-neutral-950 text-neutral-200 antialiased;
   font-family:
     ui-sans-serif,
     -apple-system,

@@ -1,51 +1,52 @@
-import { Download } from "lucide-react";
-import { downloadURL, repositoryURL } from "../links.ts";
-import { GitHubIcon } from "./GitHubIcon.tsx";
+import { brewCommands } from "../links.ts";
+import { CopyCommand } from "./CopyCommand.tsx";
 
 export function Hero() {
   return (
-    <section id="top" className="relative mx-auto grid max-w-6xl items-center gap-14 px-6 pt-20 pb-24 lg:grid-cols-[1.05fr_1fr] lg:pt-28">
-      <div>
-        <p className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/70">
-          <span className="size-1.5 rounded-full bg-emerald-400" />
-          A native menu bar app for Apple silicon Macs
-        </p>
-        <h1 className="text-5xl font-semibold tracking-tight text-balance text-white sm:text-6xl">
-          Keep your Mac cool, <span className="text-accent-soft">on your terms.</span>
+    <section id="top" className="mx-auto max-w-5xl px-6 pt-16 sm:pt-24">
+      <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
+        <img src="/icon.png" alt="" width={112} height={112} className="size-24 sm:size-28" />
+        <h1 className="mt-8 text-4xl font-semibold tracking-[-0.03em] text-balance text-white sm:text-6xl">
+          Fan control for your Mac.
         </h1>
-        <p className="mt-6 max-w-xl text-lg leading-relaxed text-pretty text-white/60">
-          Walter is a small, native menu bar app that shows your Mac's temperatures and puts you in charge of its
-          fans. Let macOS decide, pick a speed, draw your own curve, or go Full Blast.
+        <p className="mt-5 max-w-xl text-lg leading-relaxed text-pretty text-neutral-400">
+          A small menu bar app that shows your Mac's temperatures and puts you in charge of its fans.
         </p>
-        <div className="mt-9 flex flex-wrap items-center gap-3">
-          <a
-            href={downloadURL}
-            className="flex items-center gap-2 rounded-full bg-white px-5 py-2.5 font-medium text-black transition hover:bg-white/85"
-          >
-            <Download className="size-4.5" />
-            Download for Mac
-          </a>
-          <a
-            href={repositoryURL}
-            className="flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-5 py-2.5 font-medium text-white/85 transition hover:bg-white/10"
-          >
-            <GitHubIcon className="size-4.5" />
-            View on GitHub
-          </a>
-        </div>
+        <CopyCommand commands={brewCommands} className="mt-10 w-full max-w-xl text-left" />
+        <p className="mt-4 text-sm text-neutral-500">
+          or{" "}
+          <a href="#download" className="text-neutral-300 underline decoration-neutral-600 underline-offset-4 transition-colors hover:text-white">
+            download the app
+          </a>{" "}
+          · Apple silicon, macOS 26 or later
+        </p>
       </div>
-
-      <div className="relative mx-auto w-full max-w-sm lg:max-w-md">
-        <div aria-hidden="true" className="absolute inset-x-8 top-24 bottom-10 rounded-full bg-accent/30 blur-3xl" />
-        <img
-          src="/screenshots/panel-curve.png"
-          alt="Walter's menu bar panel in Curve mode, showing the fan curve, fan speeds and temperatures"
-          width={772}
-          height={1232}
-          className="relative w-full"
-        />
-      </div>
+      <Desktop />
     </section>
   );
 }
 
+/** The panel as it appears on screen, over a wallpaper. */
+function Desktop() {
+  return (
+    <div className="relative mt-16 overflow-hidden rounded-2xl border border-white/10 sm:mt-20 sm:rounded-3xl">
+      <div
+        aria-hidden="true"
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(120% 90% at 15% 0%, #4c5fd7 0%, transparent 55%), radial-gradient(90% 80% at 100% 100%, #b04aa8 0%, transparent 60%), linear-gradient(160deg, #1d2257 0%, #2a1c4a 55%, #120f24 100%)",
+        }}
+      />
+      <div className="relative flex justify-center px-4 py-8 sm:justify-end sm:px-16 sm:py-12">
+        <img
+          src="/screenshots/panel-curve.png"
+          alt="Walter's panel in Curve mode, with the fan curve, fan speeds and temperatures"
+          width={680}
+          height={1140}
+          className="w-[280px] rounded-[22px] drop-shadow-2xl sm:w-[340px]"
+        />
+      </div>
+    </div>
+  );
+}

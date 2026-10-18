@@ -2,18 +2,19 @@ import { releasesURL, repositoryURL } from "../links.ts";
 
 export function Footer() {
   return (
-    <footer className="border-t border-white/5">
-      <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 px-6 py-10 text-sm text-white/45 sm:flex-row">
-        <div className="flex items-center gap-2.5">
-          <img src="/icon.png" alt="" className="size-6" />
-          <span>
-            Walter, by <a href="https://whyredfire.dev" className="text-white/70 transition hover:text-white">whyredfire</a>
-          </span>
-        </div>
-        <div className="flex gap-6">
-          <a href={repositoryURL} className="transition hover:text-white">Source</a>
-          <a href={releasesURL} className="transition hover:text-white">Releases</a>
-        </div>
+    <footer className="mx-auto max-w-5xl px-6">
+      <div className="flex flex-col gap-3 border-t border-white/10 py-8 text-sm text-neutral-500 sm:flex-row sm:justify-between">
+      <p>
+        Walter by{" "}
+        <a href="https://whyredfire.dev" className="text-neutral-300 transition-colors hover:text-white">
+          whyredfire
+        </a>
+      </p>
+      <div className="flex gap-6">
+        <a href={repositoryURL} className="transition-colors hover:text-white">Source</a>
+        <a href={releasesURL} className="transition-colors hover:text-white">Releases</a>
+        <a href={`${repositoryURL}/issues`} className="transition-colors hover:text-white">Feedback</a>
+      </div>
       </div>
     </footer>
   );
