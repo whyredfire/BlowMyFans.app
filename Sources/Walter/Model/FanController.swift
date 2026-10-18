@@ -64,9 +64,10 @@ final class FanController {
     @ObservationIgnored private var isUninstalling = false
     @ObservationIgnored private var syncTask: Task<Void, Never>?
     @ObservationIgnored private var needsAnotherSync = false
-    /// Consecutive monitor polls showing fans out of manual mode while speeds are applied.
-    @ObservationIgnored private var lostControlPolls = 0
+    /// When the fans were first seen out of manual mode while speeds are applied.
+    @ObservationIgnored private var lostControlSince: ContinuousClock.Instant?
     @ObservationIgnored private var nextControlRecovery = ContinuousClock.now
+    @ObservationIgnored private var curveTemperatureDate = ContinuousClock.now
 
     init(monitor: HardwareMonitor, settings: AppSettings) {
         self.monitor = monitor
@@ -85,7 +86,7 @@ final class FanController {
         }
         observeWorkspace(NSWorkspace.didWakeNotification) { controller in
             controller.isAsleep = false
-            controller.lostControlPolls = 0
+            controller.lostControlSince = nil
             controller.invalidateAppliedSpeeds()
         }
 
@@ -192,8 +193,11 @@ final class FanController {
         }
     }
 
-    /// Exponential smoothing per 2 s poll: ~75% of a rise within two polls, ~90% of a fall in about 30 s.
+    /// Exponential smoothing that follows time rather than readings, so it behaves the same at any
+    /// update interval: ~75% of a rise within 4 s, ~90% of a fall in about 30 s.
     private func updateCurveTemperature() {
+        let now = ContinuousClock.now
+        defer { curveTemperatureDate = now }
         guard let current = monitor.temperatures.hottestCPU else {
             curveTemperature = nil
             return
@@ -202,24 +206,27 @@ final class FanController {
             curveTemperature = current
             return
         }
-        let weight = current > previous ? 0.5 : 0.15
+        let weightPerTwoSeconds = current > previous ? 0.5 : 0.15
+        let weight = 1 - pow(1 - weightPerTwoSeconds, (now - curveTemperatureDate) / .seconds(2))
         curveTemperature = previous + (current - previous) * weight
     }
 
-    /// Re-sends the target if fans stay out of manual mode while we believe speeds are applied
-    /// (e.g. the helper gave up re-applying them). The helper's own watchdog gets the first few
+    /// Re-sends the target if fans stay out of manual mode for 6 s while we believe speeds are
+    /// applied (e.g. the helper gave up re-applying them). The helper's own watchdog gets those first
     /// seconds, and recovery is rate-limited.
     private func detectLostControl() {
         guard let applied = appliedRPMs, !isTakingControl, !isAsleep, syncTask == nil,
               monitor.fans.count == applied.count,
               monitor.fans.contains(where: { !$0.isManual }) else {
-            lostControlPolls = 0
+            lostControlSince = nil
             return
         }
-        lostControlPolls += 1
-        guard lostControlPolls >= 3, ContinuousClock.now >= nextControlRecovery else { return }
-        lostControlPolls = 0
-        nextControlRecovery = .now + .seconds(30)
+        let now = ContinuousClock.now
+        let since = lostControlSince ?? now
+        lostControlSince = since
+        guard now - since >= .seconds(6), now >= nextControlRecovery else { return }
+        lostControlSince = nil
+        nextControlRecovery = now + .seconds(30)
         invalidateAppliedSpeeds()
     }
 

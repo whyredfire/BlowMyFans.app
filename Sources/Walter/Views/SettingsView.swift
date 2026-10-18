@@ -9,7 +9,7 @@ struct SettingsView: View {
         @Bindable var settings = settings
         @Bindable var updater = updater
         Form {
-            Section("General") {
+            Section {
                 Toggle("Launch at login", isOn: Binding(
                     get: { settings.launchAtLogin },
                     set: { settings.setLaunchAtLogin($0) }
@@ -25,6 +25,16 @@ struct SettingsView: View {
                     Text("Icon only").tag(AppSettings.iconOnly)
                     SensorChoices()
                 }
+                Picker("Update every", selection: $settings.updateInterval) {
+                    ForEach(AppSettings.updateIntervals, id: \.self) { seconds in
+                        Text(seconds == 1 ? "1 second" : "\(Int(seconds)) seconds").tag(seconds)
+                    }
+                }
+            } header: {
+                Text("General")
+            } footer: {
+                Text("How often temperatures and fan speeds are read. Longer intervals use a little less energy; Curve mode reacts more slowly.")
+                    .foregroundStyle(.secondary)
             }
 
             Section {

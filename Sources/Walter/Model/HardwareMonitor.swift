@@ -18,6 +18,12 @@ final class HardwareMonitor {
     private(set) var errorMessage: String?
 
     @ObservationIgnored var onUpdate: (@MainActor () -> Void)?
+    /// Time between readings. A change takes effect straight away.
+    @ObservationIgnored var interval: Duration {
+        didSet {
+            if interval != oldValue, sampler != nil { startPolling() }
+        }
+    }
     /// Sensor groups the menu bar and fan control need while the panel is closed.
     @ObservationIgnored var essentialGroups: (SensorGroup) -> Bool = { _ in true }
     /// Whether fan control needs fan readings while the panel is closed.
@@ -29,6 +35,7 @@ final class HardwareMonitor {
     }
     @ObservationIgnored private let database: ModelDatabase
     @ObservationIgnored private var sampler: HardwareSampler?
+    @ObservationIgnored private var pollTask: Task<Void, Never>?
 
     /// Fans as presented to the user; synchronised dual-fan coolers show as one.
     var visibleFans: [Fan] {
@@ -48,7 +55,8 @@ final class HardwareMonitor {
         temperatures.highlights.prefix(Self.panelGroupCount)
     }
 
-    init(interval: Duration = .seconds(2)) {
+    init(interval: Duration) {
+        self.interval = interval
         let directory = Bundle.main.resourceURL?.appending(path: "Database") ?? URL(filePath: "/")
         database = ModelDatabase(directory: directory)
         NotificationCenter.default.addObserver(
@@ -56,10 +64,10 @@ final class HardwareMonitor {
         ) { [weak self] _ in
             MainActor.assumeIsolated { self?.thermalState = ProcessInfo.processInfo.thermalState }
         }
-        Task { await poll(every: interval) }
+        Task { await start() }
     }
 
-    private func poll(every interval: Duration) async {
+    private func start() async {
         do {
             // Sensor discovery walks every SMC key; keep it off the main thread.
             let sampler = try await Task.detached { [database] in try HardwareSampler(database: database) }.value
@@ -69,11 +77,19 @@ final class HardwareMonitor {
             errorMessage = error.localizedDescription
             return
         }
+        startPolling()
+    }
 
-        while !Task.isCancelled {
-            await sample()
-            onUpdate?()
-            try? await Task.sleep(for: interval, tolerance: interval / 4)
+    /// Reads straight away, then at every interval. Replaces any running loop.
+    private func startPolling() {
+        pollTask?.cancel()
+        pollTask = Task { [weak self] in
+            while !Task.isCancelled {
+                guard let self else { return }
+                await sample()
+                onUpdate?()
+                try? await Task.sleep(for: interval, tolerance: interval / 4)
+            }
         }
     }
 

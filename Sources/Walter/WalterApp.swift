@@ -18,7 +18,7 @@ struct WalterApp: App {
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let settings = AppSettings()
-    let monitor = HardwareMonitor()
+    let monitor: HardwareMonitor
     lazy var controller = FanController(monitor: monitor, settings: settings)
     let updater = AppUpdater()
     private var statusItem: StatusItemController?
@@ -26,6 +26,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     override init() {
         // Read by AppKit when creating status items: narrower spacing and highlight than the default (16).
         UserDefaults.standard.register(defaults: ["NSStatusItemSpacing": 10, "NSStatusItemSelectionPadding": 10])
+        monitor = HardwareMonitor(interval: .seconds(settings.updateInterval))
         super.init()
     }
 
@@ -35,9 +36,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 || group.isCPU && (settings.menuBarItem == AppSettings.hottestCPU || controller.mode == .curve)
         }
         monitor.needsFans = { [controller] in controller.mode != .automatic }
+        followUpdateInterval()
         statusItem = StatusItemController(settings: settings, monitor: monitor, controller: controller)
         if !isLaunchingAtLogin {
             statusItem?.showPanel()
+        }
+    }
+
+    private func followUpdateInterval() {
+        withObservationTracking {
+            monitor.interval = .seconds(settings.updateInterval)
+        } onChange: {
+            Task { @MainActor in self.followUpdateInterval() }
         }
     }
 
