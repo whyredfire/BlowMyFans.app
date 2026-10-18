@@ -10,6 +10,7 @@ final class HardwareMonitor {
     private(set) var temperatures: [SensorGroupReading] = []
     /// Sensor groups present on this Mac, whether or not they currently report a value.
     private(set) var availableGroups: [SensorGroup] = []
+    private(set) var thermalState = ProcessInfo.processInfo.thermalState
     private(set) var errorMessage: String?
 
     @ObservationIgnored var onUpdate: (@MainActor () -> Void)?
@@ -50,6 +51,7 @@ final class HardwareMonitor {
             let snapshot = await sampler.sample()
             fans = snapshot.fans
             temperatures = snapshot.temperatures
+            thermalState = ProcessInfo.processInfo.thermalState
             onUpdate?()
             try? await Task.sleep(for: interval)
         }

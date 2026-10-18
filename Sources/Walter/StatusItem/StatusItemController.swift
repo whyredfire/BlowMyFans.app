@@ -45,11 +45,14 @@ final class StatusItemController: NSObject {
             let temperature = settings.menuBarItem == AppSettings.iconOnly
                 ? nil
                 : monitor.temperatures.temperature(for: settings.menuBarItem).map(settings.format)
-            let label = StatusItemImage.Label(symbol: controller.mode.symbol, text: temperature)
+            let thermalState = monitor.thermalState
+            let label = StatusItemImage.Label(symbol: controller.mode.symbol, text: temperature,
+                                              warningColor: thermalState.warningColor)
             guard label != displayedLabel else { return }
             displayedLabel = label
             statusItem.button?.image = StatusItemImage.make(label)
-            statusItem.button?.setAccessibilityLabel(["Walter", temperature].compactMap(\.self).joined(separator: ", "))
+            let pressure = thermalState == .nominal ? nil : "thermal pressure \(thermalState.title.lowercased())"
+            statusItem.button?.setAccessibilityLabel(["Walter", temperature, pressure].compactMap(\.self).joined(separator: ", "))
         } onChange: { [weak self] in
             Task { @MainActor in self?.updateButton() }
         }

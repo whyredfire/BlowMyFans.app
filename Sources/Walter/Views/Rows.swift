@@ -81,3 +81,22 @@ private struct TemperatureText: View {
         }
     }
 }
+
+struct ThermalPressureRow: View {
+    let state: ProcessInfo.ThermalState
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "gauge.with.dots.needle.50percent")
+                .foregroundStyle(.secondary)
+                .frame(width: 18)
+            Text("Thermal pressure")
+            Spacer()
+            Circle()
+                .fill(Color(nsColor: state.warningColor ?? .systemGreen))
+                .frame(width: 7, height: 7)
+            Text(state.title)
+                .foregroundStyle(.secondary)
+        }
+    }
+}

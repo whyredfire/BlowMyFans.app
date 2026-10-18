@@ -26,6 +26,7 @@ struct MenuBarContent: View {
             Divider()
 
             VStack(spacing: 10) {
+                ThermalPressureRow(state: monitor.thermalState)
                 ForEach(monitor.temperatures.highlights.prefix(5)) { TemperatureRow(reading: $0) }
             }
 
