@@ -56,3 +56,8 @@ Updates installed by Walter itself aren't blocked.
 
 To uninstall, remove the helper in Settings (or run
 `sudo /Applications/Walter.app/Contents/Resources/helper-tool.sh uninstall`), then delete Walter.
+
+## Contributing
+
+Found a bug or have an idea? [Open an issue](https://github.com/whyredfire/Walter.app/issues). Pull
+requests are welcome too.
