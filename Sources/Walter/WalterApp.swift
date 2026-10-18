@@ -35,5 +35,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 || group.isCPU && (settings.menuBarItem == AppSettings.hottestCPU || controller.mode == .curve)
         }
         statusItem = StatusItemController(settings: settings, monitor: monitor, controller: controller)
+        if !isLaunchingAtLogin {
+            statusItem?.showPanel()
+        }
+    }
+
+    /// Opening Walter again, e.g. from Finder or Spotlight, shows the panel.
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
+        statusItem?.showPanel()
+        return false
+    }
+
+    /// The launch event's login-item flag isn't documented for apps registered with `SMAppService`,
+    /// so launches within a minute of logging in count as well.
+    private var isLaunchingAtLogin: Bool {
+        let event = NSAppleEventManager.shared().currentAppleEvent
+        if event?.eventID == kAEOpenApplication,
+           event?.paramDescriptor(forKeyword: keyAEPropData)?.enumCodeValue == keyAELaunchedAsLogInItem {
+            return true
+        }
+        return Self.consoleLoginDate.map { Date.now.timeIntervalSince($0) < 60 } ?? false
+    }
+
+    private static var consoleLoginDate: Date? {
+        setutxent()
+        defer { endutxent() }
+        while let entry = getutxent()?.pointee {
+            let line = withUnsafeBytes(of: entry.ut_line) { String(decoding: $0.prefix { $0 != 0 }, as: UTF8.self) }
+            let user = withUnsafeBytes(of: entry.ut_user) { String(decoding: $0.prefix { $0 != 0 }, as: UTF8.self) }
+            if entry.ut_type == USER_PROCESS, line == "console", user == NSUserName() {
+                return Date(timeIntervalSince1970: TimeInterval(entry.ut_tv.tv_sec))
+            }
+        }
+        return nil
     }
 }

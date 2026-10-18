@@ -12,6 +12,8 @@ final class MenuBarPanel: NSPanel {
     init(rootView: some View) {
         super.init(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
         isFloatingPanel = true
+        // Closing is handled by `resignKey`; AppKit hiding the panel itself would leave the item highlighted.
+        hidesOnDeactivate = false
         level = .statusBar
         backgroundColor = .clear
         isOpaque = false

@@ -29,6 +29,17 @@ final class StatusItemController: NSObject {
         ) { [weak self] _ in
             MainActor.assumeIsolated { self?.positionPanel() }
         }
+        // Items shift as others are added or removed; keep the panel beneath this one.
+        if let itemWindow = statusItem.button?.window {
+            NotificationCenter.default.addObserver(
+                forName: NSWindow.didMoveNotification, object: itemWindow, queue: .main
+            ) { [weak self] _ in
+                MainActor.assumeIsolated {
+                    guard let self, self.panel.isVisible else { return }
+                    self.positionPanel()
+                }
+            }
+        }
 
         if #available(macOS 27, *) {
             statusItem.expandedInterfaceDelegate = self
@@ -59,6 +70,16 @@ final class StatusItemController: NSObject {
     }
 
     // MARK: Panel
+
+    func showPanel(attempt: Int = 0) {
+        guard !panel.isVisible else { return }
+        // Right after launch the item has no place in the menu bar yet.
+        if statusItem.button?.window?.frame.height ?? 0 == 0, attempt < 40 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in self?.showPanel(attempt: attempt + 1) }
+            return
+        }
+        open()
+    }
 
     @objc private func toggle() {
         panel.isVisible ? close() : open()
