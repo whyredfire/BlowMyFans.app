@@ -20,8 +20,8 @@ extension CurvePoint {
     }
 }
 
-/// Fan speed as a function of CPU temperature: linear between points sorted by temperature,
-/// and never lower at a higher temperature.
+/// Fan speed as a function of CPU temperature: a smooth curve through points sorted by
+/// temperature that never goes down as temperature rises.
 struct FanCurve: Codable, Equatable {
     static let temperatureRange = 30.0...100.0
     /// Keeps neighbouring points apart so the curve stays a function of temperature.
@@ -34,15 +34,35 @@ struct FanCurve: Codable, Equatable {
         CurvePoint(temperature: 90, speed: 1),
     ]
 
+    /// Cubic Hermite interpolation with Steffen's monotone slopes: passes through every point
+    /// without overshooting, so the curve stays non-decreasing.
     func speed(at celsius: Double) -> Double {
         guard let first = points.first, let last = points.last else { return 1 }
         if celsius <= first.temperature { return first.speed }
         if celsius >= last.temperature { return last.speed }
-        guard let upper = points.firstIndex(where: { $0.temperature >= celsius }), upper > 0 else { return last.speed }
-        let (a, b) = (points[upper - 1], points[upper])
-        let span = b.temperature - a.temperature
-        guard span > 0 else { return b.speed }
-        return a.speed + (celsius - a.temperature) / span * (b.speed - a.speed)
+        guard let index = points.lastIndex(where: { $0.temperature <= celsius }) else { return first.speed }
+        let (a, b) = (points[index], points[index + 1])
+        let width = b.temperature - a.temperature
+        guard width > 0 else { return b.speed }
+
+        let t = (celsius - a.temperature) / width
+        let (t2, t3) = (t * t, t * t * t)
+        let value = (2 * t3 - 3 * t2 + 1) * a.speed
+            + (t3 - 2 * t2 + t) * width * slope(at: index)
+            + (-2 * t3 + 3 * t2) * b.speed
+            + (t3 - t2) * width * slope(at: index + 1)
+        return min(max(value, 0), 1)
+    }
+
+    /// Zero at the ends so the curve meets its flat extensions smoothly.
+    private func slope(at index: Int) -> Double {
+        guard index > 0, index < points.count - 1 else { return 0 }
+        let (previous, point, next) = (points[index - 1], points[index], points[index + 1])
+        let (h0, h1) = (point.temperature - previous.temperature, next.temperature - point.temperature)
+        let (s0, s1) = ((point.speed - previous.speed) / h0, (next.speed - point.speed) / h1)
+        guard s0 > 0, s1 > 0 else { return 0 }
+        let parabolic = (s0 * h1 + s1 * h0) / (h0 + h1)
+        return 2 * min(s0, s1, 0.5 * parabolic)
     }
 
     /// Moves a point between its neighbours' temperatures. Raising it lifts later points to at

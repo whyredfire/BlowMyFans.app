@@ -26,7 +26,7 @@ struct FanCurveEditor: View {
 
     private var chart: some View {
         Chart {
-            ForEach(Array(linePoints.enumerated()), id: \.offset) { _, point in
+            ForEach(samples, id: \.temperature) { point in
                 AreaMark(x: .value("Temperature", point.temperature), y: .value("Speed", point.speed * 100))
                     .foregroundStyle(.linearGradient(colors: [Color.accentColor.opacity(0.28), Color.accentColor.opacity(0.02)],
                                                      startPoint: .top, endPoint: .bottom))
@@ -113,11 +113,9 @@ struct FanCurveEditor: View {
         monitor.temperatures.hottestCPU.map { min(max($0, domain.lowerBound), domain.upperBound) }
     }
 
-    /// Curve points extended flat to both edges of the chart.
-    private var linePoints: [(temperature: Double, speed: Double)] {
-        guard let first = curve.points.first, let last = curve.points.last else { return [] }
-        let inner = curve.points.map { ($0.temperature, $0.speed) }
-        return [(domain.lowerBound, first.speed)] + inner + [(domain.upperBound, last.speed)]
+    /// The curve sampled across the chart, so the drawn line matches the applied speeds exactly.
+    private var samples: [(temperature: Double, speed: Double)] {
+        stride(from: domain.lowerBound, through: domain.upperBound, by: 0.5).map { ($0, curve.speed(at: $0)) }
     }
 
     private func speedText(_ fraction: Double) -> String {
