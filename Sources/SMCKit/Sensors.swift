@@ -82,8 +82,6 @@ public struct SensorReader: Sendable {
     private let smc: SMC
     private let hid = HIDTemperatureSensors()
     private let groups: [(SensorGroup, [SensorKey])]
-    private let members: [SensorKey]
-    private let hidNames: Set<String>
     private var lastValues: [String: (celsius: Double, date: Date)] = [:]
 
     /// Groups with at least one sensor present on this Mac.
@@ -108,15 +106,17 @@ public struct SensorReader: Sendable {
             groups = resolve(SensorGroup.fallback) + groups
         }
         self.groups = groups
-        members = groups.flatMap(\.1)
-        hidNames = Set(members.filter { $0.source == .hid }.map(\.key))
     }
 
     /// Sensors that briefly report implausible values keep their last good reading,
     /// so the list stays stable between polls.
-    public mutating func read() -> [SensorGroupReading] {
+    /// - Parameter groupIDs: The groups to read, or nil for all of them. Some sensors take
+    ///   milliseconds each to read, so callers should only ask for what they show.
+    public mutating func read(groupIDs: Set<String>? = nil) -> [SensorGroupReading] {
         let now = Date.now
-        let hidValues = hid.read(hidNames)
+        let groups = groupIDs.map { ids in self.groups.filter { ids.contains($0.0.id) } } ?? self.groups
+        let members = groups.flatMap(\.1)
+        let hidValues = hid.read(Set(members.filter { $0.source == .hid }.map(\.key)))
         for member in members {
             let value = switch member.source {
             case .smc: smc.readDouble(member.key)

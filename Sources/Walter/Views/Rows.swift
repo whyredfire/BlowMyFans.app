@@ -9,19 +9,16 @@ struct FanRow: View {
             HStack(spacing: 8) {
                 Image(systemName: "fan")
                     .foregroundStyle(.secondary)
-                    .symbolEffect(.rotate, isActive: fan.currentRPM > 0)
                     .frame(width: 18)
                 Text(fan.name)
                 Spacer()
                 Text(fan.currentRPM > 0 ? fan.currentRPM.rpmText : "Off")
                     .monospacedDigit()
                     .foregroundStyle(.secondary)
-                    .contentTransition(.numericText(value: fan.currentRPM))
             }
             LevelBar(fraction: fan.maximumRPM > 0 ? fan.currentRPM / fan.maximumRPM : 0)
                 .padding(.leading, 26)
         }
-        .animation(.smooth, value: fan.currentRPM)
     }
 }
 
@@ -69,8 +66,6 @@ private struct TemperatureText: View {
         Text(settings.format(celsius))
             .monospacedDigit()
             .foregroundStyle(tint)
-            .contentTransition(.numericText(value: celsius))
-            .animation(.smooth, value: celsius)
     }
 
     private var tint: Color {

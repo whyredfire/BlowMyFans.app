@@ -65,6 +65,8 @@ final class StatusItemController: NSObject {
     }
 
     private func open() {
+        monitor.isShowingDetails = true
+        panel.prepareContent()
         positionPanel()
         panel.makeKeyAndOrderFront(nil)
         statusItem.button?.highlight(true)
@@ -83,6 +85,7 @@ final class StatusItemController: NSObject {
     }
 
     private func hidePanel() {
+        monitor.isShowingDetails = false
         panel.orderOut(nil)
         statusItem.button?.highlight(false)
         if let clickMonitor { NSEvent.removeMonitor(clickMonitor) }

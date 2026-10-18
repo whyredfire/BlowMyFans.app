@@ -30,6 +30,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        monitor.essentialGroups = { [settings, controller] group in
+            group.id == settings.menuBarItem
+                || group.isCPU && (settings.menuBarItem == AppSettings.hottestCPU || controller.mode == .curve)
+        }
         statusItem = StatusItemController(settings: settings, monitor: monitor, controller: controller)
     }
 }

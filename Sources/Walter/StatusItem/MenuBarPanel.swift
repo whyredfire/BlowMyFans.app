@@ -1,4 +1,5 @@
 import AppKit
+import Observation
 import SwiftUI
 
 /// Borderless glass panel shown beneath the status item, sized to its SwiftUI content.
@@ -6,6 +7,7 @@ final class MenuBarPanel: NSPanel {
     private static let cornerRadius: CGFloat = 22
 
     var onClose: (() -> Void)?
+    private let presence = Presence()
 
     init(rootView: some View) {
         super.init(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
@@ -18,7 +20,7 @@ final class MenuBarPanel: NSPanel {
 
         // The content reports its size and the panel follows on the next run loop turn;
         // letting constraints resize the window mid-layout makes AppKit throw.
-        let content = rootView
+        let content = OnScreen(presence: presence, content: rootView)
             .fixedSize()
             .onGeometryChange(for: CGSize.self, of: \.size) { [weak self] size in
                 DispatchQueue.main.async { self?.fit(size) }
@@ -45,6 +47,17 @@ final class MenuBarPanel: NSPanel {
 
     override var canBecomeKey: Bool { true }
 
+    /// Builds the content before the panel is shown, so it never appears empty.
+    func prepareContent() {
+        presence.isOnScreen = true
+        contentView?.layoutSubtreeIfNeeded()
+    }
+
+    override func orderOut(_ sender: Any?) {
+        super.orderOut(sender)
+        presence.isOnScreen = false
+    }
+
     override func makeKeyAndOrderFront(_ sender: Any?) {
         super.makeKeyAndOrderFront(sender)
         invalidateShadow()
@@ -64,5 +77,20 @@ final class MenuBarPanel: NSPanel {
         guard size.width > 0, size.height > 0, frame.size != size else { return }
         setContentSize(size)
         invalidateShadow()
+    }
+}
+
+@MainActor @Observable
+private final class Presence {
+    var isOnScreen = false
+}
+
+/// Drops the content while the panel is hidden, so its animations and updates stop.
+private struct OnScreen<Content: View>: View {
+    let presence: Presence
+    let content: Content
+
+    var body: some View {
+        if presence.isOnScreen { content }
     }
 }
