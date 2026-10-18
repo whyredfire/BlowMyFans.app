@@ -119,6 +119,7 @@ struct FanCurveEditor: View {
     }
 
     private func speedText(_ fraction: Double) -> String {
+        if settings.allowFanOff, fraction == 0 { return "Off" }
         guard let range = monitor.fanSpeedRange else { return "\(Int(fraction * 100))%" }
         let rpm = range.lowerBound + fraction * (range.upperBound - range.lowerBound)
         return "\(Int(fraction * 100))% (\(rpm.rpmText))"

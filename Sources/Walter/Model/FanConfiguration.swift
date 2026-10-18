@@ -25,8 +25,8 @@ struct FanConfiguration: Codable, Equatable {
 
     /// Speeds to request per fan (in hardware order), or nil to leave fans to macOS.
     ///
-    /// Only Manual mode with `allowFanOff` ever requests `FanSpeedRequest.off`. Fans must have
-    /// a usable speed range.
+    /// Only with `allowFanOff` is `FanSpeedRequest.off` ever requested: in Manual mode below the
+    /// slider's minimum, and in Curve mode where the curve is at 0%. Fans must have a usable speed range.
     /// - Parameter sliderMinimum: Lower bound of the speed slider; a manual speed below it means
     ///   "off". Above it, each fan is clamped to its own range.
     func targetRPMs(
@@ -47,8 +47,9 @@ struct FanConfiguration: Codable, Equatable {
             // Run flat out if no CPU temperature is available.
             let fraction = cpuTemperature.map(curve.speed) ?? 1
             return fans.map { fan in
+                if allowFanOff, fraction == 0 { return FanSpeedRequest.off }
                 let rpm = fan.minimumRPM + fraction * (fan.maximumRPM - fan.minimumRPM)
-                return (rpm / 50).rounded() * 50
+                return min(max((rpm / 50).rounded() * 50, fan.minimumRPM), fan.maximumRPM)
             }
         }
     }
