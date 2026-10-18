@@ -1,6 +1,6 @@
 cask "walter" do
   version "0.1.0"
-  sha256 :no_check
+  sha256 "e5465e64425dc6cc6c5382e60b7eceb2be4d25e6db70b31f6658bfc3e99c4479"
 
   url "https://github.com/whyredfire/Walter.app/releases/download/v#{version}/Walter.zip"
   name "Walter"
