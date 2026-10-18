@@ -110,7 +110,7 @@ struct FanCurveEditor: View {
     // MARK: Data
 
     private var currentTemperature: Double? {
-        monitor.temperatures.hottestCPU.map { min(max($0, domain.lowerBound), domain.upperBound) }
+        controller.curveTemperature.map { min(max($0, domain.lowerBound), domain.upperBound) }
     }
 
     /// The curve sampled across the chart, so the drawn line matches the applied speeds exactly.

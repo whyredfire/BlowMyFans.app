@@ -30,7 +30,7 @@ struct FanConfiguration: Codable, Equatable {
     /// - Parameter sliderMinimum: Lower bound of the speed slider; a manual speed below it means
     ///   "off". Above it, each fan is clamped to its own range.
     func targetRPMs(
-        for fans: [Fan], temperatures: [SensorGroupReading], allowFanOff: Bool, sliderMinimum: Double?
+        for fans: [Fan], cpuTemperature: Double?, allowFanOff: Bool, sliderMinimum: Double?
     ) -> [Double]? {
         switch mode {
         case .automatic:
@@ -45,7 +45,7 @@ struct FanConfiguration: Codable, Equatable {
             }
         case .curve:
             // Run flat out if no CPU temperature is available.
-            let fraction = temperatures.hottestCPU.map(curve.speed) ?? 1
+            let fraction = cpuTemperature.map(curve.speed) ?? 1
             return fans.map { fan in
                 let rpm = fan.minimumRPM + fraction * (fan.maximumRPM - fan.minimumRPM)
                 return (rpm / 50).rounded() * 50

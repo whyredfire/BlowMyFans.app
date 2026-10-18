@@ -28,6 +28,9 @@ final class FanController {
     /// The saved mode is kept but not applied, after a failure or while the helper is missing.
     /// macOS controls the fans meanwhile and `errorMessage` says why.
     private(set) var isSuspended = false
+    /// The CPU temperature Curve mode follows: rises are tracked quickly and falls slowly, so
+    /// short load spikes don't make the fans surge up and back down.
+    private(set) var curveTemperature: Double?
 
     var mode: FanMode { configuration.mode }
 
@@ -158,8 +161,23 @@ final class FanController {
     }
 
     private func monitorDidUpdate() {
+        updateCurveTemperature()
         detectLostControl()
         sync()
+    }
+
+    /// Exponential smoothing per 2 s poll: ~75% of a rise within two polls, ~90% of a fall in about 30 s.
+    private func updateCurveTemperature() {
+        guard let current = monitor.temperatures.hottestCPU else {
+            curveTemperature = nil
+            return
+        }
+        guard let previous = curveTemperature else {
+            curveTemperature = current
+            return
+        }
+        let weight = current > previous ? 0.5 : 0.15
+        curveTemperature = previous + (current - previous) * weight
     }
 
     /// Re-sends the target if fans stay out of manual mode while we believe speeds are applied
@@ -218,7 +236,7 @@ final class FanController {
         guard !fans.isEmpty, fans.allSatisfy(\.hasUsableSpeedRange) else { return .hold }
         let target = configuration.targetRPMs(
             for: fans,
-            temperatures: monitor.temperatures,
+            cpuTemperature: curveTemperature,
             allowFanOff: settings.allowFanOff,
             sliderMinimum: monitor.fanSpeedRange?.lowerBound
         )
