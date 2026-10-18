@@ -1,6 +1,6 @@
 import { Check, Copy, Download } from "lucide-react";
 import { useState, type ReactNode } from "react";
-import { downloadURL, quarantineCommand } from "../links.ts";
+import { brewCommands, downloadURL, quarantineCommand } from "../links.ts";
 import { SectionHeading } from "./Features.tsx";
 import { Glass } from "./Glass.tsx";
 
@@ -12,7 +12,13 @@ export function Install() {
         title="Up and running in a minute."
         text="Walter needs an Apple silicon Mac with macOS 26 or later. Once it's installed, it keeps itself up to date."
       />
-      <ol className="mt-12 grid gap-4 lg:grid-cols-3">
+      <Glass className="mt-12 p-6">
+        <h3 className="font-semibold text-white">With Homebrew</h3>
+        <p className="mt-1 text-sm text-white/55">Installs Walter and allows it to open, in one go. Then continue with step 3.</p>
+        <CopyCommand command={brewCommands.join("\n")} />
+      </Glass>
+      <p className="mt-10 text-sm font-medium text-white/45">Or by hand</p>
+      <ol className="mt-4 grid gap-4 lg:grid-cols-3">
         <Step number={1} title="Download">
           <p>
             Download <code className="text-white/80">Walter.zip</code>, unzip it and move Walter to your Applications
@@ -69,7 +75,7 @@ function CopyCommand({ command }: { command: string }) {
 
   return (
     <div className="mt-5 flex items-center gap-2 rounded-xl border border-white/10 bg-black/40 py-2 pr-2 pl-3 font-mono text-xs text-white/75">
-      <code className="min-w-0 flex-1 break-all">{command}</code>
+      <code className="min-w-0 flex-1 whitespace-pre-wrap wrap-break-word">{command}</code>
       <button
         onClick={copy}
         aria-label={copied ? "Copied" : "Copy command"}

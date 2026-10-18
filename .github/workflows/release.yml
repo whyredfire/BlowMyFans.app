@@ -82,6 +82,13 @@ jobs:
             --full-release-notes-url "$RELEASES_URL" \
             dist
 
+      # This repo is also a Homebrew tap; the cask's new version and checksum join the release commit
+      - name: Update the Homebrew cask
+        run: |
+          checksum=$(shasum -a 256 dist/Walter.zip | cut -d ' ' -f 1)
+          sed -i '' -e "s/^  version .*/  version \"${VERSION}\"/" -e "s/^  sha256 .*/  sha256 \"${checksum}\"/" Casks/walter.rb
+          git commit --amend --no-edit -- Casks/walter.rb
+
       # Notes list the commits since the previous release; GitHub adds the compare link
       - name: Release
         env:

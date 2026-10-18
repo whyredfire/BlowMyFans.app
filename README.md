@@ -42,6 +42,15 @@
 
 Requires an Apple silicon Mac with macOS 26 or later.
 
+With [Homebrew](https://brew.sh):
+
+```sh
+brew tap whyredfire/walter https://github.com/whyredfire/Walter.app
+brew install --cask walter
+```
+
+Or by hand:
+
 1. Download [`Walter.zip`](https://github.com/whyredfire/Walter.app/releases/latest/download/Walter.zip),
    unzip it and move Walter to `/Applications`.
 2. Walter isn't notarized, so macOS blocks the first launch. Choose **Open Anyway** in
@@ -54,8 +63,9 @@ Requires an Apple silicon Mac with macOS 26 or later.
 
 Updates installed by Walter itself aren't blocked.
 
-To uninstall, remove the helper in Settings (or run
-`sudo /Applications/Walter.app/Contents/Resources/helper-tool.sh uninstall`), then delete Walter.
+To uninstall, run `brew uninstall --cask walter` if you used Homebrew. Otherwise remove the helper in
+Settings (or run `sudo /Applications/Walter.app/Contents/Resources/helper-tool.sh uninstall`), then
+delete Walter.
 
 ## Contributing
 
