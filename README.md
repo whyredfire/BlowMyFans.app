@@ -71,3 +71,7 @@ delete Walter.
 
 Found a bug or have an idea? [Open an issue](https://github.com/whyredfire/Walter.app/issues). Pull
 requests are welcome too.
+
+## License
+
+[MIT](LICENSE)
