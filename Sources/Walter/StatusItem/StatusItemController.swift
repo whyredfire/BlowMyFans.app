@@ -65,6 +65,7 @@ final class StatusItemController: NSObject {
     }
 
     private func open() {
+        controller.discardDraft()
         monitor.isShowingDetails = true
         panel.prepareContent()
         positionPanel()

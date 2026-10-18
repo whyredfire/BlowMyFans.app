@@ -5,7 +5,8 @@ struct ModePicker: View {
     @Environment(FanController.self) private var controller
 
     var body: some View {
-        Picker("Mode", selection: Binding(get: { controller.mode }, set: { controller.select($0) })) {
+        @Bindable var controller = controller
+        Picker("Mode", selection: $controller.draft.mode) {
             ForEach(FanMode.allCases) { mode in
                 Text(mode.title).tag(mode)
             }
@@ -20,10 +21,24 @@ struct ModeControls: View {
     @Environment(FanController.self) private var controller
 
     var body: some View {
-        switch controller.mode {
+        switch controller.draft.mode {
         case .manual: ManualControls()
         case .curve: FanCurveEditor()
         case .automatic, .fullBlast: EmptyView()
+        }
+    }
+}
+
+/// Shown while the panel has edits that aren't applied yet.
+struct ApplyButtons: View {
+    @Environment(FanController.self) private var controller
+
+    var body: some View {
+        if controller.hasUnappliedChanges {
+            Button("Cancel") { controller.discardDraft() }
+            Button("Apply") { controller.apply() }
+                .buttonStyle(.glassProminent)
+                .keyboardShortcut(.defaultAction)
         }
     }
 }
@@ -36,7 +51,7 @@ private struct ManualControls: View {
         @Bindable var controller = controller
         if let range = monitor.fanSpeedRange {
             SpeedSlider(title: monitor.visibleFans.count > 1 ? "All fans" : "Speed",
-                        value: $controller.configuration.manual.rpm, range: range)
+                        value: $controller.draft.manual.rpm, range: range)
         } else {
             UnavailableRange()
         }

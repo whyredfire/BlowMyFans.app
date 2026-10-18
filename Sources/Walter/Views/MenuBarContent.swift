@@ -38,6 +38,8 @@ struct MenuBarContent: View {
                     NSApp.activate()
                 }
                 Spacer()
+                ApplyButtons()
+                Spacer()
                 Button("Quit", systemImage: "power") { NSApp.terminate(nil) }
             }
             .labelStyle(.iconOnly)
@@ -46,6 +48,7 @@ struct MenuBarContent: View {
         }
         .padding(16)
         .frame(width: 340)
-        .animation(.smooth, value: controller.mode)
+        .animation(.smooth, value: controller.draft.mode)
+        .animation(.smooth, value: controller.hasUnappliedChanges)
     }
 }

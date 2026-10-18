@@ -12,14 +12,32 @@ enum HelperStatus {
 final class FanController {
     private static let configurationKey = "fanConfiguration"
 
+    /// The applied configuration.
     var configuration: FanConfiguration {
         didSet {
+            draft = configuration
             guard configuration != oldValue else { return }
             UserDefaults.standard.setEncoded(configuration, forKey: Self.configurationKey)
-            // Any edit is the user acting, so give a paused mode another try.
+            // Any change is the user acting, so give a paused mode another try.
             resume()
-            scheduleSync()
+            sync()
         }
+    }
+
+    /// What the panel edits; nothing changes until it's applied.
+    var draft: FanConfiguration
+    var hasUnappliedChanges: Bool { pendingConfiguration != configuration }
+
+    /// The draft's mode with only that mode's settings; edits made while browsing other modes are dropped.
+    private var pendingConfiguration: FanConfiguration {
+        var pending = configuration
+        pending.mode = draft.mode
+        switch draft.mode {
+        case .manual: pending.manual = draft.manual
+        case .curve: pending.curve = draft.curve
+        case .automatic, .fullBlast: break
+        }
+        return pending
     }
 
     private(set) var helperStatus: HelperStatus = .unknown
@@ -46,7 +64,6 @@ final class FanController {
     @ObservationIgnored private var isUninstalling = false
     @ObservationIgnored private var syncTask: Task<Void, Never>?
     @ObservationIgnored private var needsAnotherSync = false
-    @ObservationIgnored private var debounceTask: Task<Void, Never>?
     /// Consecutive monitor polls showing fans out of manual mode while speeds are applied.
     @ObservationIgnored private var lostControlPolls = 0
     @ObservationIgnored private var nextControlRecovery = ContinuousClock.now
@@ -55,7 +72,9 @@ final class FanController {
         self.monitor = monitor
         self.settings = settings
         let defaults = UserDefaults.standard
-        configuration = defaults.decoded(FanConfiguration.self, forKey: Self.configurationKey) ?? FanConfiguration()
+        let configuration = defaults.decoded(FanConfiguration.self, forKey: Self.configurationKey) ?? FanConfiguration()
+        self.configuration = configuration
+        draft = configuration
 
         monitor.onUpdate = { [weak self] in self?.monitorDidUpdate() }
         helper.onConnectionLost = { [weak self] in self?.invalidateAppliedSpeeds() }
@@ -63,7 +82,6 @@ final class FanController {
         // The helper hands fans to macOS for sleep itself; the app pauses and re-sends on wake.
         observeWorkspace(NSWorkspace.willSleepNotification) { controller in
             controller.isAsleep = true
-            controller.debounceTask?.cancel()
         }
         observeWorkspace(NSWorkspace.didWakeNotification) { controller in
             controller.isAsleep = false
@@ -82,13 +100,18 @@ final class FanController {
         }
     }
 
-    func select(_ mode: FanMode) {
+    func apply() {
+        configuration = pendingConfiguration
+    }
+
+    func discardDraft() {
+        draft = configuration
+    }
+
+    /// Tries a paused mode again.
+    func retry() {
         resume()
-        if configuration.mode == mode {
-            sync()
-        } else {
-            configuration.mode = mode
-        }
+        sync()
     }
 
     // MARK: Helper
@@ -112,7 +135,6 @@ final class FanController {
     func uninstallHelper() async {
         guard !isUninstalling else { return }
         isUninstalling = true
-        debounceTask?.cancel()
         // Let an in-flight sync finish so it can't re-apply speeds after the restore below.
         while let syncTask { await syncTask.value }
 
@@ -202,15 +224,6 @@ final class FanController {
         appliedRPMs = nil
         appliedGeneration &+= 1
         sync()
-    }
-
-    private func scheduleSync() {
-        debounceTask?.cancel()
-        debounceTask = Task {
-            try? await Task.sleep(for: .milliseconds(200))
-            guard !Task.isCancelled else { return }
-            sync()
-        }
     }
 
     /// Coalesces requests so only one sync talks to the helper at a time.

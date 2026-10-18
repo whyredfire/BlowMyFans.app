@@ -13,7 +13,7 @@ struct FanCurveEditor: View {
 
     private let height: CGFloat = 150
     private let hitRadius: CGFloat = 14
-    private var curve: FanCurve { controller.configuration.curve }
+    private var curve: FanCurve { controller.draft.curve }
     private var domain: ClosedRange<Double> { FanCurve.temperatureRange }
 
     var body: some View {
@@ -133,15 +133,15 @@ struct FanCurveEditor: View {
                     target = .some(nearestPoint(to: value.startLocation, proxy: proxy, origin: origin))
                 }
                 guard let id = target ?? nil, let (temperature, speed) = values(at: value.location, proxy: proxy, origin: origin) else { return }
-                controller.configuration.curve.move(id, temperature: temperature, speed: speed)
+                controller.draft.curve.move(id, temperature: temperature, speed: speed)
             }
     }
 
     private func toggle(at location: CGPoint, proxy: ChartProxy, origin: CGPoint) {
         if let id = nearestPoint(to: location, proxy: proxy, origin: origin) {
-            controller.configuration.curve.remove(id)
+            controller.draft.curve.remove(id)
         } else if let (temperature, speed) = values(at: location, proxy: proxy, origin: origin) {
-            controller.configuration.curve.add(temperature: temperature, speed: speed)
+            controller.draft.curve.add(temperature: temperature, speed: speed)
         }
     }
 
