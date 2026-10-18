@@ -15,7 +15,7 @@ Native menu bar app for monitoring temperatures and controlling fan speeds on Ap
 ./scripts/build.sh          # → build/Walter.app (arm64, ad-hoc signed)
 ```
 
-Requires only the Xcode Command Line Tools. The version comes from `VERSION`; the build number
+Requires only the Xcode Command Line Tools. The version is `CFBundleShortVersionString` in `Support/Info.plist`, set by releases; the build number
 is the git commit count.
 
 ## Install
@@ -30,30 +30,25 @@ aren't affected.
 Walter updates itself with [Sparkle](https://sparkle-project.org). Installed copies poll
 `releases/latest/download/appcast.xml` daily and offer new versions.
 
-One-time setup:
+Run the **release** workflow from the Actions tab, or:
 
 ```sh
-mkdir -p .tools/sparkle && cd .tools/sparkle
-gh release download 2.10.0 --repo sparkle-project/Sparkle --pattern "Sparkle-2.10.0.tar.xz"
-tar -xf Sparkle-2.10.0.tar.xz
+gh workflow run release.yml -f version=0.2.0
 ```
 
-The update signing key lives in your login Keychain (created with `.tools/sparkle/bin/generate_keys`;
-its public half is `SUPublicEDKey` in `Support/Info.plist`). Back it up — without it, installed
-copies can't accept new updates:
+It sets the version in `Support/Info.plist`, commits `chore: Release v0.2.0`, builds the app, signs
+the update archive and generates `appcast.xml` with Sparkle's `generate_appcast`, then pushes the tag
+and creates the GitHub Release with the commits since the previous release as notes.
+
+Updates are signed with the EdDSA key in your login Keychain; its public half is `SUPublicEDKey` in
+`Support/Info.plist`. Without the private key installed copies can't accept new updates, so export
+it once (after a build, which fetches Sparkle's tools), keep the file somewhere safe and give it to
+the workflow:
 
 ```sh
-.tools/sparkle/bin/generate_keys -x walter-sparkle-private-key   # store this file somewhere safe
+.build/artifacts/sparkle/Sparkle/bin/generate_keys -x walter-sparkle-private-key
+gh secret set SPARKLE_PRIVATE_KEY --repo whyredfire/Walter.app < walter-sparkle-private-key
 ```
-
-Publish a release (requires a clean tree; the repo must be public for updates to download):
-
-```sh
-./scripts/release.sh 0.2.0 [release-notes.md]
-```
-
-It commits the version bump, tags `v0.2.0`, builds, signs the archive, writes `appcast.xml` and
-creates the GitHub Release.
 
 ## Layout
 
@@ -63,9 +58,10 @@ creates the GitHub Release.
 | `Sources/HelperInterface` | XPC protocol and identifiers shared by app and helper |
 | `Sources/WalterHelper` | Root LaunchDaemon that performs fan writes |
 | `Sources/Walter` | Menu bar app (status item, panel, settings and updates) |
+| `.github/workflows` | Release workflow |
 | `Support` | Info.plist, entitlements, app icon, launchd plist, helper install script |
 | `Support/Database` | Per-model sensor, fan-name and model-ID tables |
-| `scripts` | `build.sh` (app bundle), `release.sh` (GitHub Release + update feed), `make-icon.swift` (app icon) |
+| `scripts` | `build.sh` (local app bundle), `make-icon.swift` (app icon) |
 
 Reading sensors needs no privileges. Fan control needs the helper, which the app installs on
 first use (admin password prompt) to `/Library/PrivilegedHelperTools` + `/Library/LaunchDaemons`.

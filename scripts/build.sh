@@ -6,9 +6,8 @@ cd "$(dirname "$0")/.."
 HELPER_LABEL="dev.whyredfire.walter.helper"
 APP="build/Walter.app"
 ARCHS="--arch arm64"
-VERSION="$(cat VERSION)"
 BUILD="$(git rev-list --count HEAD)"
-SPARKLE="$(find .build/artifacts -path "*Sparkle.xcframework/macos-*/Sparkle.framework" -maxdepth 6 | head -1)"
+SPARKLE=".build/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework"
 
 swift build -c release $ARCHS
 BIN="$(swift build -c release $ARCHS --show-bin-path)"
@@ -17,7 +16,7 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Library/LaunchServices" "$APP/Contents/Frameworks"
 
 cp Support/Info.plist "$APP/Contents/"
-/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" -c "Set :CFBundleVersion $BUILD" "$APP/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$APP/Contents/Info.plist"
 cp "$BIN/Walter" "$APP/Contents/MacOS/"
 cp "$BIN/WalterHelper" "$APP/Contents/Library/LaunchServices/$HELPER_LABEL"
 cp "Support/$HELPER_LABEL.plist" Support/helper-tool.sh Support/AppIcon.icns "$APP/Contents/Resources/"
@@ -34,4 +33,4 @@ codesign --force --options runtime --sign - --identifier "$HELPER_LABEL" \
     "$APP/Contents/Library/LaunchServices/$HELPER_LABEL"
 codesign --force --options runtime --sign - --entitlements Support/Walter.entitlements "$APP"
 
-echo "Built $APP $VERSION ($BUILD)"
+echo "Built $APP $(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" Support/Info.plist) ($BUILD)"
