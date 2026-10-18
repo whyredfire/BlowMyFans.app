@@ -10,6 +10,7 @@ struct WalterApp: App {
                 .environment(appDelegate.settings)
                 .environment(appDelegate.monitor)
                 .environment(appDelegate.controller)
+                .environment(appDelegate.updater)
         }
     }
 }
@@ -19,6 +20,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     let settings = AppSettings()
     let monitor = HardwareMonitor()
     lazy var controller = FanController(monitor: monitor, settings: settings)
+    let updater = AppUpdater()
     private var statusItem: StatusItemController?
 
     override init() {

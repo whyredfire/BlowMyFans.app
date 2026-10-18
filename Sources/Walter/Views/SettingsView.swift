@@ -3,9 +3,11 @@ import SwiftUI
 struct SettingsView: View {
     @Environment(AppSettings.self) private var settings
     @Environment(FanController.self) private var controller
+    @Environment(AppUpdater.self) private var updater
 
     var body: some View {
         @Bindable var settings = settings
+        @Bindable var updater = updater
         Form {
             Section("General") {
                 Toggle("Launch at login", isOn: Binding(
@@ -56,6 +58,13 @@ struct SettingsView: View {
             } footer: {
                 Text("A small background service that changes fan speeds. It hands fans back to macOS when the app quits.")
                     .foregroundStyle(.secondary)
+            }
+
+            Section("Updates") {
+                Toggle("Check for updates automatically", isOn: $updater.automaticallyChecks)
+                LabeledContent("Version \(updater.version)") {
+                    Button("Check for Updates…") { updater.checkForUpdates() }
+                }
             }
         }
         .formStyle(.grouped)

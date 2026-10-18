@@ -15,7 +15,45 @@ Native menu bar app for monitoring temperatures and controlling fan speeds on Ap
 ./scripts/build.sh          # → build/Walter.app (arm64, ad-hoc signed)
 ```
 
-Requires only the Xcode Command Line Tools.
+Requires only the Xcode Command Line Tools. The version comes from `VERSION`; the build number
+is the git commit count.
+
+## Install
+
+Download `Walter-<version>.zip` from the latest GitHub Release, unzip it and move `Walter.app` to
+`/Applications`. Walter isn't notarized, so the first launch is blocked: open
+System Settings › Privacy & Security and choose **Open Anyway**. Updates installed by Walter itself
+aren't affected.
+
+## Releasing
+
+Walter updates itself with [Sparkle](https://sparkle-project.org). Installed copies poll
+`releases/latest/download/appcast.xml` daily and offer new versions.
+
+One-time setup:
+
+```sh
+mkdir -p .tools/sparkle && cd .tools/sparkle
+gh release download 2.10.0 --repo sparkle-project/Sparkle --pattern "Sparkle-2.10.0.tar.xz"
+tar -xf Sparkle-2.10.0.tar.xz
+```
+
+The update signing key lives in your login Keychain (created with `.tools/sparkle/bin/generate_keys`;
+its public half is `SUPublicEDKey` in `Support/Info.plist`). Back it up — without it, installed
+copies can't accept new updates:
+
+```sh
+.tools/sparkle/bin/generate_keys -x walter-sparkle-private-key   # store this file somewhere safe
+```
+
+Publish a release (requires a clean tree; the repo must be public for updates to download):
+
+```sh
+./scripts/release.sh 0.2.0 [release-notes.md]
+```
+
+It commits the version bump, tags `v0.2.0`, builds, signs the archive, writes `appcast.xml` and
+creates the GitHub Release.
 
 ## Layout
 
@@ -24,9 +62,10 @@ Requires only the Xcode Command Line Tools.
 | `Sources/SMCKit` | AppleSMC access, HID sensors, fan/sensor readers, model database parsing |
 | `Sources/HelperInterface` | XPC protocol and identifiers shared by app and helper |
 | `Sources/WalterHelper` | Root LaunchDaemon that performs fan writes |
-| `Sources/Walter` | Menu bar app (status item, panel and settings) |
-| `Support` | Info.plist, launchd plist, helper install script |
+| `Sources/Walter` | Menu bar app (status item, panel, settings and updates) |
+| `Support` | Info.plist, entitlements, launchd plist, helper install script |
 | `Support/Database` | Per-model sensor, fan-name and model-ID tables |
+| `scripts` | `build.sh` (app bundle) and `release.sh` (GitHub Release + update feed) |
 
 Reading sensors needs no privileges. Fan control needs the helper, which the app installs on
 first use (admin password prompt) to `/Library/PrivilegedHelperTools` + `/Library/LaunchDaemons`.
