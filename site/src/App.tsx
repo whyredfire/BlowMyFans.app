@@ -1,5 +1,4 @@
 import { Changelog } from "./components/Changelog.tsx";
-import { CurveDemo } from "./components/CurveDemo.tsx";
 import { Details } from "./components/Details.tsx";
 import { Download } from "./components/Download.tsx";
 import { Footer } from "./components/Footer.tsx";
@@ -14,7 +13,6 @@ export function App() {
       <main>
         <Hero />
         <Modes />
-        <CurveDemo />
         <Details />
         <Changelog />
         <Download />
