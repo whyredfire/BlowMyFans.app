@@ -110,11 +110,11 @@ public struct SensorReader: Sendable {
 
     /// Sensors that briefly report implausible values keep their last good reading,
     /// so the list stays stable between polls.
-    /// - Parameter groupIDs: The groups to read, or nil for all of them. Some sensors take
-    ///   milliseconds each to read, so callers should only ask for what they show.
-    public mutating func read(groupIDs: Set<String>? = nil) -> [SensorGroupReading] {
+    /// - Parameter groupIDs: The groups to read. Some sensors take milliseconds each to read, so
+    ///   callers should only ask for what they show.
+    public mutating func read(groupIDs: Set<String>) -> [SensorGroupReading] {
         let now = Date.now
-        let groups = groupIDs.map { ids in self.groups.filter { ids.contains($0.0.id) } } ?? self.groups
+        let groups = self.groups.filter { groupIDs.contains($0.0.id) }
         let members = groups.flatMap(\.1)
         let hidValues = hid.read(Set(members.filter { $0.source == .hid }.map(\.key)))
         for member in members {
