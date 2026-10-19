@@ -23,7 +23,7 @@ extension CurvePoint {
 /// Fan speed as a function of CPU temperature: a smooth curve through points sorted by
 /// temperature that never goes down as temperature rises.
 struct FanCurve: Codable, Equatable {
-    static let temperatureRange = 30.0...100.0
+    static let temperatureRange = 30.0...110.0
     /// Keeps neighbouring points apart so the curve stays a function of temperature.
     private static let spacing = 2.0
 

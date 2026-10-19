@@ -3,7 +3,7 @@
 
 export type CurvePoint = { id: number; temperature: number; speed: number };
 
-export const temperatureRange = { min: 30, max: 100 } as const;
+export const temperatureRange = { min: 30, max: 110 } as const;
 /** Keeps neighbouring points apart so the curve stays a function of temperature. */
 const spacing = 2;
 
