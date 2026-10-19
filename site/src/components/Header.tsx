@@ -10,6 +10,7 @@ export function Header() {
       <nav className="flex items-center gap-7 text-sm text-neutral-400">
         <a href="#modes" className="hidden transition-colors hover:text-white sm:block">Modes</a>
         <a href="#curve" className="hidden transition-colors hover:text-white sm:block">Curve</a>
+        <a href="#changelog" className="hidden transition-colors hover:text-white sm:block">Changelog</a>
         <a href={repositoryURL} className="transition-colors hover:text-white">GitHub</a>
       </nav>
     </header>

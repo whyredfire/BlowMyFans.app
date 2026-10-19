@@ -1,3 +1,4 @@
+import { Changelog } from "./components/Changelog.tsx";
 import { CurveDemo } from "./components/CurveDemo.tsx";
 import { Details } from "./components/Details.tsx";
 import { Download } from "./components/Download.tsx";
@@ -15,6 +16,7 @@ export function App() {
         <Modes />
         <CurveDemo />
         <Details />
+        <Changelog />
         <Download />
       </main>
       <Footer />
