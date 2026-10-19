@@ -46,7 +46,7 @@ With [Homebrew](https://brew.sh):
 
 ```sh
 brew tap whyredfire/walter https://github.com/whyredfire/Walter.app
-brew install --cask walter
+brew install --cask whyredfire/walter/walter
 ```
 
 Or by hand:
