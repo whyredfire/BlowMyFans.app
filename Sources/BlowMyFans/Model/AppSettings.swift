@@ -44,7 +44,7 @@ final class AppSettings {
         useFahrenheit = defaults.bool(forKey: "useFahrenheit")
         menuBarItem = defaults.string(forKey: "menuBarItem") ?? Self.hottestCPU
         let interval = defaults.double(forKey: "updateInterval")
-        updateInterval = Self.updateIntervals.contains(interval) ? interval : 2
+        updateInterval = Self.updateIntervals.contains(interval) ? interval : 5
         switchesModeWithPower = defaults.bool(forKey: "switchesModeWithPower")
         modes = Dictionary(uniqueKeysWithValues: PowerSource.allCases.map { source in
             (source, defaults.string(forKey: Self.modeKey(source)).flatMap(FanMode.init(rawValue:)) ?? .automatic)

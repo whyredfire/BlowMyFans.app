@@ -6,7 +6,7 @@ import { FanRow, TemperatureRow, ThermalPressureRow } from "./Rows.tsx";
 import { Symbol } from "./Symbol.tsx";
 
 const initialConfiguration: Configuration = { mode: "curve", manualRPM: 3900, curve: defaultPoints };
-/** Matches the app's default update interval. */
+/** One of the app's update intervals; faster than its default so the demo feels alive. */
 const tick = 2000;
 
 /** The draft's mode with only that mode's settings, as the app applies it. */
