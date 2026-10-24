@@ -24,6 +24,12 @@ jobs:
           CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
         run: crowdin download --no-progress --no-colors --skip-untranslated-strings
 
+      # A language with nothing translated yet comes down empty; without a folder the app doesn't offer it.
+      - name: Remove empty languages
+        run: |
+          find Support/Localization -name Localizable.strings -empty -delete
+          find Support/Localization -type d -empty -delete
+
       - uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore(l10n): Import translations from Crowdin"
