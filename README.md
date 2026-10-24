@@ -35,6 +35,8 @@
 - **Light:** reads only what's on screen; well under 1% CPU in the background, and the helper sleeps
   while it has nothing to do.
 - **Updates itself** with signed [Sparkle](https://sparkle-project.org) updates.
+- **Speaks your language:** follows your Mac's language, in Chinese, Dutch, French, German, Italian, Japanese,
+  Polish, Portuguese, Russian and Spanish. [Help translate](https://translate-blowmyfans.whyredfire.dev).
 
 <p align="center">
   <img src="site/public/screenshots/settings.webp" width="572" alt="The Settings window">

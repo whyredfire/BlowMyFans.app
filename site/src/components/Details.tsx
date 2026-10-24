@@ -1,10 +1,25 @@
-const details = [
+import type { ReactNode } from "react";
+import { translateURL } from "../links.ts";
+
+const details: { title: string; text: ReactNode }[] = [
   { title: "Every sensor", text: "CPU, GPU, SSD, battery and more, named for your Mac's model. Keep any of them in the menu bar, in °C or °F." },
   { title: "Plugged in or on battery", text: "Give each its own mode, like Curve at your desk and Auto on the go. It switches as you plug in or unplug." },
   { title: "Thermal pressure", text: "A coloured dot on the icon when macOS starts slowing your Mac down to cool it." },
   { title: "Hands back cleanly", text: "Fans return to macOS when the app quits, crashes or your Mac sleeps. If macOS isn't ready, they run at full speed until it is." },
   { title: "Barely there", text: "It reads only what's on screen: well under 1% CPU, and its helper sleeps when there's nothing to do." },
   { title: "Keeps itself current", text: "Signed updates install in the background, without stealing focus." },
+  {
+    title: "Speaks your language",
+    text: (
+      <>
+        Follows your Mac's language, in Chinese, Dutch, French, German, Italian, Japanese, Polish, Portuguese, Russian
+        and Spanish.{" "}
+        <a href={translateURL} className="text-neutral-200 underline decoration-neutral-600 underline-offset-4 transition-colors hover:text-white">
+          Help translate
+        </a>
+      </>
+    ),
+  },
 ];
 
 export function Details() {
