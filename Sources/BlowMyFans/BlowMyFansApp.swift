@@ -11,6 +11,7 @@ struct BlowMyFansApp: App {
                 .environment(appDelegate.monitor)
                 .environment(appDelegate.controller)
                 .environment(appDelegate.updater)
+                .environment(appDelegate.power)
         }
     }
 }
@@ -19,7 +20,8 @@ struct BlowMyFansApp: App {
 final class AppDelegate: NSObject, NSApplicationDelegate {
     let settings = AppSettings()
     let monitor: HardwareMonitor
-    lazy var controller = FanController(monitor: monitor, settings: settings)
+    let power = PowerSourceMonitor()
+    lazy var controller = FanController(monitor: monitor, settings: settings, power: power)
     let updater = AppUpdater()
     private var statusItem: StatusItemController?
 

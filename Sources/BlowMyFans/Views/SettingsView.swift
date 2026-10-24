@@ -4,6 +4,7 @@ struct SettingsView: View {
     @Environment(AppSettings.self) private var settings
     @Environment(FanController.self) private var controller
     @Environment(AppUpdater.self) private var updater
+    @Environment(PowerSourceMonitor.self) private var power
 
     var body: some View {
         @Bindable var settings = settings
@@ -35,6 +36,10 @@ struct SettingsView: View {
             } footer: {
                 Text("How often temperatures and fan speeds are read. Longer intervals use a little less energy; Curve mode reacts more slowly.")
                     .foregroundStyle(.secondary)
+            }
+
+            if power.hasBattery {
+                PowerSection()
             }
 
             Section {
@@ -93,6 +98,38 @@ private struct SensorChoices: View {
         Divider()
         ForEach(monitor.availableGroups) { group in
             Text(group.name).tag(group.id)
+        }
+    }
+}
+
+/// A mode for each power source, switched when the Mac is plugged in or unplugged.
+private struct PowerSection: View {
+    @Environment(AppSettings.self) private var settings
+    @Environment(FanController.self) private var controller
+
+    var body: some View {
+        Section {
+            Toggle("Switch modes with power source", isOn: Binding(
+                get: { settings.switchesModeWithPower },
+                set: { controller.setSwitchesModeWithPower($0) }
+            ))
+            if settings.switchesModeWithPower {
+                ForEach(PowerSource.allCases) { source in
+                    Picker(source.title, selection: Binding(
+                        get: { settings.mode(for: source) },
+                        set: { controller.setMode($0, for: source) }
+                    )) {
+                        ForEach(FanMode.allCases) { mode in
+                            Text(mode.title).tag(mode)
+                        }
+                    }
+                }
+            }
+        } header: {
+            Text("Power")
+        } footer: {
+            Text("Applying a mode in the menu bar also sets it for the power source you're on.")
+                .foregroundStyle(.secondary)
         }
     }
 }

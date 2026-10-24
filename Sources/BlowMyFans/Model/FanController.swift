@@ -18,8 +18,8 @@ final class FanController {
             draft = configuration
             guard configuration != oldValue else { return }
             UserDefaults.standard.setEncoded(configuration, forKey: Self.configurationKey)
-            // Any change is the user acting, so give a paused mode another try.
-            resume()
+            // A change the user made gives a paused mode another try; a switch for the power source doesn't.
+            if !isSwitchingForPowerSource { resume() }
             sync()
         }
     }
@@ -54,6 +54,8 @@ final class FanController {
 
     @ObservationIgnored private let monitor: HardwareMonitor
     @ObservationIgnored private let settings: AppSettings
+    @ObservationIgnored private let power: PowerSourceMonitor
+    @ObservationIgnored private var isSwitchingForPowerSource = false
     @ObservationIgnored private let helper = HelperClient()
     /// Speeds last confirmed by the helper; nil while macOS controls the fans.
     @ObservationIgnored private var appliedRPMs: [Double]?
@@ -69,15 +71,21 @@ final class FanController {
     @ObservationIgnored private var nextControlRecovery = ContinuousClock.now
     @ObservationIgnored private var curveTemperatureDate = ContinuousClock.now
 
-    init(monitor: HardwareMonitor, settings: AppSettings) {
+    init(monitor: HardwareMonitor, settings: AppSettings, power: PowerSourceMonitor) {
         self.monitor = monitor
         self.settings = settings
+        self.power = power
         let defaults = UserDefaults.standard
-        let configuration = defaults.decoded(FanConfiguration.self, forKey: Self.configurationKey) ?? FanConfiguration()
+        var configuration = defaults.decoded(FanConfiguration.self, forKey: Self.configurationKey) ?? FanConfiguration()
+        // The Mac may have been plugged in or unplugged while the app wasn't running.
+        if settings.switchesModeWithPower {
+            configuration.mode = settings.mode(for: power.current)
+        }
         self.configuration = configuration
         draft = configuration
 
         monitor.onUpdate = { [weak self] in self?.monitorDidUpdate() }
+        power.onChange = { [weak self] in self?.powerSourceChanged(to: $0) }
         helper.onConnectionLost = { [weak self] in self?.invalidateAppliedSpeeds() }
 
         // The helper hands fans to macOS for sleep itself; the app pauses and re-sends on wake.
@@ -93,16 +101,51 @@ final class FanController {
         Task {
             await refreshHelperStatus()
             // A saved mode must never trigger a password prompt at launch; wait for the user to act.
-            if helperStatus != .installed, configuration.mode != .automatic {
-                isSuspended = true
-                errorMessage = "The fan helper isn't installed. Install it or choose a mode to resume \(mode.title)."
-            }
+            suspendIfHelperMissing()
             sync()
         }
     }
 
     func apply() {
         configuration = pendingConfiguration
+        if settings.switchesModeWithPower {
+            settings.setMode(configuration.mode, for: power.current)
+        }
+    }
+
+    // MARK: Power source
+
+    /// Turning it on keeps the current mode for the current power source, so nothing changes yet.
+    func setSwitchesModeWithPower(_ isOn: Bool) {
+        settings.switchesModeWithPower = isOn
+        if isOn {
+            settings.setMode(configuration.mode, for: power.current)
+        }
+    }
+
+    func setMode(_ mode: FanMode, for source: PowerSource) {
+        settings.setMode(mode, for: source)
+        if source == power.current {
+            resume()
+            configuration.mode = mode
+        }
+    }
+
+    private func powerSourceChanged(to source: PowerSource) {
+        guard settings.switchesModeWithPower else { return }
+        let mode = settings.mode(for: source)
+        guard mode != configuration.mode else { return }
+        isSwitchingForPowerSource = true
+        configuration.mode = mode
+        isSwitchingForPowerSource = false
+        // Unplugging must not pop up a password prompt; wait for the user to act.
+        suspendIfHelperMissing()
+    }
+
+    private func suspendIfHelperMissing() {
+        guard helperStatus != .installed, configuration.mode != .automatic else { return }
+        isSuspended = true
+        errorMessage = "The fan helper isn't installed. Install it or choose a mode to resume \(mode.title)."
     }
 
     func discardDraft() {

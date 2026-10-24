@@ -28,6 +28,19 @@ final class AppSettings {
         didSet { UserDefaults.standard.set(updateInterval, forKey: "updateInterval") }
     }
 
+    /// Each power source keeps its own mode, applied when the Mac is plugged in or unplugged.
+    var switchesModeWithPower: Bool {
+        didSet { UserDefaults.standard.set(switchesModeWithPower, forKey: "switchesModeWithPower") }
+    }
+
+    private(set) var modes: [PowerSource: FanMode] {
+        didSet {
+            for (source, mode) in modes {
+                UserDefaults.standard.set(mode.rawValue, forKey: Self.modeKey(source))
+            }
+        }
+    }
+
     private(set) var launchAtLogin = SMAppService.mainApp.status == .enabled
     private(set) var launchAtLoginError: String?
 
@@ -38,6 +51,22 @@ final class AppSettings {
         allowFanOff = defaults.bool(forKey: "allowFanOff")
         let interval = defaults.double(forKey: "updateInterval")
         updateInterval = Self.updateIntervals.contains(interval) ? interval : 2
+        switchesModeWithPower = defaults.bool(forKey: "switchesModeWithPower")
+        modes = Dictionary(uniqueKeysWithValues: PowerSource.allCases.map { source in
+            (source, defaults.string(forKey: Self.modeKey(source)).flatMap(FanMode.init(rawValue:)) ?? .automatic)
+        })
+    }
+
+    func mode(for source: PowerSource) -> FanMode {
+        modes[source] ?? .automatic
+    }
+
+    func setMode(_ mode: FanMode, for source: PowerSource) {
+        modes[source] = mode
+    }
+
+    private static func modeKey(_ source: PowerSource) -> String {
+        "\(source.rawValue)Mode"
     }
 
     func setLaunchAtLogin(_ enabled: Bool) {

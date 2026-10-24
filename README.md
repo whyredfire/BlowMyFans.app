@@ -26,6 +26,8 @@
   the fans surge.
 - **Temperatures:** CPU, GPU, SSD, battery and more, with readable names for each Mac model. The menu
   bar can show the hottest CPU, any sensor, or just the icon.
+- **Plugged in or on battery:** give each its own mode, for example Curve at your desk and Auto on the
+  go. It switches as you plug in or unplug.
 - **Thermal pressure:** shown in the panel, with a coloured dot on the menu bar icon when macOS starts
   throttling.
 - **Safe:** fans go back to macOS when the app quits, crashes or the Mac sleeps. If macOS won't take
