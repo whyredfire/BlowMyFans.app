@@ -304,7 +304,6 @@ final class FanController {
         let target = configuration.targetRPMs(
             for: fans,
             cpuTemperature: curveTemperature,
-            allowFanOff: settings.allowFanOff,
             sliderMinimum: monitor.fanSpeedRange?.lowerBound
         )
         return target.map(SyncTarget.speeds) ?? .automatic

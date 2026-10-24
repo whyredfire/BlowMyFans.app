@@ -1,9 +1,9 @@
 const modes = [
   { title: "Auto", text: "macOS runs the fans as it always does. Blow My Fans just shows you what's going on." },
-  { title: "Manual", text: "One slider for every fan. Allow it in Settings and the lowest notch stops them while your Mac is idle." },
+  { title: "Manual", text: "One slider for every fan. Its lowest notch stops them while your Mac is idle." },
   {
     title: "Curve",
-    text: "The fans follow a curve you draw against CPU temperature. It never dips as things heat up, and short spikes don't send the fans surging.",
+    text: "The fans follow a curve you draw against CPU temperature. At 0% they stop. It never dips as things heat up, and short spikes don't send the fans surging.",
   },
   { title: "Full Blast", text: "Every fan at maximum, for when you want it cool right now." },
 ];

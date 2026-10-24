@@ -38,32 +38,43 @@ export function ModePicker({ mode, onChange }: { mode: Mode; onChange: (mode: Mo
   );
 }
 
+/** "Off" is one notch below the minimum, as in the app's slider. */
+const sliderStart = fanRange.min - (fanRange.max - fanRange.min) * 0.05;
+
 /** One speed for every fan, snapped to 50 RPM like the app's slider. */
 export function SpeedSlider({ rpm, onChange }: { rpm: number; onChange: (rpm: number) => void }) {
   const track = useRef<HTMLDivElement>(null);
-  const fraction = (rpm - fanRange.min) / (fanRange.max - fanRange.min);
-  const set = (value: number) => onChange(Math.min(Math.max(Math.round(value / 50) * 50, fanRange.min), fanRange.max));
+  const fraction = (Math.max(rpm, sliderStart) - sliderStart) / (fanRange.max - sliderStart);
+  const set = (value: number) =>
+    onChange(value < (sliderStart + fanRange.min) / 2 ? 0 : Math.min(Math.max(Math.round(value / 50) * 50, fanRange.min), fanRange.max));
 
   function drag(event: PointerEvent<HTMLDivElement>) {
     const bounds = track.current!.getBoundingClientRect();
-    set(fanRange.min + ((event.clientX - bounds.left) / bounds.width) * (fanRange.max - fanRange.min));
+    set(sliderStart + ((event.clientX - bounds.left) / bounds.width) * (fanRange.max - sliderStart));
+  }
+
+  /** Arrow keys step through the speeds, with Off just below the minimum. */
+  function nudge(delta: number) {
+    if (rpm < fanRange.min) return set(delta > 0 ? fanRange.min : 0);
+    if (rpm === fanRange.min && delta < 0) return set(0);
+    set(Math.max(rpm + delta, fanRange.min));
   }
 
   return (
     <div className="space-y-1">
       <div className="flex items-baseline">
         <span className="text-white/50">All fans</span>
-        <span className="ml-auto font-medium tabular-nums">{rpm.toLocaleString("en-US")} RPM</span>
+        <span className="ml-auto font-medium tabular-nums">{rpm < fanRange.min ? "Off" : `${rpm.toLocaleString("en-US")} RPM`}</span>
       </div>
       <div
         ref={track}
         role="slider"
         tabIndex={0}
         aria-label="Speed for all fans"
-        aria-valuemin={fanRange.min}
+        aria-valuemin={0}
         aria-valuemax={fanRange.max}
         aria-valuenow={rpm}
-        aria-valuetext={`${rpm} RPM`}
+        aria-valuetext={rpm < fanRange.min ? "Off" : `${rpm} RPM`}
         className="relative flex h-5 cursor-pointer touch-none items-center outline-none"
         onPointerDown={(event) => {
           event.currentTarget.setPointerCapture(event.pointerId);
@@ -74,7 +85,7 @@ export function SpeedSlider({ rpm, onChange }: { rpm: number; onChange: (rpm: nu
           const delta = { ArrowRight: 100, ArrowUp: 100, ArrowLeft: -100, ArrowDown: -100 }[event.key];
           if (delta) {
             event.preventDefault();
-            set(rpm + delta);
+            nudge(delta);
           }
         }}
       >
@@ -203,7 +214,7 @@ export function CurveEditor({
         <circle cx={x(celsius)} cy={y(speed)} r={4.5} fill="#ff9f0a" className="drop-shadow-[0_0_4px_rgb(255_159_10/0.7)]" />
       </svg>
       <p className="text-[11px] text-white/50 tabular-nums">
-        CPU {Math.round(temperature)}° → {Math.round(speed * 100)}% ({curveRPM(points, temperature).toLocaleString("en-US")} RPM)
+        CPU {Math.round(temperature)}° → {speed === 0 ? "Off" : `${Math.round(speed * 100)}% (${curveRPM(points, temperature).toLocaleString("en-US")} RPM)`}
       </p>
     </div>
   );

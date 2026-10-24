@@ -43,15 +43,6 @@ struct SettingsView: View {
             }
 
             Section {
-                Toggle("Allow turning fans off", isOn: $settings.allowFanOff)
-            } header: {
-                Text("Fans")
-            } footer: {
-                Text("Lets the fans stop: in Manual mode below the slider's lowest speed, and in Curve mode wherever the curve is at 0%.")
-                    .foregroundStyle(.secondary)
-            }
-
-            Section {
                 LabeledContent("Status") {
                     switch controller.helperStatus {
                     case .installed:

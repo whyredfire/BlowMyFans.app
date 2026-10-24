@@ -74,9 +74,10 @@ const random = (min: number, max: number) => min + Math.random() * (max - min);
 const approach = (value: number, target: number, tau: number, dt: number) => value + (target - value) * (1 - Math.exp(-dt / tau));
 const rpmFor = (fraction: number) => fanRange.min + fraction * (fanRange.max - fanRange.min);
 
-/** Curve mode's speed for a temperature, as the app computes it. */
+/** Curve mode's speed for a temperature, as the app computes it: 0% stops the fans. */
 export function curveRPM(curve: CurvePoint[], celsius: number) {
-  return clamp(Math.round(rpmFor(speedAt(curve, celsius)) / 50) * 50, fanRange.min, fanRange.max);
+  const fraction = speedAt(curve, celsius);
+  return fraction === 0 ? 0 : clamp(Math.round(rpmFor(fraction) / 50) * 50, fanRange.min, fanRange.max);
 }
 
 function targetRPM(machine: Machine, configuration: Configuration) {
@@ -89,7 +90,7 @@ function targetRPM(machine: Machine, configuration: Configuration) {
       return machine.fans[0] > 0 && machine.autoTemperature > autoStopTemperature ? fanRange.min : 0;
     }
     case "manual":
-      return clamp(configuration.manualRPM, fanRange.min, fanRange.max);
+      return configuration.manualRPM < fanRange.min ? 0 : clamp(configuration.manualRPM, fanRange.min, fanRange.max);
     case "curve":
       return curveRPM(configuration.curve, machine.smoothedTemperature);
     case "fullBlast":

@@ -66,7 +66,6 @@ private struct UnavailableRange: View {
 }
 
 private struct SpeedSlider: View {
-    @Environment(AppSettings.self) private var settings
     let title: String
     @Binding var value: Double
     let range: ClosedRange<Double>
@@ -90,13 +89,13 @@ private struct SpeedSlider: View {
         }
     }
 
-    /// With fans allowed off, "Off" is one notch below the minimum rather than everything from 0 up to it.
+    /// "Off" is one notch below the minimum rather than everything from 0 up to it.
     private var start: Double {
-        settings.allowFanOff ? range.lowerBound - (range.upperBound - range.lowerBound) * 0.05 : range.lowerBound
+        range.lowerBound - (range.upperBound - range.lowerBound) * 0.05
     }
 
     private func setSliderValue(_ position: Double) {
-        if settings.allowFanOff, position < (start + range.lowerBound) / 2 {
+        if position < (start + range.lowerBound) / 2 {
             value = 0
         } else {
             value = min(max((position / 50).rounded() * 50, range.lowerBound), range.upperBound)
@@ -105,7 +104,7 @@ private struct SpeedSlider: View {
 
     private var valueText: String {
         if value < range.lowerBound {
-            return settings.allowFanOff ? "Off" : range.lowerBound.rpmText
+            return "Off"
         }
         return min(value, range.upperBound).rpmText
     }

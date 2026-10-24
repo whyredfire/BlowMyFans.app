@@ -18,11 +18,6 @@ final class AppSettings {
         didSet { UserDefaults.standard.set(menuBarItem, forKey: "menuBarItem") }
     }
 
-    /// Lets the fans stop: below the minimum in Manual mode, and where the curve is at 0% in Curve mode.
-    var allowFanOff: Bool {
-        didSet { UserDefaults.standard.set(allowFanOff, forKey: "allowFanOff") }
-    }
-
     /// How often temperatures and fan speeds are read, in seconds.
     var updateInterval: Double {
         didSet { UserDefaults.standard.set(updateInterval, forKey: "updateInterval") }
@@ -48,7 +43,6 @@ final class AppSettings {
         let defaults = UserDefaults.standard
         useFahrenheit = defaults.bool(forKey: "useFahrenheit")
         menuBarItem = defaults.string(forKey: "menuBarItem") ?? Self.hottestCPU
-        allowFanOff = defaults.bool(forKey: "allowFanOff")
         let interval = defaults.double(forKey: "updateInterval")
         updateInterval = Self.updateIntervals.contains(interval) ? interval : 2
         switchesModeWithPower = defaults.bool(forKey: "switchesModeWithPower")
