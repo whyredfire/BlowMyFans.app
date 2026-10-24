@@ -3,11 +3,11 @@ import AppKit
 extension ProcessInfo.ThermalState {
     var title: String {
         switch self {
-        case .nominal: "Nominal"
-        case .fair: "Fair"
-        case .serious: "Serious"
-        case .critical: "Critical"
-        @unknown default: "Unknown"
+        case .nominal: String(localized: "Nominal")
+        case .fair: String(localized: "Fair")
+        case .serious: String(localized: "Serious")
+        case .critical: String(localized: "Critical")
+        @unknown default: String(localized: "Unknown")
         }
     }
 

@@ -1,0 +1,37 @@
+name: sync strings
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync-strings:
+    runs-on: xcode-27
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Extract strings
+        run: ./scripts/extract-strings.sh
+
+      - uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore(l10n): Update the source strings"
+          commit_author: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+
+      - name: Install Crowdin CLI
+        run: |
+          curl -fsSLo /usr/local/bin/crowdin https://github.com/crowdin/crowdin-cli/releases/latest/download/crowdin-darwin-arm64
+          chmod +x /usr/local/bin/crowdin
+          crowdin --version
+
+      - name: Upload strings to Crowdin
+        env:
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
+        run: crowdin upload sources --no-progress --no-colors

@@ -16,7 +16,7 @@ struct StatusMessage: View {
                         .foregroundStyle(.orange)
                         .fixedSize(horizontal: false, vertical: true)
                     if controller.isSuspended {
-                        Button(controller.helperStatus == .installed ? "Resume \(controller.mode.title)" : "Install Helper & Resume") {
+                        Button(controller.helperStatus == .installed ? String(localized: "Resume \(controller.mode.title)") : String(localized: "Install Helper & Resume")) {
                             controller.retry()
                         }
                         .buttonStyle(.glassProminent)

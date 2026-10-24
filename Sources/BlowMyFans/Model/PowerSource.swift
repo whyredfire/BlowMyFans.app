@@ -9,8 +9,8 @@ enum PowerSource: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .adapter: "On power adapter"
-        case .battery: "On battery"
+        case .adapter: String(localized: "On power adapter")
+        case .battery: String(localized: "On battery")
         }
     }
 }

@@ -62,7 +62,7 @@ final class StatusItemController: NSObject {
             guard label != displayedLabel else { return }
             displayedLabel = label
             statusItem.button?.image = StatusItemImage.make(label)
-            let pressure = thermalState == .nominal ? nil : "thermal pressure \(thermalState.title.lowercased())"
+            let pressure = thermalState == .nominal ? nil : String(localized: "Thermal pressure: \(thermalState.title)")
             statusItem.button?.setAccessibilityLabel(["Blow My Fans", temperature, pressure].compactMap(\.self).joined(separator: ", "))
         } onChange: { [weak self] in
             Task { @MainActor in self?.updateButton() }

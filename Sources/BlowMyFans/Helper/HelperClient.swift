@@ -7,7 +7,7 @@ enum HelperClientError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .unreachable: "The fan helper isn't responding."
+        case .unreachable: String(localized: "The fan helper isn't responding.")
         case .failed(let message): message
         }
     }

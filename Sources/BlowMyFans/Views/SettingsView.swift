@@ -28,7 +28,7 @@ struct SettingsView: View {
                 }
                 Picker("Update every", selection: $settings.updateInterval) {
                     ForEach(AppSettings.updateIntervals, id: \.self) { seconds in
-                        Text(seconds == 1 ? "1 second" : "\(Int(seconds)) seconds").tag(seconds)
+                        Text(Duration.seconds(seconds).formatted(.units(allowed: [.seconds], width: .wide))).tag(seconds)
                     }
                 }
             } header: {

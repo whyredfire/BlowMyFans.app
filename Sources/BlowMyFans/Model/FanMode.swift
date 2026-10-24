@@ -5,10 +5,10 @@ enum FanMode: String, CaseIterable, Identifiable, Codable {
 
     var title: String {
         switch self {
-        case .automatic: "Auto"
-        case .manual: "Manual"
-        case .curve: "Curve"
-        case .fullBlast: "Full Blast"
+        case .automatic: String(localized: "Auto", comment: "Fan mode, one of four in a narrow segmented control. Keep it to one short word.")
+        case .manual: String(localized: "Manual", comment: "Fan mode, one of four in a narrow segmented control. Keep it to one short word.")
+        case .curve: String(localized: "Curve", comment: "Fan mode, one of four in a narrow segmented control. Keep it to one short word.")
+        case .fullBlast: String(localized: "Full Blast", comment: "Fan mode, one of four in a narrow segmented control. Keep it to one short word.")
         }
     }
 

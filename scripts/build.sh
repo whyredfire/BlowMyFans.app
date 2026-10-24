@@ -20,7 +20,7 @@ cp Support/Info.plist "$APP/Contents/"
 cp "$BIN/BlowMyFans" "$APP/Contents/MacOS/"
 cp "$BIN/BlowMyFansHelper" "$APP/Contents/Library/LaunchServices/$HELPER_LABEL"
 cp "Support/$HELPER_LABEL.plist" Support/helper-tool.sh Support/AppIcon.icns "$APP/Contents/Resources/"
-cp -R Support/Database "$APP/Contents/Resources/"
+cp -R Support/Database Support/Localization/*.lproj "$APP/Contents/Resources/"
 ditto "$SPARKLE" "$APP/Contents/Frameworks/Sparkle.framework"
 
 # Sign inside-out: Sparkle's nested executables, the framework, the helper, then the app.

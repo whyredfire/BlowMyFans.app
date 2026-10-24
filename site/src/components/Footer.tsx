@@ -1,4 +1,4 @@
-import { releasesURL, repositoryURL } from "../links.ts";
+import { releasesURL, repositoryURL, translateURL } from "../links.ts";
 
 export function Footer() {
   return (
@@ -14,6 +14,7 @@ export function Footer() {
         <a href={repositoryURL} className="transition-colors hover:text-white">Source</a>
         <a href={releasesURL} className="transition-colors hover:text-white">Releases</a>
         <a href={`${repositoryURL}/issues`} className="transition-colors hover:text-white">Feedback</a>
+        <a href={translateURL} className="transition-colors hover:text-white">Translate</a>
       </div>
       </div>
     </footer>

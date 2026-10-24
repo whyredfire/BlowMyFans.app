@@ -8,9 +8,9 @@ enum HelperInstallerError: LocalizedError {
 
     var errorDescription: String? {
         switch self {
-        case .missingResource(let name): "The app bundle is missing \(name)."
-        case .cancelled: "Helper installation was cancelled."
-        case .failed(let output): "Helper installation failed: \(output)"
+        case .missingResource(let name): String(localized: "The app bundle is missing \(name).")
+        case .cancelled: String(localized: "Helper installation was cancelled.")
+        case .failed(let output): String(localized: "Helper installation failed: \(output)")
         }
     }
 }
@@ -38,7 +38,7 @@ enum HelperInstaller {
             throw HelperInstallerError.missingResource("helper-tool.sh")
         }
         let command = (["/bin/sh", script.path] + arguments).map(\.shellQuoted).joined(separator: " ")
-        let prompt = "Blow My Fans needs to install a helper to change fan speeds."
+        let prompt = String(localized: "Blow My Fans needs to install a helper to change fan speeds.")
 
         let process = Process()
         process.executableURL = URL(filePath: "/usr/bin/osascript")

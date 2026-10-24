@@ -50,7 +50,7 @@ private struct ManualControls: View {
     var body: some View {
         @Bindable var controller = controller
         if let range = monitor.fanSpeedRange {
-            SpeedSlider(title: monitor.visibleFans.count > 1 ? "All fans" : "Speed",
+            SpeedSlider(title: monitor.visibleFans.count > 1 ? String(localized: "All fans") : String(localized: "Speed"),
                         value: $controller.draft.manual.rpm, range: range)
         } else {
             UnavailableRange()
@@ -104,7 +104,7 @@ private struct SpeedSlider: View {
 
     private var valueText: String {
         if value < range.lowerBound {
-            return "Off"
+            return String(localized: "Off")
         }
         return min(value, range.upperBound).rpmText
     }

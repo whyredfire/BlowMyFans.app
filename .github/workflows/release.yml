@@ -55,7 +55,7 @@ jobs:
           cp "$bin/BlowMyFans" "$app/Contents/MacOS/"
           cp "$bin/BlowMyFansHelper" "$app/Contents/Library/LaunchServices/$helper"
           cp "Support/$helper.plist" Support/helper-tool.sh Support/AppIcon.icns "$app/Contents/Resources/"
-          cp -R Support/Database "$app/Contents/Resources/"
+          cp -R Support/Database Support/Localization/*.lproj "$app/Contents/Resources/"
           ditto .build/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework \
             "$app/Contents/Frameworks/Sparkle.framework"
 

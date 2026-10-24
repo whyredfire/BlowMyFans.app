@@ -12,7 +12,7 @@ struct FanRow: View {
                     .frame(width: 18)
                 Text(fan.name)
                 Spacer()
-                Text(fan.currentRPM > 0 ? fan.currentRPM.rpmText : "Off")
+                Text(fan.currentRPM > 0 ? fan.currentRPM.rpmText : String(localized: "Off"))
                     .monospacedDigit()
                     .foregroundStyle(.secondary)
             }

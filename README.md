@@ -74,6 +74,8 @@ delete Blow My Fans.
 Found a bug or have an idea? [Open an issue](https://github.com/whyredfire/BlowMyFans.app/issues). Pull
 requests are welcome too.
 
+Speak another language? Help translate Blow My Fans on [Crowdin](https://translate-blowmyfans.whyredfire.dev).
+
 ## License
 
 [MIT](LICENSE)

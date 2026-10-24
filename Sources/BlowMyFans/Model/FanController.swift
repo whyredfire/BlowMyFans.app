@@ -145,7 +145,7 @@ final class FanController {
     private func suspendIfHelperMissing() {
         guard helperStatus != .installed, configuration.mode != .automatic else { return }
         isSuspended = true
-        errorMessage = "The fan helper isn't installed. Install it or choose a mode to resume \(mode.title)."
+        errorMessage = String(localized: "The fan helper isn't installed. Install it or choose a mode to resume \(mode.title).")
     }
 
     func discardDraft() {
@@ -346,7 +346,7 @@ final class FanController {
         appliedRPMs = nil
         if configuration.mode != .automatic {
             isSuspended = true
-            errorMessage = "\(error.localizedDescription) \(mode.title) is paused until you choose a mode."
+            errorMessage = String(localized: "\(error.localizedDescription) \(mode.title) is paused until you choose a mode.")
         } else {
             errorMessage = error.localizedDescription
         }
