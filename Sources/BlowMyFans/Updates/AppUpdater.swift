@@ -36,7 +36,7 @@ final class AppUpdater {
     }
 }
 
-/// Walter lives in the menu bar, so scheduled update prompts shouldn't steal focus.
+/// Blow My Fans lives in the menu bar, so scheduled update prompts shouldn't steal focus.
 private final class BackgroundAppUserDriverDelegate: NSObject, SPUStandardUserDriverDelegate {
     var supportsGentleScheduledUpdateReminders: Bool { true }
 }

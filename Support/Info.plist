@@ -3,15 +3,15 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleDisplayName</key>
-	<string>Walter</string>
+	<string>Blow My Fans</string>
 	<key>CFBundleExecutable</key>
-	<string>Walter</string>
+	<string>BlowMyFans</string>
 	<key>CFBundleIconFile</key>
 	<string>AppIcon</string>
 	<key>CFBundleIdentifier</key>
-	<string>dev.whyredfire.walter</string>
+	<string>dev.whyredfire.blowmyfans</string>
 	<key>CFBundleName</key>
-	<string>Walter</string>
+	<string>Blow My Fans</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -27,7 +27,7 @@
 	<key>SUEnableAutomaticChecks</key>
 	<true/>
 	<key>SUFeedURL</key>
-	<string>https://github.com/whyredfire/Walter.app/releases/latest/download/appcast.xml</string>
+	<string>https://github.com/whyredfire/BlowMyFans.app/releases/latest/download/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>joiEoSdQ7UR/Jkz84YzyL698cm9Matmm3DsdRjo3c9k=</string>
 </dict>

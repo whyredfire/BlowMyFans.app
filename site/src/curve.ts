@@ -1,4 +1,4 @@
-// Port of Walter's FanCurve: a smooth curve through points sorted by temperature that never goes
+// Port of the app's FanCurve: a smooth curve through points sorted by temperature that never goes
 // down as temperature rises.
 
 export type CurvePoint = { id: number; temperature: number; speed: number };

@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "walter-site",
+      "name": "blowmyfans-site",
       "dependencies": {
         "lucide-react": "^1.59.0",
         "react": "^19.3.1",

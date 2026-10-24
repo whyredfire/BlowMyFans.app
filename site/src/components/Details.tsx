@@ -2,7 +2,7 @@ const details = [
   { title: "Every sensor", text: "CPU, GPU, SSD, battery and more, with readable names for your Mac's model." },
   { title: "Your menu bar, your choice", text: "Show the hottest CPU, any sensor, or just the icon, in °C or °F." },
   { title: "Thermal pressure", text: "A coloured dot on the icon when macOS starts slowing your Mac down to cool it." },
-  { title: "Hands back cleanly", text: "Fans return to macOS when Walter quits, crashes or your Mac sleeps. If macOS isn't ready, they run at full speed until it is." },
+  { title: "Hands back cleanly", text: "Fans return to macOS when the app quits, crashes or your Mac sleeps. If macOS isn't ready, they run at full speed until it is." },
   { title: "Barely there", text: "It reads only what's on screen: well under 1% CPU, and its helper sleeps when there's nothing to do." },
   { title: "Keeps itself current", text: "Signed updates install in the background, without stealing focus." },
 ];

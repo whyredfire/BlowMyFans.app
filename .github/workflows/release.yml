@@ -46,14 +46,14 @@ jobs:
         run: |
           swift build -c release --arch arm64
           bin=$(swift build -c release --arch arm64 --show-bin-path)
-          helper=dev.whyredfire.walter.helper
-          app=build/Walter.app
+          helper=dev.whyredfire.blowmyfans.helper
+          app="build/Blow My Fans.app"
 
           mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources" "$app/Contents/Library/LaunchServices" "$app/Contents/Frameworks"
           cp Support/Info.plist "$app/Contents/"
           plutil -replace CFBundleVersion -string "$(git rev-list --count HEAD)" "$app/Contents/Info.plist"
-          cp "$bin/Walter" "$app/Contents/MacOS/"
-          cp "$bin/WalterHelper" "$app/Contents/Library/LaunchServices/$helper"
+          cp "$bin/BlowMyFans" "$app/Contents/MacOS/"
+          cp "$bin/BlowMyFansHelper" "$app/Contents/Library/LaunchServices/$helper"
           cp "Support/$helper.plist" Support/helper-tool.sh Support/AppIcon.icns "$app/Contents/Resources/"
           cp -R Support/Database "$app/Contents/Resources/"
           ditto .build/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework \
@@ -66,7 +66,7 @@ jobs:
           done
           codesign --force --options runtime --sign - "$app/Contents/Frameworks/Sparkle.framework"
           codesign --force --options runtime --sign - --identifier "$helper" "$app/Contents/Library/LaunchServices/$helper"
-          codesign --force --options runtime --sign - --entitlements Support/Walter.entitlements "$app"
+          codesign --force --options runtime --sign - --entitlements Support/BlowMyFans.entitlements "$app"
           codesign --verify --deep --strict "$app"
 
       # Installed copies only accept updates signed with the key behind SUPublicEDKey
@@ -75,7 +75,7 @@ jobs:
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
           mkdir dist
-          ditto -c -k --sequesterRsrc --keepParent build/Walter.app dist/Walter.zip
+          ditto -c -k --sequesterRsrc --keepParent "build/Blow My Fans.app" dist/BlowMyFans.zip
           echo "$SPARKLE_PRIVATE_KEY" | .build/artifacts/sparkle/Sparkle/bin/generate_appcast \
             --ed-key-file - \
             --download-url-prefix "${RELEASES_URL}/download/v${VERSION}/" \
@@ -85,9 +85,9 @@ jobs:
       # This repo is also a Homebrew tap; the cask's new version and checksum join the release commit
       - name: Update the Homebrew cask
         run: |
-          checksum=$(shasum -a 256 dist/Walter.zip | cut -d ' ' -f 1)
-          sed -i '' -e "s/^  version .*/  version \"${VERSION}\"/" -e "s/^  sha256 .*/  sha256 \"${checksum}\"/" Casks/walter.rb
-          git commit --amend --no-edit -- Casks/walter.rb
+          checksum=$(shasum -a 256 dist/BlowMyFans.zip | cut -d ' ' -f 1)
+          sed -i '' -e "s/^  version .*/  version \"${VERSION}\"/" -e "s/^  sha256 .*/  sha256 \"${checksum}\"/" Casks/blow-my-fans.rb
+          git commit --amend --no-edit -- Casks/blow-my-fans.rb
 
       # Notes list the commits since the previous release; GitHub adds the compare link
       - name: Release
@@ -97,7 +97,7 @@ jobs:
           previous=$(git describe --tags --abbrev=0 --match 'v[0-9]*' 2>/dev/null || true)
           git tag "v${VERSION}"
           git push --atomic origin HEAD "v${VERSION}"
-          gh release create "v${VERSION}" dist/Walter.zip dist/appcast.xml \
-            --title "Walter ${VERSION}" \
+          gh release create "v${VERSION}" dist/BlowMyFans.zip dist/appcast.xml \
+            --title "Blow My Fans ${VERSION}" \
             --notes "$(git log --no-merges --pretty='- %s (%h)' "${previous:+$previous..}HEAD~1")" \
             --generate-notes

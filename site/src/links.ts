@@ -1,9 +1,9 @@
-export const repositoryURL = "https://github.com/whyredfire/Walter.app";
+export const repositoryURL = "https://github.com/whyredfire/BlowMyFans.app";
 export const releasesURL = `${repositoryURL}/releases`;
-/** Every release names its archive Walter.zip, so this link always gets the latest. */
-export const downloadURL = `${releasesURL}/latest/download/Walter.zip`;
-export const quarantineCommand = "xattr -dr com.apple.quarantine /Applications/Walter.app";
+/** Every release names its archive BlowMyFans.zip, so this link always gets the latest. */
+export const downloadURL = `${releasesURL}/latest/download/BlowMyFans.zip`;
+export const quarantineCommand = 'xattr -dr com.apple.quarantine "/Applications/Blow My Fans.app"';
 export const brewCommands = [
-  "brew tap whyredfire/walter https://github.com/whyredfire/Walter.app",
-  "brew install --cask whyredfire/walter/walter",
+  "brew tap whyredfire/blowmyfans https://github.com/whyredfire/BlowMyFans.app",
+  "brew install --cask whyredfire/blowmyfans/blow-my-fans",
 ];

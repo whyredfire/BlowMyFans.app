@@ -1,14 +1,14 @@
 <p align="center">
-  <img src="site/public/icon.png" width="128" alt="Walter's app icon">
+  <img src="site/public/icon.png" width="128" alt="Blow My Fans app icon">
 </p>
 
-<h1 align="center">Walter</h1>
+<h1 align="center">Blow My Fans</h1>
 
 <p align="center">
   Temperatures and fan control in your menu bar, for Apple silicon Macs.<br>
-  <a href="https://walter.whyredfire.dev">Website</a> ·
-  <a href="https://github.com/whyredfire/Walter.app/releases/latest/download/Walter.zip">Download</a> ·
-  <a href="https://github.com/whyredfire/Walter.app/releases">Releases</a>
+  <a href="https://blowmyfans.whyredfire.dev">Website</a> ·
+  <a href="https://github.com/whyredfire/BlowMyFans.app/releases/latest/download/BlowMyFans.zip">Download</a> ·
+  <a href="https://github.com/whyredfire/BlowMyFans.app/releases">Releases</a>
 </p>
 
 <p align="center">
@@ -28,7 +28,7 @@
   bar can show the hottest CPU, any sensor, or just the icon.
 - **Thermal pressure:** shown in the panel, with a coloured dot on the menu bar icon when macOS starts
   throttling.
-- **Safe:** fans go back to macOS when Walter quits, crashes or the Mac sleeps. If macOS won't take
+- **Safe:** fans go back to macOS when the app quits, crashes or the Mac sleeps. If macOS won't take
   them back yet, they run at full speed until it does.
 - **Light:** reads only what's on screen; well under 1% CPU in the background, and the helper sleeps
   while it has nothing to do.
@@ -45,31 +45,31 @@ Requires an Apple silicon Mac with macOS 26 or later.
 With [Homebrew](https://brew.sh):
 
 ```sh
-brew tap whyredfire/walter https://github.com/whyredfire/Walter.app
-brew install --cask whyredfire/walter/walter
+brew tap whyredfire/blowmyfans https://github.com/whyredfire/BlowMyFans.app
+brew install --cask whyredfire/blowmyfans/blow-my-fans
 ```
 
 Or by hand:
 
-1. Download [`Walter.zip`](https://github.com/whyredfire/Walter.app/releases/latest/download/Walter.zip),
-   unzip it and move Walter to `/Applications`.
-2. Walter isn't notarized, so macOS blocks the first launch. Choose **Open Anyway** in
+1. Download [`BlowMyFans.zip`](https://github.com/whyredfire/BlowMyFans.app/releases/latest/download/BlowMyFans.zip),
+   unzip it and move Blow My Fans to `/Applications`.
+2. Blow My Fans isn't notarized, so macOS blocks the first launch. Choose **Open Anyway** in
    System Settings › Privacy & Security, or run:
    ```sh
-   xattr -dr com.apple.quarantine /Applications/Walter.app
+   xattr -dr com.apple.quarantine "/Applications/Blow My Fans.app"
    ```
-3. Open Walter. The first time you apply a mode other than Auto, it installs its helper and asks for
+3. Open Blow My Fans. The first time you apply a mode other than Auto, it installs its helper and asks for
    your administrator password.
 
-Updates installed by Walter itself aren't blocked.
+Updates installed by the app itself aren't blocked.
 
-To uninstall, run `brew uninstall --cask walter` if you used Homebrew. Otherwise remove the helper in
-Settings (or run `sudo /Applications/Walter.app/Contents/Resources/helper-tool.sh uninstall`), then
-delete Walter.
+To uninstall, run `brew uninstall --cask blow-my-fans` if you used Homebrew. Otherwise remove the helper in
+Settings (or run `sudo "/Applications/Blow My Fans.app/Contents/Resources/helper-tool.sh" uninstall`), then
+delete Blow My Fans.
 
 ## Contributing
 
-Found a bug or have an idea? [Open an issue](https://github.com/whyredfire/Walter.app/issues). Pull
+Found a bug or have an idea? [Open an issue](https://github.com/whyredfire/BlowMyFans.app/issues). Pull
 requests are welcome too.
 
 ## License

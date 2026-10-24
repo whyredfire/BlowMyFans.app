@@ -1,5 +1,5 @@
 const modes = [
-  { title: "Auto", text: "macOS runs the fans as it always does. Walter just shows you what's going on." },
+  { title: "Auto", text: "macOS runs the fans as it always does. Blow My Fans just shows you what's going on." },
   { title: "Manual", text: "One slider for every fan. Allow it in Settings and the lowest notch stops them while your Mac is idle." },
   {
     title: "Curve",
@@ -14,7 +14,7 @@ export function Modes() {
       <h2 className="text-3xl font-semibold tracking-[-0.02em] text-white sm:text-4xl">Four modes, one click away.</h2>
       <p className="mt-5 max-w-2xl leading-relaxed text-pretty text-neutral-400">
         Look around freely: nothing changes until you press Apply. The first time you apply a mode other than Auto,
-        Walter asks for your password to install the small helper that sets fan speeds.
+        the app asks for your password to install the small helper that sets fan speeds.
       </p>
       <dl className="mt-12 divide-y divide-white/10 border-y border-white/10">
         {modes.map(({ title, text }) => (

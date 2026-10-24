@@ -29,7 +29,7 @@ export function Hero() {
   );
 }
 
-/** Walter's panel, live, over a wallpaper. */
+/** The app's panel, live, over a wallpaper. */
 function Desktop() {
   const [workload, setWorkload] = useState<Workload>("normal");
   return (

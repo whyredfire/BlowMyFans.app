@@ -1,4 +1,4 @@
-// Renders Walter's app icon into Support/AppIcon.icns, plus a 1024 px preview PNG in the temp directory.
+// Renders the app icon into Support/AppIcon.icns, plus a 1024 px preview PNG in the temp directory.
 // Usage: swift scripts/make-icon.swift
 import AppKit
 import SwiftUI

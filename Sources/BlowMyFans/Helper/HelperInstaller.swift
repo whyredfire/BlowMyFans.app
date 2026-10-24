@@ -38,7 +38,7 @@ enum HelperInstaller {
             throw HelperInstallerError.missingResource("helper-tool.sh")
         }
         let command = (["/bin/sh", script.path] + arguments).map(\.shellQuoted).joined(separator: " ")
-        let prompt = "Walter needs to install a helper to change fan speeds."
+        let prompt = "Blow My Fans needs to install a helper to change fan speeds."
 
         let process = Process()
         process.executableURL = URL(filePath: "/usr/bin/osascript")

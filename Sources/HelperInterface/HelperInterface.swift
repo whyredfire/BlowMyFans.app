@@ -1,8 +1,8 @@
 import Foundation
 
 public enum HelperIdentity {
-    public static let appBundleID = "dev.whyredfire.walter"
-    public static let label = "dev.whyredfire.walter.helper"
+    public static let appBundleID = "dev.whyredfire.blowmyfans"
+    public static let label = "dev.whyredfire.blowmyfans.helper"
     public static let machServiceName = label
 
     /// Bump whenever the helper changes so the app knows to reinstall it.

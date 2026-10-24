@@ -4,7 +4,7 @@ export type ChangeKind = "new" | "fixed" | "improved";
 export type Change = { kind: ChangeKind; text: string };
 export type Release = { version: string; date: Date; url: string; changes: Change[] };
 
-/** Commit types that matter to people using Walter; everything else is left out. */
+/** Commit types that matter to people using the app; everything else is left out. */
 const kinds: Record<string, ChangeKind> = { feat: "new", fix: "fixed", perf: "improved" };
 /** Scopes about the project rather than the app. */
 const hiddenScopes = new Set(["site", "ci"]);

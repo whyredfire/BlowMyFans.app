@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct WalterApp: App {
+struct BlowMyFansApp: App {
     @NSApplicationDelegateAdaptor private var appDelegate: AppDelegate
 
     var body: some Scene {
@@ -51,7 +51,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    /// Opening Walter again, e.g. from Finder or Spotlight, shows the panel.
+    /// Opening the app again, e.g. from Finder or Spotlight, shows the panel.
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows: Bool) -> Bool {
         statusItem?.showPanel()
         return false

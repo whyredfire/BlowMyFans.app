@@ -21,7 +21,7 @@ function pending(applied: Configuration, draft: Configuration): Configuration {
 const isSame = (a: Configuration, b: Configuration) =>
   a.mode === b.mode && a.manualRPM === b.manualRPM && JSON.stringify(a.curve) === JSON.stringify(b.curve);
 
-/** Walter's menu bar panel, running against a simulated Mac. */
+/** The menu bar panel, running against a simulated Mac. */
 export function Panel({ workload }: { workload: Workload }) {
   const [applied, setApplied] = useState(initialConfiguration);
   const [draft, setDraft] = useState(initialConfiguration);

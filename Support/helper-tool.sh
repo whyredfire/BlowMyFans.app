@@ -2,7 +2,7 @@
 # Installs or removes the fan helper LaunchDaemon. Must run as root.
 set -eu
 
-LABEL="dev.whyredfire.walter.helper"
+LABEL="dev.whyredfire.blowmyfans.helper"
 TOOL="/Library/PrivilegedHelperTools/$LABEL"
 PLIST="/Library/LaunchDaemons/$LABEL.plist"
 

@@ -2,11 +2,11 @@
 import PackageDescription
 
 let package = Package(
-    name: "Walter",
+    name: "BlowMyFans",
     platforms: [.macOS(.v26)],
     products: [
-        .executable(name: "Walter", targets: ["Walter"]),
-        .executable(name: "WalterHelper", targets: ["WalterHelper"]),
+        .executable(name: "BlowMyFans", targets: ["BlowMyFans"]),
+        .executable(name: "BlowMyFansHelper", targets: ["BlowMyFansHelper"]),
     ],
     dependencies: [
         .package(url: "https://github.com/sparkle-project/Sparkle", from: "2.10.0"),
@@ -14,9 +14,9 @@ let package = Package(
     targets: [
         .target(name: "SMCKit", linkerSettings: [.linkedFramework("IOKit")]),
         .target(name: "HelperInterface"),
-        .executableTarget(name: "WalterHelper", dependencies: ["SMCKit", "HelperInterface"]),
+        .executableTarget(name: "BlowMyFansHelper", dependencies: ["SMCKit", "HelperInterface"]),
         .executableTarget(
-            name: "Walter",
+            name: "BlowMyFans",
             dependencies: ["SMCKit", "HelperInterface", .product(name: "Sparkle", package: "Sparkle")],
             linkerSettings: [.unsafeFlags(["-Xlinker", "-rpath", "-Xlinker", "@executable_path/../Frameworks"])]
         ),
