@@ -1,0 +1,185 @@
+/* FanController.swift */
+"%@ %@ is paused until you choose a mode." = "%@ %@ 已暂停，直到您选择模式。";
+
+/* FanCurveEditor.swift */
+"%lld%%" = "%lld%%";
+
+/* SettingsView.swift */
+"A small background service that changes fan speeds. It hands fans back to macOS when the app quits." = "一个改变风扇速度的小后台服务。当应用退出时，它会把风扇传回macOS。";
+
+/* ModeControls.swift */
+"All fans" = "所有粉丝数";
+
+/* ModeControls.swift */
+"Apply" = "应用";
+
+/* SettingsView.swift */
+"Applying a mode in the menu bar also sets it for the power source you're on." = "在菜单栏中应用一种模式也为您开启的电源设置它。";
+
+/* Fan mode, one of four in a narrow segmented control. Keep it to one short word. FanMode.swift */
+"Auto" = "自动操作";
+
+/* HelperInstaller.swift */
+"Blow My Fans needs to install a helper to change fan speeds." = "Blow My Fans 需要安装助手才能改变风扇速度。";
+
+/* ModeControls.swift */
+"Cancel" = "取消";
+
+/* SettingsView.swift */
+"Celsius" = "摄氏度";
+
+/* SettingsView.swift */
+"Check for updates automatically" = "自动检查更新";
+
+/* SettingsView.swift */
+"Check for Updates…" = "检查更新…";
+
+/* FanCurveEditor.swift */
+"CPU %@ → %@" = "CPU %@ -> %@";
+
+/* ThermalPressure.swift */
+"Critical" = "关键的";
+
+/* Fan mode, one of four in a narrow segmented control. Keep it to one short word. FanMode.swift */
+"Curve" = "曲线";
+
+/* FanCurveEditor.swift */
+"Drag points to adjust · double-click to add or remove" = "拖动点以调整 · 双击以添加或删除";
+
+/* SettingsView.swift */
+"Fahrenheit" = "Fahrenheit";
+
+/* ThermalPressure.swift */
+"Fair" = "公平的";
+
+/* ModeControls.swift */
+"Fan speed range unavailable" = "风扇速度范围不可用";
+
+/* Fan mode, one of four in a narrow segmented control. Keep it to one short word. FanMode.swift */
+"Full Blast" = "满球";
+
+/* SettingsView.swift */
+"General" = "A. 概况";
+
+/* SettingsView.swift */
+"Helper" = "帮助者";
+
+/* HelperInstaller.swift */
+"Helper installation failed: %@" = "辅助安装失败： %@";
+
+/* HelperInstaller.swift */
+"Helper installation was cancelled." = "帮助安装被取消。";
+
+/* SettingsView.swift */
+"Hottest CPU" = "最热的 CPU";
+
+/* SettingsView.swift */
+"How often temperatures and fan speeds are read. Longer intervals use a little less energy; Curve mode reacts more slowly." = "温度和风扇速度读取频率。更长的间隔使用少一点能量；曲线模式反应更慢。";
+
+/* SettingsView.swift */
+"Icon only" = "仅图标";
+
+/* SettingsView.swift */
+"Install" = "安装";
+
+/* StatusMessage.swift */
+"Install Helper & Resume" = "安装助手并恢复";
+
+/* SettingsView.swift */
+"Installed" = "已安装";
+
+/* StatusMessage.swift */
+"Installing helper…" = "正在安装助手…";
+
+/* SettingsView.swift */
+"Launch at login" = "登录时启动";
+
+/* Fan mode, one of four in a narrow segmented control. Keep it to one short word. FanMode.swift */
+"Manual" = "手动模式";
+
+/* SettingsView.swift */
+"Menu bar shows" = "菜单栏显示";
+
+/* ModeControls.swift */
+"Mode" = "模式";
+
+/* ThermalPressure.swift */
+"Nominal" = "名义值";
+
+/* SettingsView.swift */
+"Not installed" = "未安装";
+
+/* FanCurveEditor.swift */
+"Now" = "现在开始";
+
+/* FanCurveEditor.swift, ModeControls.swift, Rows.swift */
+"Off" = "关闭";
+
+/* PowerSource.swift */
+"On battery" = "电池电量时";
+
+/* PowerSource.swift */
+"On power adapter" = "在电源适配器";
+
+/* SettingsView.swift */
+"Power" = "战斗力";
+
+/* MenuBarContent.swift */
+"Quit" = "退出";
+
+/* StatusMessage.swift */
+"Resume %@" = "恢复 %@";
+
+/* ThermalPressure.swift */
+"Serious" = "严重的";
+
+/* MenuBarContent.swift */
+"Settings" = "设置";
+
+/* FanCurveEditor.swift, ModeControls.swift */
+"Speed" = "速度";
+
+/* SettingsView.swift */
+"Status" = "状态";
+
+/* SettingsView.swift */
+"Switch modes with power source" = "使用电源切换模式";
+
+/* FanCurveEditor.swift */
+"Temperature" = "温度";
+
+/* SettingsView.swift */
+"Temperature unit" = "温度单位";
+
+/* HelperInstaller.swift */
+"The app bundle is missing %@." = "应用程序包缺少 %@。";
+
+/* FanController.swift */
+"The fan helper isn't installed. Install it or choose a mode to resume %@." = "粉丝助手未安装。安装它或选择一个模式来恢复 %@。";
+
+/* HelperClient.swift */
+"The fan helper isn't responding." = "粉丝助手没有响应。";
+
+/* Rows.swift */
+"Thermal pressure" = "热压";
+
+/* StatusItemController.swift */
+"Thermal pressure: %@" = "热压： %@";
+
+/* MenuBarContent.swift */
+"This Mac has no fans to control." = "此 Mac 没有风扇可以控制。";
+
+/* SettingsView.swift */
+"Uninstall" = "卸载";
+
+/* ThermalPressure.swift */
+"Unknown" = "未知的";
+
+/* SettingsView.swift */
+"Update every" = "更新每";
+
+/* SettingsView.swift */
+"Updates" = "更新";
+
+/* SettingsView.swift */
+"Version %@" = "版本 %@";

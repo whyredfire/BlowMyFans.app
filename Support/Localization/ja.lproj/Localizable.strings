@@ -1,0 +1,179 @@
+/* FanController.swift */
+"%@ %@ is paused until you choose a mode." = "%@ %@ はモードを選択するまで一時停止します。";
+
+/* FanCurveEditor.swift */
+"%lld%%" = "%lld%%";
+
+/* SettingsView.swift */
+"A small background service that changes fan speeds. It hands fans back to macOS when the app quits." = "ファンの速度を変える小さなバックグラウンドサービス。アプリが終了すると、macOSにファンが戻ってきます。";
+
+/* ModeControls.swift */
+"All fans" = "すべてのファン";
+
+/* ModeControls.swift */
+"Apply" = "適用";
+
+/* SettingsView.swift */
+"Applying a mode in the menu bar also sets it for the power source you're on." = "メニューバーでモードを適用すると、電源に設定することもできます。";
+
+/* Fan mode, one of four in a narrow segmented control. Keep it to one short word. FanMode.swift */
+"Auto" = "自動";
+
+/* HelperInstaller.swift */
+"Blow My Fans needs to install a helper to change fan speeds." = "Blow My Fans はファンの速度を変更するためにヘルパーをインストールする必要があります。";
+
+/* ModeControls.swift */
+"Cancel" = "キャンセル";
+
+/* SettingsView.swift */
+"Celsius" = "摂氏度";
+
+/* SettingsView.swift */
+"Check for updates automatically" = "アップデートを自動的に確認する";
+
+/* FanCurveEditor.swift */
+"CPU %@ → %@" = "CPU %@ → %@";
+
+/* ThermalPressure.swift */
+"Critical" = "Critical";
+
+/* Fan mode, one of four in a narrow segmented control. Keep it to one short word. FanMode.swift */
+"Curve" = "曲線";
+
+/* FanCurveEditor.swift */
+"Drag points to adjust · double-click to add or remove" = "点をドラッグして調整する · ダブルクリックして追加または削除する";
+
+/* SettingsView.swift */
+"Fahrenheit" = "Fahrenheit";
+
+/* ThermalPressure.swift */
+"Fair" = "公平な";
+
+/* ModeControls.swift */
+"Fan speed range unavailable" = "ファン速度範囲が利用できません";
+
+/* Fan mode, one of four in a narrow segmented control. Keep it to one short word. FanMode.swift */
+"Full Blast" = "フルブラスト";
+
+/* SettingsView.swift */
+"General" = "全般";
+
+/* SettingsView.swift */
+"Helper" = "ヘルパー";
+
+/* HelperInstaller.swift */
+"Helper installation failed: %@" = "ヘルパーのインストールに失敗しました: %@";
+
+/* HelperInstaller.swift */
+"Helper installation was cancelled." = "ヘルパーのインストールはキャンセルされました。";
+
+/* SettingsView.swift */
+"Hottest CPU" = "一番ホットな CPU";
+
+/* SettingsView.swift */
+"How often temperatures and fan speeds are read. Longer intervals use a little less energy; Curve mode reacts more slowly." = "温度とファン速度がどのくらいの頻度で読み取られるか。長い間隔ではエネルギーが少なく、カーブモードではよりゆっくりと反応します。";
+
+/* SettingsView.swift */
+"Icon only" = "アイコンのみ";
+
+/* SettingsView.swift */
+"Install" = "インストール";
+
+/* StatusMessage.swift */
+"Install Helper & Resume" = "ヘルパーをインストールして再開する";
+
+/* SettingsView.swift */
+"Installed" = "インストール済み";
+
+/* SettingsView.swift */
+"Launch at login" = "ログイン時に起動";
+
+/* Fan mode, one of four in a narrow segmented control. Keep it to one short word. FanMode.swift */
+"Manual" = "マニュアル";
+
+/* SettingsView.swift */
+"Menu bar shows" = "メニューバーの表示";
+
+/* ModeControls.swift */
+"Mode" = "モード";
+
+/* ThermalPressure.swift */
+"Nominal" = "公称者";
+
+/* SettingsView.swift */
+"Not installed" = "インストールされていません";
+
+/* FanCurveEditor.swift */
+"Now" = "現在";
+
+/* FanCurveEditor.swift, ModeControls.swift, Rows.swift */
+"Off" = "オフ";
+
+/* PowerSource.swift */
+"On battery" = "バッテリー残量時";
+
+/* PowerSource.swift */
+"On power adapter" = "電源アダプター";
+
+/* SettingsView.swift */
+"Power" = "パワー";
+
+/* MenuBarContent.swift */
+"Quit" = "終了";
+
+/* StatusMessage.swift */
+"Resume %@" = "%@ を再開";
+
+/* ThermalPressure.swift */
+"Serious" = "深刻な";
+
+/* MenuBarContent.swift */
+"Settings" = "設定";
+
+/* FanCurveEditor.swift, ModeControls.swift */
+"Speed" = "速度";
+
+/* SettingsView.swift */
+"Status" = "ステータス";
+
+/* SettingsView.swift */
+"Switch modes with power source" = "電源モードを切り替える";
+
+/* FanCurveEditor.swift */
+"Temperature" = "温度";
+
+/* SettingsView.swift */
+"Temperature unit" = "温度の単位";
+
+/* HelperInstaller.swift */
+"The app bundle is missing %@." = "アプリのバンドルに %@がありません。";
+
+/* FanController.swift */
+"The fan helper isn't installed. Install it or choose a mode to resume %@." = "ファンヘルパーがインストールされていません。インストールするか、 %@を再開するモードを選択してください。";
+
+/* HelperClient.swift */
+"The fan helper isn't responding." = "ファンヘルパーが応答していません。";
+
+/* Rows.swift */
+"Thermal pressure" = "<unk>";
+
+/* StatusItemController.swift */
+"Thermal pressure: %@" = "熱圧: %@";
+
+/* MenuBarContent.swift */
+"This Mac has no fans to control." = "このMacにはコントロールするファンがありません。";
+
+/* SettingsView.swift */
+"Uninstall" = "アンインストール";
+
+/* ThermalPressure.swift */
+"Unknown" = "不明";
+
+/* SettingsView.swift */
+"Update every" = "更新間隔";
+
+/* SettingsView.swift */
+"Updates" = "更新";
+
+/* SettingsView.swift */
+"Version %@" = "バージョン %@";

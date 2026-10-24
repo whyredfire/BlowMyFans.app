@@ -1,0 +1,170 @@
+/* FanController.swift */
+"%@ %@ is paused until you choose a mode." = "%@ %@ is gepauzeerd totdat u een modus kiest.";
+
+/* FanCurveEditor.swift */
+"%lld%%" = "%lld%%";
+
+/* SettingsView.swift */
+"A small background service that changes fan speeds. It hands fans back to macOS when the app quits." = "Een kleine achtergrondservice die snelheid verandert. Het geeft fans terug naar macOS wanneer de app afsluit.";
+
+/* ModeControls.swift */
+"All fans" = "Alle ventilatoren";
+
+/* ModeControls.swift */
+"Apply" = "Toepassen";
+
+/* SettingsView.swift */
+"Applying a mode in the menu bar also sets it for the power source you're on." = "Het toepassen van een modus in de menubalk stelt deze ook in voor de aan-/uit-bron.";
+
+/* HelperInstaller.swift */
+"Blow My Fans needs to install a helper to change fan speeds." = "Blow Mijn Fans moet een helper installeren om de ventilatorsnelheid te veranderen.";
+
+/* ModeControls.swift */
+"Cancel" = "annuleren";
+
+/* SettingsView.swift */
+"Celsius" = "Celsius";
+
+/* SettingsView.swift */
+"Check for updates automatically" = "Automatisch controleren op updates";
+
+/* FanCurveEditor.swift */
+"CPU %@ → %@" = "CPU %@ → %@";
+
+/* ThermalPressure.swift */
+"Critical" = "Kritiek";
+
+/* Fan mode, one of four in a narrow segmented control. Keep it to one short word. FanMode.swift */
+"Curve" = "Kromme";
+
+/* FanCurveEditor.swift */
+"Drag points to adjust · double-click to add or remove" = "Sleep punten om aan te passen · dubbel klikken om toe te voegen of te verwijderen";
+
+/* SettingsView.swift */
+"Fahrenheit" = "Fahrenheit";
+
+/* ThermalPressure.swift */
+"Fair" = "Redelijk";
+
+/* ModeControls.swift */
+"Fan speed range unavailable" = "Ventilator snelheidsbereik niet beschikbaar";
+
+/* SettingsView.swift */
+"General" = "Algemeen";
+
+/* SettingsView.swift */
+"Helper" = "Helper";
+
+/* HelperInstaller.swift */
+"Helper installation failed: %@" = "Helper installatie mislukt: %@";
+
+/* HelperInstaller.swift */
+"Helper installation was cancelled." = "Helper-installatie is geannuleerd.";
+
+/* SettingsView.swift */
+"Hottest CPU" = "Populairste CPU";
+
+/* SettingsView.swift */
+"How often temperatures and fan speeds are read. Longer intervals use a little less energy; Curve mode reacts more slowly." = "Hoe vaak temperaturen en ventilatorsnelheden worden gelezen. Langere intervallen gebruiken een beetje minder energie; Curve modus reageert langzamer op.";
+
+/* SettingsView.swift */
+"Icon only" = "Alleen icoon";
+
+/* SettingsView.swift */
+"Install" = "Installeren";
+
+/* StatusMessage.swift */
+"Install Helper & Resume" = "Installeer Helper & Hervat";
+
+/* SettingsView.swift */
+"Installed" = "Geinstalleerd";
+
+/* SettingsView.swift */
+"Launch at login" = "Start bij inloggen";
+
+/* SettingsView.swift */
+"Menu bar shows" = "Menubalk series";
+
+/* ModeControls.swift */
+"Mode" = "Modus";
+
+/* ThermalPressure.swift */
+"Nominal" = "Nominaal";
+
+/* SettingsView.swift */
+"Not installed" = "Niet geïnstalleerd";
+
+/* FanCurveEditor.swift */
+"Now" = "Nu";
+
+/* FanCurveEditor.swift, ModeControls.swift, Rows.swift */
+"Off" = "UIT";
+
+/* PowerSource.swift */
+"On battery" = "Op accu";
+
+/* PowerSource.swift */
+"On power adapter" = "Op stroomadapter";
+
+/* SettingsView.swift */
+"Power" = "Vermogen";
+
+/* MenuBarContent.swift */
+"Quit" = "Afsluiten";
+
+/* StatusMessage.swift */
+"Resume %@" = "Hervat %@";
+
+/* ThermalPressure.swift */
+"Serious" = "Serieus";
+
+/* MenuBarContent.swift */
+"Settings" = "Instellingen";
+
+/* FanCurveEditor.swift, ModeControls.swift */
+"Speed" = "Snelheid";
+
+/* SettingsView.swift */
+"Status" = "status";
+
+/* SettingsView.swift */
+"Switch modes with power source" = "Verander van modus met stroombron";
+
+/* FanCurveEditor.swift */
+"Temperature" = "Temperatuur";
+
+/* SettingsView.swift */
+"Temperature unit" = "Eenheid temperatuur";
+
+/* HelperInstaller.swift */
+"The app bundle is missing %@." = "De app-bundel mist %@.";
+
+/* FanController.swift */
+"The fan helper isn't installed. Install it or choose a mode to resume %@." = "De ventieleverancier is niet geïnstalleerd. Installeer deze of kies een modus om %@ te hervatten.";
+
+/* HelperClient.swift */
+"The fan helper isn't responding." = "De vensterhelper reageert niet.";
+
+/* Rows.swift */
+"Thermal pressure" = "Thermische druk";
+
+/* StatusItemController.swift */
+"Thermal pressure: %@" = "Thermische druk: %@";
+
+/* MenuBarContent.swift */
+"This Mac has no fans to control." = "Deze Mac heeft geen ventilatoren te bedienen.";
+
+/* SettingsView.swift */
+"Uninstall" = "De-installeer";
+
+/* ThermalPressure.swift */
+"Unknown" = "onbekend";
+
+/* SettingsView.swift */
+"Update every" = "Update elke";
+
+/* SettingsView.swift */
+"Updates" = "Bijwerken";
+
+/* SettingsView.swift */
+"Version %@" = "Versie %@";

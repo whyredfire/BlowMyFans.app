@@ -1,0 +1,182 @@
+/* FanController.swift */
+"%@ %@ is paused until you choose a mode." = "%@ %@ приостановлен, пока вы не выберите режим.";
+
+/* FanCurveEditor.swift */
+"%lld%%" = "%lld%%";
+
+/* SettingsView.swift */
+"A small background service that changes fan speeds. It hands fans back to macOS when the app quits." = "Небольшая фоновая служба, меняющая скорость вращения. Она заставляет вентиляторов вернуться к macOS при выходе из приложения.";
+
+/* ModeControls.swift */
+"All fans" = "Все фанаты";
+
+/* ModeControls.swift */
+"Apply" = "Применить";
+
+/* SettingsView.swift */
+"Applying a mode in the menu bar also sets it for the power source you're on." = "Применение режима в строке меню также устанавливает для выбранного источника питания.";
+
+/* Fan mode, one of four in a narrow segmented control. Keep it to one short word. FanMode.swift */
+"Auto" = "Авто";
+
+/* HelperInstaller.swift */
+"Blow My Fans needs to install a helper to change fan speeds." = "Blow My Fans требуется установить помощника для изменения скорости вращения.";
+
+/* ModeControls.swift */
+"Cancel" = "Отмена";
+
+/* SettingsView.swift */
+"Celsius" = "Цельсий";
+
+/* SettingsView.swift */
+"Check for updates automatically" = "Проверять обновления автоматически";
+
+/* SettingsView.swift */
+"Check for Updates…" = "Проверка обновлений…";
+
+/* FanCurveEditor.swift */
+"CPU %@ → %@" = "%@ ЦП → %@";
+
+/* ThermalPressure.swift */
+"Critical" = "Критический";
+
+/* Fan mode, one of four in a narrow segmented control. Keep it to one short word. FanMode.swift */
+"Curve" = "Кривая";
+
+/* FanCurveEditor.swift */
+"Drag points to adjust · double-click to add or remove" = "Перетащите точки для настройки · двойной щелчок для добавления или удаления";
+
+/* SettingsView.swift */
+"Fahrenheit" = "Fahrenheit";
+
+/* ThermalPressure.swift */
+"Fair" = "Справедливый";
+
+/* ModeControls.swift */
+"Fan speed range unavailable" = "Диапазон скорости вентилятора недоступен";
+
+/* SettingsView.swift */
+"General" = "Общие положения";
+
+/* SettingsView.swift */
+"Helper" = "Помощник";
+
+/* HelperInstaller.swift */
+"Helper installation failed: %@" = "Ошибка установки помощника: %@";
+
+/* HelperInstaller.swift */
+"Helper installation was cancelled." = "Установка Helper отменена.";
+
+/* SettingsView.swift */
+"Hottest CPU" = "Самые популярные ЦП";
+
+/* SettingsView.swift */
+"How often temperatures and fan speeds are read. Longer intervals use a little less energy; Curve mode reacts more slowly." = "Как часто происходит чтение температур и скоростей вентиляторов. Более длинные интервалы потребляют чуть меньше энергии; режим Кривая реагирует медленнее.";
+
+/* SettingsView.swift */
+"Icon only" = "Только значок";
+
+/* SettingsView.swift */
+"Install" = "Установить";
+
+/* StatusMessage.swift */
+"Install Helper & Resume" = "Установить Helper & Продолжить";
+
+/* SettingsView.swift */
+"Installed" = "Установлено";
+
+/* StatusMessage.swift */
+"Installing helper…" = "Установка помощника…";
+
+/* SettingsView.swift */
+"Launch at login" = "Запуск при входе";
+
+/* Fan mode, one of four in a narrow segmented control. Keep it to one short word. FanMode.swift */
+"Manual" = "Ручной";
+
+/* SettingsView.swift */
+"Menu bar shows" = "Показывать панель меню";
+
+/* ModeControls.swift */
+"Mode" = "Режим";
+
+/* ThermalPressure.swift */
+"Nominal" = "Номинал";
+
+/* SettingsView.swift */
+"Not installed" = "Не установлен";
+
+/* FanCurveEditor.swift */
+"Now" = "Сейчас";
+
+/* FanCurveEditor.swift, ModeControls.swift, Rows.swift */
+"Off" = "Выкл";
+
+/* PowerSource.swift */
+"On battery" = "При заряде батареи";
+
+/* PowerSource.swift */
+"On power adapter" = "На адаптере питания";
+
+/* SettingsView.swift */
+"Power" = "Сила";
+
+/* MenuBarContent.swift */
+"Quit" = "Выйти";
+
+/* StatusMessage.swift */
+"Resume %@" = "Возобновить %@";
+
+/* ThermalPressure.swift */
+"Serious" = "Серьезный";
+
+/* MenuBarContent.swift */
+"Settings" = "Настройки";
+
+/* FanCurveEditor.swift, ModeControls.swift */
+"Speed" = "Скорость";
+
+/* SettingsView.swift */
+"Status" = "Статус";
+
+/* SettingsView.swift */
+"Switch modes with power source" = "Переключение режимов с источником питания";
+
+/* FanCurveEditor.swift */
+"Temperature" = "Температура";
+
+/* SettingsView.swift */
+"Temperature unit" = "Единица температуры";
+
+/* HelperInstaller.swift */
+"The app bundle is missing %@." = "В приложении отсутствует %@.";
+
+/* FanController.swift */
+"The fan helper isn't installed. Install it or choose a mode to resume %@." = "Фан-хелпер не установлен. Установите его или выберите режим для возобновления %@.";
+
+/* HelperClient.swift */
+"The fan helper isn't responding." = "Фан-помощник не отвечает.";
+
+/* Rows.swift */
+"Thermal pressure" = "Тепловое давление";
+
+/* StatusItemController.swift */
+"Thermal pressure: %@" = "Тепловое давление: %@";
+
+/* MenuBarContent.swift */
+"This Mac has no fans to control." = "У этого Mac нет поклонников для контроля.";
+
+/* SettingsView.swift */
+"Uninstall" = "Удалить";
+
+/* ThermalPressure.swift */
+"Unknown" = "Неизвестен";
+
+/* SettingsView.swift */
+"Update every" = "Обновлять каждые";
+
+/* SettingsView.swift */
+"Updates" = "Обновления";
+
+/* SettingsView.swift */
+"Version %@" = "Версия %@";
