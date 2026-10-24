@@ -37,7 +37,7 @@
 - **Updates itself** with signed [Sparkle](https://sparkle-project.org) updates.
 
 <p align="center">
-  <img src="site/public/screenshots/settings.png" width="460" alt="The Settings window">
+  <img src="site/public/screenshots/settings.webp" width="572" alt="The Settings window">
 </p>
 
 ## Install

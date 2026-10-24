@@ -11,14 +11,24 @@ export function Details() {
   return (
     <section className="mx-auto max-w-5xl px-6 pt-32">
       <h2 className="text-3xl font-semibold tracking-[-0.02em] text-white sm:text-4xl">The details.</h2>
-      <dl className="mt-12 grid gap-x-12 sm:grid-cols-2">
-        {details.map(({ title, text }) => (
-          <div key={title} className="border-t border-white/10 py-6">
-            <dt className="font-medium text-white">{title}</dt>
-            <dd className="mt-2 leading-relaxed text-neutral-400">{text}</dd>
-          </div>
-        ))}
-      </dl>
+      <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_400px] lg:items-center">
+        <dl className="grid gap-x-12 sm:grid-cols-2 lg:grid-cols-1">
+          {details.map(({ title, text }) => (
+            <div key={title} className="border-t border-white/10 py-6">
+              <dt className="font-medium text-white">{title}</dt>
+              <dd className="mt-2 leading-relaxed text-neutral-400">{text}</dd>
+            </div>
+          ))}
+        </dl>
+        <img
+          src="/screenshots/settings.webp"
+          alt="The Settings window"
+          width={572}
+          height={860}
+          loading="lazy"
+          className="mx-auto w-full max-w-[400px]"
+        />
+      </div>
     </section>
   );
 }
