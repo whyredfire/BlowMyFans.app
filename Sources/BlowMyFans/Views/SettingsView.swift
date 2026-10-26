@@ -34,7 +34,7 @@ struct SettingsView: View {
             } header: {
                 Text("General")
             } footer: {
-                Text("How often temperatures and fan speeds are read. Longer intervals use a little less energy; Curve mode reacts more slowly.")
+                Text("How often the menu bar and panel update. Longer intervals use a little less energy. Curve mode checks the CPU temperature every 2 seconds regardless.")
                     .foregroundStyle(.secondary)
             }
 

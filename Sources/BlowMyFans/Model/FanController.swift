@@ -20,6 +20,7 @@ final class FanController {
             UserDefaults.standard.setEncoded(configuration, forKey: Self.configurationKey)
             // A new curve or mode applies straight away rather than waiting out the hold.
             curveHold.reset()
+            monitor.followsCPUTemperature = configuration.mode == .curve
             // A change the user made gives a paused mode another try; a switch for the power source doesn't.
             if !isSwitchingForPowerSource { resume() }
             sync()
@@ -48,8 +49,7 @@ final class FanController {
     /// The saved mode is kept but not applied, after a failure or while the helper is missing.
     /// macOS controls the fans meanwhile and `errorMessage` says why.
     private(set) var isSuspended = false
-    /// The CPU temperature Curve mode follows: rises are tracked quickly and falls slowly, so
-    /// short load spikes don't make the fans surge up and back down.
+    /// The CPU temperature Curve mode follows, as of the last update, for display.
     private(set) var curveTemperature: Double?
 
     var mode: FanMode { configuration.mode }
@@ -71,7 +71,10 @@ final class FanController {
     /// When the fans were first seen out of manual mode while speeds are applied.
     @ObservationIgnored private var lostControlSince: ContinuousClock.Instant?
     @ObservationIgnored private var nextControlRecovery = ContinuousClock.now
-    @ObservationIgnored private var curveTemperatureDate = ContinuousClock.now
+    /// The CPU temperature Curve mode follows, updated with every reading: rises are tracked quickly
+    /// and falls slowly, so short load spikes don't make the fans surge up and back down.
+    @ObservationIgnored private var smoothedCPUTemperature: Double?
+    @ObservationIgnored private var smoothedCPUTemperatureDate = ContinuousClock.now
     @ObservationIgnored private var curveHold = CurveSpeedHold()
 
     init(monitor: HardwareMonitor, settings: AppSettings, power: PowerSourceMonitor) {
@@ -87,7 +90,8 @@ final class FanController {
         self.configuration = configuration
         draft = configuration
 
-        monitor.onUpdate = { [weak self] in self?.monitorDidUpdate() }
+        monitor.followsCPUTemperature = configuration.mode == .curve
+        monitor.onUpdate = { [weak self] didRefresh in self?.monitorDidUpdate(didRefresh: didRefresh) }
         power.onChange = { [weak self] in self?.powerSourceChanged(to: $0) }
         helper.onConnectionLost = { [weak self] in self?.invalidateAppliedSpeeds() }
 
@@ -229,8 +233,9 @@ final class FanController {
         errorMessage = nil
     }
 
-    private func monitorDidUpdate() {
-        updateCurveTemperature()
+    private func monitorDidUpdate(didRefresh: Bool) {
+        updateSmoothedCPUTemperature()
+        if didRefresh { curveTemperature = smoothedCPUTemperature }
         detectLostControl()
         // With macOS in charge and nothing applied there's nothing to send.
         let isLeftToMacOS = isSuspended || configuration.mode == .automatic
@@ -241,20 +246,20 @@ final class FanController {
 
     /// Exponential smoothing that follows time rather than readings, so it behaves the same at any
     /// update interval: ~75% of a rise within 4 s, ~90% of a fall in about 30 s.
-    private func updateCurveTemperature() {
+    private func updateSmoothedCPUTemperature() {
         let now = ContinuousClock.now
-        defer { curveTemperatureDate = now }
-        guard let current = monitor.temperatures.hottestCPU else {
-            curveTemperature = nil
+        defer { smoothedCPUTemperatureDate = now }
+        guard let current = monitor.cpuTemperature else {
+            smoothedCPUTemperature = nil
             return
         }
-        guard let previous = curveTemperature else {
-            curveTemperature = current
+        guard let previous = smoothedCPUTemperature else {
+            smoothedCPUTemperature = current
             return
         }
         let weightPerTwoSeconds = current > previous ? 0.5 : 0.15
-        let weight = 1 - pow(1 - weightPerTwoSeconds, (now - curveTemperatureDate) / .seconds(2))
-        curveTemperature = previous + (current - previous) * weight
+        let weight = 1 - pow(1 - weightPerTwoSeconds, (now - smoothedCPUTemperatureDate) / .seconds(2))
+        smoothedCPUTemperature = previous + (current - previous) * weight
     }
 
     /// Re-sends the target if fans stay out of manual mode for 6 s while we believe speeds are
@@ -309,12 +314,12 @@ final class FanController {
         guard !fans.isEmpty, fans.allSatisfy(\.hasUsableSpeedRange) else { return .hold }
         guard var target = configuration.targetRPMs(
             for: fans,
-            cpuTemperature: curveTemperature,
+            cpuTemperature: smoothedCPUTemperature,
             sliderMinimum: monitor.fanSpeedRange?.lowerBound
         ) else { return .automatic }
         if configuration.mode == .curve {
             target = curveHold.speeds(
-                for: target, fans: fans, curve: configuration.curve, temperature: curveTemperature, now: .now
+                for: target, fans: fans, curve: configuration.curve, temperature: smoothedCPUTemperature, now: .now
             )
         }
         return .speeds(target)

@@ -74,7 +74,7 @@
 "Hottest CPU" = "Hottest CPU";
 
 /* SettingsView.swift */
-"How often temperatures and fan speeds are read. Longer intervals use a little less energy; Curve mode reacts more slowly." = "How often temperatures and fan speeds are read. Longer intervals use a little less energy; Curve mode reacts more slowly.";
+"How often the menu bar and panel update. Longer intervals use a little less energy. Curve mode checks the CPU temperature every 2 seconds regardless." = "How often the menu bar and panel update. Longer intervals use a little less energy. Curve mode checks the CPU temperature every 2 seconds regardless.";
 
 /* SettingsView.swift */
 "Icon only" = "Icon only";

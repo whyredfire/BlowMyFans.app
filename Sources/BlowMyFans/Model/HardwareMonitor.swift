@@ -8,6 +8,8 @@ import SMCKit
 final class HardwareMonitor {
     /// How many sensor groups the panel lists.
     static let panelGroupCount = 5
+    /// How often the CPU temperature is read while fan control follows it, whatever `interval` is.
+    static let controlInterval = Duration.seconds(2)
 
     /// Every fan the SMC reports, in hardware order.
     private(set) var fans: [Fan] = []
@@ -17,13 +19,23 @@ final class HardwareMonitor {
     private(set) var thermalState = ProcessInfo.processInfo.thermalState
     private(set) var errorMessage: String?
 
-    @ObservationIgnored var onUpdate: (@MainActor () -> Void)?
-    /// Time between readings. A change takes effect straight away.
+    /// Called after every reading. `didRefresh` is false for the CPU-only readings taken between updates.
+    @ObservationIgnored var onUpdate: (@MainActor (_ didRefresh: Bool) -> Void)?
+    /// Time between updates of the published readings. A change takes effect straight away.
     @ObservationIgnored var interval: Duration {
         didSet {
             if interval != oldValue, sampler != nil { startPolling() }
         }
     }
+    /// Fan control follows the CPU temperature (Curve mode), so it's read every `controlInterval`
+    /// even when the published readings update less often.
+    @ObservationIgnored var followsCPUTemperature = false {
+        didSet {
+            if followsCPUTemperature != oldValue, sampler != nil { startPolling() }
+        }
+    }
+    /// The hottest CPU core as last read; between updates too while `followsCPUTemperature`.
+    @ObservationIgnored private(set) var cpuTemperature: Double?
     /// Sensor groups the menu bar and fan control need while the panel is closed.
     @ObservationIgnored var essentialGroups: (SensorGroup) -> Bool = { _ in true }
     /// Whether fan control needs fan readings while the panel is closed.
@@ -80,17 +92,36 @@ final class HardwareMonitor {
         startPolling()
     }
 
-    /// Reads straight away, then at every interval. Replaces any running loop.
+    /// Updates straight away, then every `interval`; while fan control follows the CPU temperature,
+    /// reads just that in between, every `controlInterval`. Replaces any running loop.
     private func startPolling() {
         pollTask?.cancel()
         pollTask = Task { [weak self] in
+            var nextRefresh = ContinuousClock.now
             while !Task.isCancelled {
                 guard let self else { return }
-                await sample()
-                onUpdate?()
-                try? await Task.sleep(for: interval, tolerance: interval / 4)
+                let tick = followsCPUTemperature ? min(interval, Self.controlInterval) : interval
+                let now = ContinuousClock.now
+                // An update due within half a tick happens now rather than a whole tick late.
+                let didRefresh = now >= nextRefresh - tick / 2
+                if didRefresh {
+                    // After a late wake, e.g. from sleep, carry on from now instead of catching up.
+                    nextRefresh = max(nextRefresh + interval, now + interval / 2)
+                    await sample()
+                } else {
+                    await sampleCPU()
+                }
+                onUpdate?(didRefresh)
+                try? await Task.sleep(for: tick, tolerance: tick / 4)
             }
         }
+    }
+
+    /// Reads only the CPU sensors, for fan control between updates. Nothing is published.
+    private func sampleCPU() async {
+        guard let sampler else { return }
+        let groupIDs = Set(availableGroups.filter(\.isCPU).map(\.id))
+        cpuTemperature = await sampler.sample(groupIDs: groupIDs, includeFans: false).temperatures.hottestCPU
     }
 
     private func sample() async {
@@ -115,6 +146,7 @@ final class HardwareMonitor {
         if temperatures != self.temperatures {
             self.temperatures = temperatures
         }
+        cpuTemperature = temperatures.hottestCPU
     }
 }
 
