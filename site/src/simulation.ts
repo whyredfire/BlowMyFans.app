@@ -27,6 +27,11 @@ const autoCurve: CurvePoint[] = [
 
 /** Running fans stop only once the chip is back below this. */
 const autoStopTemperature = 60;
+/**
+ * Curve mode holds its speed through small swings, as the app does: up straight away for 250 RPM or more,
+ * down only once the lower speed has been wanted for 20 s, and off only 3 °C into the curve's 0% region.
+ */
+const holdLimits = { deadband: 250, slowDownDelay: 20, stopMargin: 3 };
 /** Seconds macOS lags behind the chip: fans always ramp up a little after it heats, and wind down slower still. */
 const autoLag = { rising: 8, falling: 20 };
 
@@ -50,6 +55,8 @@ export type Machine = {
   /** The slower-moving CPU temperature macOS's Auto curve follows. */
   autoTemperature: number;
   fans: [number, number];
+  /** The speed Curve mode holds, and the curve it was held for; null when another mode runs. */
+  curveHold: { rpm: number; curve: CurvePoint[]; lowerFor: number | null } | null;
   isUnderLoad: boolean;
   /** Seconds until the normal workload switches between idle and a burst. */
   phaseLeft: number;
@@ -64,6 +71,7 @@ export const initialMachine: Machine = {
   smoothedTemperature: 47,
   autoTemperature: 47,
   fans: [0, 0],
+  curveHold: null,
   isUnderLoad: false,
   phaseLeft: 8,
 };
@@ -92,10 +100,27 @@ function targetRPM(machine: Machine, configuration: Configuration) {
     case "manual":
       return configuration.manualRPM < fanRange.min ? 0 : clamp(configuration.manualRPM, fanRange.min, fanRange.max);
     case "curve":
-      return curveRPM(configuration.curve, machine.smoothedTemperature);
+      return machine.curveHold?.rpm ?? curveRPM(configuration.curve, machine.smoothedTemperature);
     case "fullBlast":
       return fanRange.max;
   }
+}
+
+/** The speed Curve mode runs at, kept steady through small temperature swings. A newly applied curve starts afresh. */
+function holdCurveSpeed(machine: Machine, curve: CurvePoint[], celsius: number, dt: number): NonNullable<Machine["curveHold"]> {
+  const target = curveRPM(curve, celsius);
+  const held = machine.curveHold;
+  if (!held || held.curve !== curve) return { rpm: target, curve, lowerFor: null };
+
+  // Running fans keep going at minimum until the curve is at 0% a few degrees higher too.
+  const wanted = held.rpm > 0 && target === 0 && speedAt(curve, celsius + holdLimits.stopMargin) > 0 ? fanRange.min : target;
+  const change = wanted - held.rpm;
+  const reachesLimit = change > 0 ? wanted >= fanRange.max : wanted <= fanRange.min;
+  if (Math.abs(change) < holdLimits.deadband && !(change !== 0 && reachesLimit)) return { ...held, lowerFor: null };
+  if (change > 0) return { rpm: wanted, curve, lowerFor: null };
+
+  const lowerFor = held.lowerFor === null ? 0 : held.lowerFor + dt;
+  return lowerFor >= holdLimits.slowDownDelay ? { rpm: wanted, curve, lowerFor: null } : { ...held, lowerFor };
 }
 
 /** Advances the machine by `dt` seconds with `configuration` applied while running `workload`. */
@@ -123,7 +148,8 @@ export function step(machine: Machine, configuration: Configuration, workload: W
   const autoLagSeconds = cpu > machine.autoTemperature ? autoLag.rising : autoLag.falling;
   const autoTemperature = approach(machine.autoTemperature, cpu, autoLagSeconds, dt);
 
-  const target = targetRPM({ ...machine, smoothedTemperature, autoTemperature }, configuration);
+  const curveHold = configuration.mode === "curve" ? holdCurveSpeed(machine, configuration.curve, smoothedTemperature, dt) : null;
+  const target = targetRPM({ ...machine, smoothedTemperature, autoTemperature, curveHold }, configuration);
   const fans = machine.fans.map((rpm) => {
     if (target === 0) {
       const slowed = approach(rpm, 0, 1.5, dt);
@@ -142,6 +168,7 @@ export function step(machine: Machine, configuration: Configuration, workload: W
     smoothedTemperature,
     autoTemperature,
     fans,
+    curveHold,
     isUnderLoad,
     phaseLeft,
   };

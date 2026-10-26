@@ -18,6 +18,8 @@ final class FanController {
             draft = configuration
             guard configuration != oldValue else { return }
             UserDefaults.standard.setEncoded(configuration, forKey: Self.configurationKey)
+            // A new curve or mode applies straight away rather than waiting out the hold.
+            curveHold.reset()
             // A change the user made gives a paused mode another try; a switch for the power source doesn't.
             if !isSwitchingForPowerSource { resume() }
             sync()
@@ -70,6 +72,7 @@ final class FanController {
     @ObservationIgnored private var lostControlSince: ContinuousClock.Instant?
     @ObservationIgnored private var nextControlRecovery = ContinuousClock.now
     @ObservationIgnored private var curveTemperatureDate = ContinuousClock.now
+    @ObservationIgnored private var curveHold = CurveSpeedHold()
 
     init(monitor: HardwareMonitor, settings: AppSettings, power: PowerSourceMonitor) {
         self.monitor = monitor
@@ -297,16 +300,24 @@ final class FanController {
     }
 
     private func desiredTarget() -> SyncTarget {
-        guard !isSuspended, configuration.mode != .automatic else { return .automatic }
+        guard !isSuspended, configuration.mode != .automatic else {
+            curveHold.reset()
+            return .automatic
+        }
         let fans = monitor.fans
         // A failed SMC read reports 0 RPM limits; never turn that into a speed (0 would stop the fan).
         guard !fans.isEmpty, fans.allSatisfy(\.hasUsableSpeedRange) else { return .hold }
-        let target = configuration.targetRPMs(
+        guard var target = configuration.targetRPMs(
             for: fans,
             cpuTemperature: curveTemperature,
             sliderMinimum: monitor.fanSpeedRange?.lowerBound
-        )
-        return target.map(SyncTarget.speeds) ?? .automatic
+        ) else { return .automatic }
+        if configuration.mode == .curve {
+            target = curveHold.speeds(
+                for: target, fans: fans, curve: configuration.curve, temperature: curveTemperature, now: .now
+            )
+        }
+        return .speeds(target)
     }
 
     private func syncNow() async {
