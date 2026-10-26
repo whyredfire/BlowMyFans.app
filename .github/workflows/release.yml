@@ -69,17 +69,36 @@ jobs:
           codesign --force --options runtime --sign - --entitlements Support/BlowMyFans.entitlements "$app"
           codesign --verify --deep --strict "$app"
 
+      # Shown in the app's update window: features and fixes to the app since the previous release,
+      # without commit types or hashes. Website and tooling changes are left out.
+      - name: Write the update notes
+        run: |
+          mkdir dist
+          previous=$(git describe --tags --abbrev=0 --match 'v[0-9]*' 2>/dev/null || true)
+          commits() {
+            git log --no-merges --pretty=%s "${previous:+$previous..}HEAD~1" -- Sources Support \
+              | sed -nE "s/^$1(\([^)]*\))?!?: (.*)/- \2/p"
+          }
+          new=$(commits feat)
+          fixed=$(commits fix)
+          {
+            if [ -n "$new" ]; then printf '## New\n\n%s\n\n' "$new"; fi
+            if [ -n "$fixed" ]; then printf '## Fixed\n\n%s\n\n' "$fixed"; fi
+            if [ -z "$new$fixed" ]; then printf 'Small improvements behind the scenes.\n'; fi
+          } > dist/BlowMyFans.md
+          cat dist/BlowMyFans.md
+
       # Installed copies only accept updates signed with the key behind SUPublicEDKey
       - name: Generate the appcast
         env:
           SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
         run: |
-          mkdir dist
           ditto -c -k --sequesterRsrc --keepParent "build/Blow My Fans.app" dist/BlowMyFans.zip
           echo "$SPARKLE_PRIVATE_KEY" | .build/artifacts/sparkle/Sparkle/bin/generate_appcast \
             --ed-key-file - \
             --download-url-prefix "${RELEASES_URL}/download/v${VERSION}/" \
             --full-release-notes-url "$RELEASES_URL" \
+            --embed-release-notes \
             dist
 
       # This repo is also a Homebrew tap; the cask's new version and checksum join the release commit
