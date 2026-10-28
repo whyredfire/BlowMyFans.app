@@ -60,8 +60,9 @@ export function Changelog() {
                       <div key={kind}>
                         <h3 className="text-sm font-medium text-neutral-500">{title}</h3>
                         <ul className="mt-2 space-y-1.5 leading-relaxed text-neutral-300">
-                          {changes.map((change) => (
-                            <li key={change.text}>{change.text}</li>
+                          {changes.map((change, index) => (
+                            // Two commits can share a subject, so the position keeps keys unique.
+                            <li key={index}>{change.text}</li>
                           ))}
                         </ul>
                       </div>

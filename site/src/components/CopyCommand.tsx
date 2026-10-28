@@ -6,7 +6,12 @@ export function CopyCommand({ commands, className = "" }: { commands: readonly s
   const [copied, setCopied] = useState(false);
 
   async function copy() {
-    await navigator.clipboard.writeText(commands.join("\n"));
+    try {
+      await navigator.clipboard.writeText(commands.join("\n"));
+    } catch {
+      // Clipboard access was denied; the commands can still be selected and copied by hand.
+      return;
+    }
     setCopied(true);
     setTimeout(() => setCopied(false), 1500);
   }

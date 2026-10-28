@@ -91,8 +91,8 @@ export function curveRPM(curve: CurvePoint[], celsius: number) {
 function targetRPM(machine: Machine, configuration: Configuration) {
   switch (configuration.mode) {
     case "automatic": {
-      // At 0% macOS stops the fans, but once they run they stay at minimum until the chip has cooled
-      // a few degrees below where they started, rather than flicking on and off.
+      // At 0% macOS stops the fans, but once they run they stay at minimum until the chip is back
+      // below autoStopTemperature, rather than flicking on and off.
       const fraction = speedAt(autoCurve, machine.autoTemperature);
       if (fraction > 0) return rpmFor(fraction);
       return machine.fans[0] > 0 && machine.autoTemperature > autoStopTemperature ? fanRange.min : 0;
@@ -116,7 +116,9 @@ function holdCurveSpeed(machine: Machine, curve: CurvePoint[], celsius: number, 
   const wanted = held.rpm > 0 && target === 0 && speedAt(curve, celsius + holdLimits.stopMargin) > 0 ? fanRange.min : target;
   const change = wanted - held.rpm;
   const reachesLimit = change > 0 ? wanted >= fanRange.max : wanted <= fanRange.min;
-  if (Math.abs(change) < holdLimits.deadband && !(change !== 0 && reachesLimit)) return { ...held, lowerFor: null };
+  // The slow-down wait runs for as long as the curve wants less, even when only a little less.
+  const waiting = change < 0 && held.lowerFor !== null ? held.lowerFor + dt : null;
+  if (Math.abs(change) < holdLimits.deadband && !(change !== 0 && reachesLimit)) return { ...held, lowerFor: waiting };
   if (change > 0) return { rpm: wanted, curve, lowerFor: null };
 
   const lowerFor = held.lowerFor === null ? 0 : held.lowerFor + dt;
