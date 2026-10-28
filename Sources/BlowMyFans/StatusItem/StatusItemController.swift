@@ -92,6 +92,8 @@ final class StatusItemController: NSObject {
         positionPanel()
         panel.makeKeyAndOrderFront(nil)
         statusItem.button?.highlight(true)
+        // On macOS 27 a session can begin while the panel is already open, e.g. after it opened at launch.
+        if let clickMonitor { NSEvent.removeMonitor(clickMonitor) }
         clickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
             MainActor.assumeIsolated { self?.close() }
         }

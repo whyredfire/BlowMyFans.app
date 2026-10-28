@@ -237,8 +237,11 @@ final class FanController {
 
     private func monitorDidUpdate(didRefresh: Bool) {
         updateSmoothedCPUTemperature()
-        if didRefresh { curveTemperature = smoothedCPUTemperature }
-        detectLostControl()
+        if didRefresh {
+            curveTemperature = smoothedCPUTemperature
+            // Fan readings only change on refreshes.
+            detectLostControl()
+        }
         // With macOS in charge and nothing applied there's nothing to send.
         let isLeftToMacOS = isSuspended || configuration.mode == .automatic
         if !isLeftToMacOS || appliedRPMs != nil {

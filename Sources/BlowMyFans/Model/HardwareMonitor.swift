@@ -111,6 +111,8 @@ final class HardwareMonitor {
                 } else {
                     await sampleCPU()
                 }
+                // A loop replaced while reading must not report after its successor has started.
+                guard !Task.isCancelled else { return }
                 onUpdate?(didRefresh)
                 try? await Task.sleep(for: tick, tolerance: tick / 4)
             }

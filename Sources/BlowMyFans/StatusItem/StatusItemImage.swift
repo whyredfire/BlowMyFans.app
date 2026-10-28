@@ -40,7 +40,8 @@ enum StatusItemImage {
             }
             return true
         }
-        return trimmedHorizontally(image, isTemplate: label.warningColor == nil) ?? image
+        image.isTemplate = label.warningColor == nil
+        return trimmedHorizontally(image, isTemplate: image.isTemplate) ?? image
     }
 
     /// Crops the symbol's built-in side margins and the text's trailing advance so the item is

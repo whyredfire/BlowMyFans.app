@@ -86,6 +86,8 @@ private struct SpeedSlider: View {
             Slider(value: Binding(get: { max(value, start) }, set: { setSliderValue($0) }),
                    in: start...range.upperBound)
                 .labelsHidden()
+                .accessibilityLabel(title)
+                .accessibilityValue(valueText)
         }
     }
 
