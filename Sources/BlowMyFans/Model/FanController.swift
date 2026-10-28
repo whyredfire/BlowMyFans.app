@@ -75,6 +75,8 @@ final class FanController {
     /// and falls slowly, so short load spikes don't make the fans surge up and back down.
     @ObservationIgnored private var smoothedCPUTemperature: Double?
     @ObservationIgnored private var smoothedCPUTemperatureDate = ContinuousClock.now
+    /// How long a missing CPU reading keeps the last temperature before Curve mode runs flat out.
+    private static let cpuReadingGrace = Duration.seconds(10)
     @ObservationIgnored private var curveHold = CurveSpeedHold()
 
     init(monitor: HardwareMonitor, settings: AppSettings, power: PowerSourceMonitor) {
@@ -248,11 +250,12 @@ final class FanController {
     /// update interval: ~75% of a rise within 4 s, ~90% of a fall in about 30 s.
     private func updateSmoothedCPUTemperature() {
         let now = ContinuousClock.now
-        defer { smoothedCPUTemperatureDate = now }
         guard let current = monitor.cpuTemperature else {
-            smoothedCPUTemperature = nil
+            // A missed reading keeps the last temperature for a while rather than sending the fans flat out.
+            if now - smoothedCPUTemperatureDate > Self.cpuReadingGrace { smoothedCPUTemperature = nil }
             return
         }
+        defer { smoothedCPUTemperatureDate = now }
         guard let previous = smoothedCPUTemperature else {
             smoothedCPUTemperature = current
             return

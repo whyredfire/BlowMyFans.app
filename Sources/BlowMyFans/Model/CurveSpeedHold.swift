@@ -15,7 +15,7 @@ struct CurveSpeedHold {
     static let stopMargin = 3.0
 
     /// The speeds being held, as last returned.
-    private(set) var rpms: [Double]?
+    private var rpms: [Double]?
     private var lowerSince: ContinuousClock.Instant?
 
     mutating func reset() {
@@ -46,10 +46,9 @@ struct CurveSpeedHold {
         }
         let isSignificant = abs(change) >= Self.deadband || (change != 0 && reachesLimit)
 
-        guard isSignificant else {
-            lowerSince = nil
-            return held
-        }
+        // The slow-down wait runs for as long as the curve wants less, even when only a little less.
+        if change >= 0 { lowerSince = nil }
+        guard isSignificant else { return held }
         if change > 0 {
             return hold(wanted)
         }
