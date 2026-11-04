@@ -23,8 +23,14 @@ cp "Support/$HELPER_LABEL.plist" Support/helper-tool.sh Support/AppIcon.icns "$A
 cp -R Support/Database Support/Localization/*.lproj "$APP/Contents/Resources/"
 ditto "$SPARKLE" "$APP/Contents/Frameworks/Sparkle.framework"
 
-# Sign inside-out: Sparkle's nested executables, the framework, the helper, then the app.
 FRAMEWORK="$APP/Contents/Frameworks/Sparkle.framework/Versions/B"
+# Sparkle ships universal; keep only the Apple silicon half of each binary.
+for binary in Sparkle Autoupdate Updater.app/Contents/MacOS/Updater \
+    XPCServices/Downloader.xpc/Contents/MacOS/Downloader XPCServices/Installer.xpc/Contents/MacOS/Installer; do
+    lipo "$FRAMEWORK/$binary" -thin arm64 -output "$FRAMEWORK/$binary"
+done
+
+# Sign inside-out: Sparkle's nested executables, the framework, the helper, then the app.
 for item in XPCServices/Installer.xpc XPCServices/Downloader.xpc Autoupdate Updater.app; do
     codesign --force --options runtime --sign - "$FRAMEWORK/$item"
 done

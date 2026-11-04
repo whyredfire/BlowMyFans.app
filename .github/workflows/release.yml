@@ -60,8 +60,14 @@ jobs:
           ditto .build/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework \
             "$app/Contents/Frameworks/Sparkle.framework"
 
-          # Ad-hoc signed inside-out: Sparkle's nested executables, the framework, the helper, then the app
+          # Sparkle ships universal; keep only the Apple silicon half of each binary
           framework="$app/Contents/Frameworks/Sparkle.framework/Versions/B"
+          for binary in Sparkle Autoupdate Updater.app/Contents/MacOS/Updater \
+            XPCServices/Downloader.xpc/Contents/MacOS/Downloader XPCServices/Installer.xpc/Contents/MacOS/Installer; do
+            lipo "$framework/$binary" -thin arm64 -output "$framework/$binary"
+          done
+
+          # Ad-hoc signed inside-out: Sparkle's nested executables, the framework, the helper, then the app
           for item in XPCServices/Installer.xpc XPCServices/Downloader.xpc Autoupdate Updater.app; do
             codesign --force --options runtime --sign - "$framework/$item"
           done
