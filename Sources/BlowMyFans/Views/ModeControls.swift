@@ -13,6 +13,8 @@ struct ModePicker: View {
         }
         .pickerStyle(.segmented)
         .labelsHidden()
+        // Fills the panel when the labels are short; when they're long, the panel widens instead.
+        .buttonSizing(.flexible)
         .frame(maxWidth: .infinity)
     }
 }

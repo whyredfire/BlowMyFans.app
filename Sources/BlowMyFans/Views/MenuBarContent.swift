@@ -6,13 +6,15 @@ struct MenuBarContent: View {
     @Environment(\.openSettings) private var openSettings
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        // 340 pt with the padding, wider if the mode picker or footer buttons need it.
+        PanelStack(minimumWidth: 308, spacing: 14) {
             if monitor.fans.isEmpty {
                 Text("This Mac has no fans to control.")
                     .foregroundStyle(.secondary)
             } else {
                 ModePicker()
                     .controlSize(.large)
+                    .setsPanelWidth()
                 ModeControls()
                 StatusMessage()
 
@@ -45,9 +47,9 @@ struct MenuBarContent: View {
             .labelStyle(.iconOnly)
             .buttonStyle(.glass)
             .controlSize(.large)
+            .setsPanelWidth()
         }
         .padding(16)
-        .frame(width: 340)
         .animation(.smooth, value: controller.draft.mode)
         .animation(.smooth, value: controller.hasUnappliedChanges)
     }
