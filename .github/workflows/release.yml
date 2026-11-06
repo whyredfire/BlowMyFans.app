@@ -76,22 +76,24 @@ jobs:
           codesign --force --options runtime --sign - --entitlements Support/BlowMyFans.entitlements "$app"
           codesign --verify --deep --strict "$app"
 
-      # Shown in the app's update window: features and fixes to the app since the previous release,
-      # without commit types or hashes. Website and tooling changes are left out.
+      # Shown in the app's update window: every release's features and fixes to the app, newest first,
+      # so updating from any older version shows everything since. Website and tooling changes are left out.
       - name: Write the update notes
         run: |
           mkdir dist
-          previous=$(git describe --tags --abbrev=0 --match 'v[0-9]*' 2>/dev/null || true)
-          commits() {
-            git log --no-merges --pretty=%s "${previous:+$previous..}HEAD~1" -- Sources Support \
-              | sed -nE "s/^$1(\([^)]*\))?!?: (.*)/- \2/p"
+          section() {
+            changes=$(git log --no-merges --pretty=%s "$3" -- Sources Support \
+              | sed -nE 's/^(feat|fix)(\([^)]*\))?!?: (.*)/- \3/p')
+            printf '# %s (%s)\n\n%s\n\n' "$1" "$2" "${changes:-- Small improvements behind the scenes.}"
           }
-          new=$(commits feat)
-          fixed=$(commits fix)
+          set -- $(git tag --list 'v[0-9]*' --sort=-version:refname)
           {
-            if [ -n "$new" ]; then printf '## New\n\n%s\n\n' "$new"; fi
-            if [ -n "$fixed" ]; then printf '## Fixed\n\n%s\n\n' "$fixed"; fi
-            if [ -z "$new$fixed" ]; then printf 'Small improvements behind the scenes.\n'; fi
+            section "$VERSION" "$(date '+%-d %b %Y')" "${1:+$1..}HEAD~1"
+            while [ $# -gt 0 ]; do
+              tag=$1
+              shift
+              section "${tag#v}" "$(git log -1 --format=%cd --date=format:'%-d %b %Y' "$tag")" "${1:+$1..}$tag"
+            done
           } > dist/BlowMyFans.md
           cat dist/BlowMyFans.md
 
