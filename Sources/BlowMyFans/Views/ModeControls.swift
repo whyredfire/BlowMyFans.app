@@ -73,21 +73,24 @@ private struct SpeedSlider: View {
     let range: ClosedRange<Double>
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(title)
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(spacing: 8) {
+                Image(systemName: "fan.fill")
                     .foregroundStyle(.secondary)
+                    .frame(width: 18)
+                Text(title)
                 Spacer()
                 Text(valueText)
                     .fontWeight(.medium)
                     .monospacedDigit()
-                    .contentTransition(.numericText(value: value))
             }
             // Snaps in the binding instead of using `step:`, which draws a tick mark per step
             // and makes the slider wider than the popover.
             Slider(value: Binding(get: { max(value, start) }, set: { setSliderValue($0) }),
                    in: start...range.upperBound)
                 .labelsHidden()
+                .controlSize(.small)
+                .padding(.leading, 26)
                 .accessibilityLabel(title)
                 .accessibilityValue(valueText)
         }

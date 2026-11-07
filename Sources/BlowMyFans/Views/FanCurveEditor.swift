@@ -61,7 +61,8 @@ struct FanCurveEditor: View {
             }
         }
         .chartXScale(domain: domain)
-        .chartYScale(domain: 0...100)
+        // Room above 100% for its label and a dragged point.
+        .chartYScale(domain: 0...100, range: .plotDimension(endPadding: 8))
         .chartXAxis {
             AxisMarks(values: .stride(by: 20)) { value in
                 AxisGridLine(stroke: StrokeStyle(lineWidth: 0.5))
