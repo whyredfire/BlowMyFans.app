@@ -68,9 +68,6 @@
 "Hottest CPU" = "CPU Più Calda";
 
 /* SettingsView.swift */
-"How often temperatures and fan speeds are read. Longer intervals use a little less energy; Curve mode reacts more slowly." = "Quante volte vengono lette le temperature e le velocità della ventola. Gli intervalli più lunghi usano un po' meno energia; la modalità Curve reagisce più lentamente.";
-
-/* SettingsView.swift */
 "Icon only" = "Solo icona";
 
 /* SettingsView.swift */
@@ -115,7 +112,7 @@
 /* PowerSource.swift */
 "On power adapter" = "Adattatore di alimentazione";
 
-/* SettingsView.swift */
+/* PanelSection.swift, SettingsView.swift */
 "Power" = "Potenza";
 
 /* MenuBarContent.swift */
@@ -154,7 +151,7 @@
 /* HelperClient.swift */
 "The fan helper isn't responding." = "Il fan helper non risponde.";
 
-/* Rows.swift */
+/* PanelSection.swift, Rows.swift */
 "Thermal pressure" = "Pressione termica";
 
 /* StatusItemController.swift */

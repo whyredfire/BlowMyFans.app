@@ -74,9 +74,6 @@
 "Hottest CPU" = "最热的 CPU";
 
 /* SettingsView.swift */
-"How often temperatures and fan speeds are read. Longer intervals use a little less energy; Curve mode reacts more slowly." = "温度和风扇速度读取频率。更长的间隔使用少一点能量；曲线模式反应更慢。";
-
-/* SettingsView.swift */
 "Icon only" = "仅图标";
 
 /* SettingsView.swift */
@@ -121,7 +118,7 @@
 /* PowerSource.swift */
 "On power adapter" = "在电源适配器";
 
-/* SettingsView.swift */
+/* PanelSection.swift, SettingsView.swift */
 "Power" = "战斗力";
 
 /* MenuBarContent.swift */
@@ -160,7 +157,7 @@
 /* HelperClient.swift */
 "The fan helper isn't responding." = "粉丝助手没有响应。";
 
-/* Rows.swift */
+/* PanelSection.swift, Rows.swift */
 "Thermal pressure" = "热压";
 
 /* StatusItemController.swift */

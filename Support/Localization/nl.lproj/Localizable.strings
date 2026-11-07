@@ -65,9 +65,6 @@
 "Hottest CPU" = "Populairste CPU";
 
 /* SettingsView.swift */
-"How often temperatures and fan speeds are read. Longer intervals use a little less energy; Curve mode reacts more slowly." = "Hoe vaak temperaturen en ventilatorsnelheden worden gelezen. Langere intervallen gebruiken een beetje minder energie; Curve modus reageert langzamer op.";
-
-/* SettingsView.swift */
 "Icon only" = "Alleen icoon";
 
 /* SettingsView.swift */
@@ -106,7 +103,7 @@
 /* PowerSource.swift */
 "On power adapter" = "Op stroomadapter";
 
-/* SettingsView.swift */
+/* PanelSection.swift, SettingsView.swift */
 "Power" = "Vermogen";
 
 /* MenuBarContent.swift */
@@ -145,7 +142,7 @@
 /* HelperClient.swift */
 "The fan helper isn't responding." = "De vensterhelper reageert niet.";
 
-/* Rows.swift */
+/* PanelSection.swift, Rows.swift */
 "Thermal pressure" = "Thermische druk";
 
 /* StatusItemController.swift */
