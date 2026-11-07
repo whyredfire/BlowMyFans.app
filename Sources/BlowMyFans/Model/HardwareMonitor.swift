@@ -27,14 +27,12 @@ final class HardwareMonitor {
             if interval != oldValue, sampler != nil { startPolling() }
         }
     }
-    /// Fan control follows the CPU temperature (Curve mode), so it's read every `controlInterval`
-    /// even when the published readings update less often.
+    /// In Curve mode the CPU temperature is read every `controlInterval`, whatever `interval` is.
     @ObservationIgnored var followsCPUTemperature = false {
         didSet {
             if followsCPUTemperature != oldValue, sampler != nil { startPolling() }
         }
     }
-    /// The hottest CPU core as last read; between updates too while `followsCPUTemperature`.
     @ObservationIgnored private(set) var cpuTemperature: Double?
     /// Sensor groups the menu bar and fan control need while the panel is closed.
     @ObservationIgnored var essentialGroups: (SensorGroup) -> Bool = { _ in true }
@@ -95,8 +93,7 @@ final class HardwareMonitor {
         startPolling()
     }
 
-    /// Updates straight away, then every `interval`; while fan control follows the CPU temperature,
-    /// reads just that in between, every `controlInterval`. Replaces any running loop.
+    /// Replaces any running loop.
     private func startPolling() {
         pollTask?.cancel()
         pollTask = Task { [weak self] in
@@ -122,7 +119,7 @@ final class HardwareMonitor {
         }
     }
 
-    /// Reads only the CPU sensors, for fan control between updates. Nothing is published.
+    /// For fan control between updates; nothing is published.
     private func sampleCPU() async {
         guard let sampler else { return }
         let groupIDs = Set(availableGroups.filter(\.isCPU).map(\.id))

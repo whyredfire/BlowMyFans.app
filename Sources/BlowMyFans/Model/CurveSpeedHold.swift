@@ -1,11 +1,8 @@
 import HelperInterface
 import SMCKit
 
-/// Keeps Curve mode's fan speeds steady through the small temperature swings of normal use.
-///
-/// Speeds go up as soon as the curve asks for noticeably more, but come down only once the lower
-/// speed has been wanted for a while, so bursty work doesn't send the fans up and down. Running fans
-/// stop only once the chip is a few degrees into the curve's 0% region, not the moment it gets there.
+/// Keeps Curve mode's fan speeds steady: up at once for a real rise, down only after a lower speed
+/// has been wanted for a while, and off only a few degrees into the curve's 0% region.
 struct CurveSpeedHold {
     /// Smaller changes than this, in RPM, are ignored.
     static let deadband = 250.0
@@ -14,7 +11,6 @@ struct CurveSpeedHold {
     /// Running fans keep going at minimum until the curve is at 0% this many degrees higher too.
     static let stopMargin = 3.0
 
-    /// The speeds being held, as last returned.
     private var rpms: [Double]?
     private var lowerSince: ContinuousClock.Instant?
 
@@ -23,7 +19,6 @@ struct CurveSpeedHold {
         lowerSince = nil
     }
 
-    /// The speeds to apply, given what the curve asks for at `temperature`.
     mutating func speeds(
         for target: [Double], fans: [Fan], curve: FanCurve, temperature: Double?, now: ContinuousClock.Instant
     ) -> [Double] {

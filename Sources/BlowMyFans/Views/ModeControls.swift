@@ -23,11 +23,18 @@ struct ModeControls: View {
     @Environment(FanController.self) private var controller
 
     var body: some View {
-        switch controller.draft.mode {
-        case .manual: ManualControls()
-        case .curve: FanCurveEditor()
-        case .automatic, .fullBlast: EmptyView()
+        Group {
+            switch controller.draft.mode {
+            case .manual: ManualControls()
+            case .curve: FanCurveEditor()
+            case .automatic, .fullBlast: EmptyView()
+            }
         }
+        // Out fast and in late, so they never overlap the rows moving beneath.
+        .transition(.asymmetric(
+            insertion: .opacity.animation(.easeOut(duration: MenuBarPanel.animationDuration).delay(MenuBarPanel.animationDuration / 2)),
+            removal: .opacity.animation(.easeOut(duration: MenuBarPanel.animationDuration / 2))
+        ))
     }
 }
 

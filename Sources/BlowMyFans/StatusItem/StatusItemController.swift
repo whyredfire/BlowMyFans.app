@@ -24,11 +24,7 @@ final class StatusItemController: NSObject {
         super.init()
 
         panel.onClose = { [weak self] in self?.close() }
-        NotificationCenter.default.addObserver(
-            forName: NSWindow.didResizeNotification, object: panel, queue: .main
-        ) { [weak self] _ in
-            MainActor.assumeIsolated { self?.positionPanel() }
-        }
+        panel.placement = { [weak self] width in self?.frame(forPanelWidth: width) ?? .zero }
         // Items shift as others are added or removed; keep the panel beneath this one.
         if let itemWindow = statusItem.button?.window {
             NotificationCenter.default.addObserver(
@@ -36,7 +32,7 @@ final class StatusItemController: NSObject {
             ) { [weak self] _ in
                 MainActor.assumeIsolated {
                     guard let self, self.panel.isVisible else { return }
-                    self.positionPanel()
+                    self.panel.place()
                 }
             }
         }
@@ -89,7 +85,7 @@ final class StatusItemController: NSObject {
         controller.discardDraft()
         monitor.isShowingDetails = true
         panel.prepareContent()
-        positionPanel()
+        panel.place()
         panel.makeKeyAndOrderFront(nil)
         statusItem.button?.highlight(true)
         // On macOS 27 a session can begin while the panel is already open, e.g. after it opened at launch.
@@ -116,13 +112,14 @@ final class StatusItemController: NSObject {
         clickMonitor = nil
     }
 
-    private func positionPanel() {
+    private func frame(forPanelWidth width: CGFloat) -> NSRect {
         guard let itemFrame = statusItem.button?.window?.frame,
-              let screen = statusItem.button?.window?.screen ?? NSScreen.main else { return }
-        let size = panel.frame.size
+              let screen = statusItem.button?.window?.screen ?? NSScreen.main else { return panel.frame }
         let visible = screen.visibleFrame
-        let x = min(max(itemFrame.midX - size.width / 2, visible.minX + 8), visible.maxX - size.width - 8)
-        panel.setFrameOrigin(NSPoint(x: x, y: itemFrame.minY - size.height - 6))
+        let margin = MenuBarPanel.shadowMargin
+        let x = min(max(itemFrame.midX - width / 2, visible.minX + 8), visible.maxX - width - 8)
+        let top = itemFrame.minY - 6
+        return NSRect(x: x - margin, y: visible.minY, width: width + 2 * margin, height: top - visible.minY)
     }
 }
 

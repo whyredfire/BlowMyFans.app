@@ -61,7 +61,7 @@ struct MenuBarContent: View {
             .setsPanelWidth()
         }
         .padding(16)
-        .animation(.smooth, value: controller.draft.mode)
-        .animation(.smooth, value: controller.hasUnappliedChanges)
+        .animation(.easeInOut(duration: MenuBarPanel.animationDuration), value: controller.draft.mode)
+        .animation(.easeInOut(duration: MenuBarPanel.animationDuration), value: controller.hasUnappliedChanges)
     }
 }

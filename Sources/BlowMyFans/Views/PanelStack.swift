@@ -1,8 +1,7 @@
 import SwiftUI
 
-/// A leading-aligned vertical stack at least `minimumWidth` wide, and wider only when a control that
-/// can't shrink needs it, e.g. a segmented picker, which macOS sizes to four times its widest label.
-/// Everything else, wrapping text included, is laid out at that width rather than widening it.
+/// A stack at least `minimumWidth` wide, widened only by views marked `setsPanelWidth()`, such as the
+/// segmented picker, which macOS 27 won't shrink below four times its widest label.
 struct PanelStack: Layout {
     var minimumWidth: CGFloat
     var spacing: CGFloat
@@ -32,7 +31,6 @@ struct PanelStack: Layout {
 }
 
 extension View {
-    /// Lets this view widen a `PanelStack` to its natural width.
     func setsPanelWidth() -> some View {
         layoutValue(key: PanelStack.SetsWidth.self, value: true)
     }
