@@ -50,18 +50,26 @@ struct MenuBarContent: View {
                     openSettings()
                     NSApp.activate()
                 }
+                .footerIcon()
                 Spacer()
                 ApplyButtons()
+                    .buttonBorderShape(.capsule)
                 Spacer()
                 Button("Quit", systemImage: "power") { NSApp.terminate(nil) }
+                    .footerIcon()
             }
-            .labelStyle(.iconOnly)
-            .buttonStyle(.glass)
-            .controlSize(.large)
             .setsPanelWidth()
         }
         .padding(16)
         .animation(.easeInOut(duration: MenuBarPanel.animationDuration), value: controller.draft.mode)
         .animation(.easeInOut(duration: MenuBarPanel.animationDuration), value: controller.hasUnappliedChanges)
+    }
+}
+
+private extension View {
+    func footerIcon() -> some View {
+        labelStyle(.iconOnly)
+            .buttonStyle(.glass)
+            .buttonBorderShape(.circle)
     }
 }

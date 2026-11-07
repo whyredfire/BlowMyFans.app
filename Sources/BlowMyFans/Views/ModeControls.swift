@@ -45,6 +45,7 @@ struct ApplyButtons: View {
     var body: some View {
         if controller.hasUnappliedChanges {
             Button("Cancel") { controller.discardDraft() }
+                .buttonStyle(.glass)
             Button("Apply") { controller.apply() }
                 .buttonStyle(.glassProminent)
                 .keyboardShortcut(.defaultAction)
