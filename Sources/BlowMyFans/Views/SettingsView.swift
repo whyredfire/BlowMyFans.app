@@ -1,14 +1,21 @@
 import SwiftUI
 
 struct SettingsView: View {
+    var body: some View {
+        TabView {
+            Tab("General", systemImage: "gearshape") { GeneralSettings() }
+            Tab("Panel", systemImage: "menubar.rectangle") { PanelSettings() }
+            Tab("Advanced", systemImage: "gearshape.2") { AdvancedSettings() }
+        }
+    }
+}
+
+private struct GeneralSettings: View {
     @Environment(AppSettings.self) private var settings
-    @Environment(FanController.self) private var controller
-    @Environment(AppUpdater.self) private var updater
     @Environment(PowerSourceMonitor.self) private var power
 
     var body: some View {
         @Bindable var settings = settings
-        @Bindable var updater = updater
         Form {
             Section {
                 Toggle("Launch at login", isOn: Binding(
@@ -31,8 +38,6 @@ struct SettingsView: View {
                         Text(Duration.seconds(seconds).formatted(.units(allowed: [.seconds], width: .wide))).tag(seconds)
                     }
                 }
-            } header: {
-                Text("General")
             } footer: {
                 Text("How often the menu bar and panel update. Longer intervals use a little less energy. Curve mode checks the CPU temperature every 2 seconds regardless.")
                     .foregroundStyle(.secondary)
@@ -41,7 +46,68 @@ struct SettingsView: View {
             if power.hasBattery {
                 PowerSection()
             }
+        }
+        .settingsPage()
+    }
+}
 
+private struct PanelSettings: View {
+    @Environment(AppSettings.self) private var settings
+    @Environment(HardwareMonitor.self) private var monitor
+
+    var body: some View {
+        Form {
+            Section("Show in the panel") {
+                ForEach(PanelSection.allCases) { section in
+                    Toggle(section.title, isOn: Binding(
+                        get: { settings.shows(section) },
+                        set: { settings.setShows(section, $0) }
+                    ))
+                }
+            }
+
+            if settings.shows(.temperatures) {
+                Section {
+                    Picker("Sensors", selection: Binding(
+                        get: { settings.panelSensors == nil },
+                        // Choosing starts from what the panel shows now.
+                        set: { settings.panelSensors = $0 ? nil : monitor.availableGroups.panelDefaults.map(\.id) }
+                    )) {
+                        Text("Automatic").tag(true)
+                        Text("Choose").tag(false)
+                    }
+                    if let chosen = settings.panelSensors {
+                        LazyVGrid(columns: [GridItem(.flexible(), alignment: .leading), GridItem(.flexible(), alignment: .leading)],
+                                  alignment: .leading, spacing: 8) {
+                            ForEach(monitor.availableGroups.highlights) { group in
+                                Toggle(group.shortName, isOn: Binding(
+                                    get: { chosen.contains(group.id) },
+                                    set: { settings.panelSensors = $0 ? chosen + [group.id] : chosen.filter { $0 != group.id } }
+                                ))
+                                .toggleStyle(.checkbox)
+                                .help(group.name)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("Temperatures")
+                } footer: {
+                    Text("Automatic lists the CPU, GPU, SSD and battery, then the next most useful sensor. Only the sensors shown are read.")
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .settingsPage()
+    }
+}
+
+private struct AdvancedSettings: View {
+    @Environment(FanController.self) private var controller
+    @Environment(AppUpdater.self) private var updater
+
+    var body: some View {
+        @Bindable var updater = updater
+        Form {
             Section {
                 LabeledContent("Status") {
                     switch controller.helperStatus {
@@ -73,10 +139,17 @@ struct SettingsView: View {
                 }
             }
         }
-        .formStyle(.grouped)
-        .scrollDisabled(true)
-        .fixedSize(horizontal: false, vertical: true)
-        .frame(width: 460)
+        .settingsPage()
+    }
+}
+
+private extension View {
+    /// As tall as its content, so each tab sizes the window.
+    func settingsPage() -> some View {
+        formStyle(.grouped)
+            .scrollDisabled(true)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(width: 460)
     }
 }
 

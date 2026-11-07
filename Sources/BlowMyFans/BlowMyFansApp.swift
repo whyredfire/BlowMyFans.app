@@ -38,6 +38,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 || group.isCPU && (settings.menuBarItem == AppSettings.hottestCPU || controller.mode == .curve)
         }
         monitor.needsFans = { [controller] in controller.mode != .automatic }
+        monitor.panelGroups = { [settings] groups in
+            guard settings.shows(.temperatures) else { return [] }
+            guard let chosen = settings.panelSensors else { return groups.panelDefaults }
+            return groups.filter { chosen.contains($0.id) }
+        }
+        monitor.showsPower = { [settings] in settings.shows(.power) }
         followUpdateInterval()
         statusItem = StatusItemController(settings: settings, monitor: monitor, controller: controller)
         if !isLaunchingAtLogin {

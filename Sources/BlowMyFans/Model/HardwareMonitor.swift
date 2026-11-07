@@ -6,8 +6,6 @@ import SMCKit
 /// acted on is read: some sensors take milliseconds each, and every SMC read is a firmware call.
 @MainActor @Observable
 final class HardwareMonitor {
-    /// How many sensor groups the panel lists.
-    static let panelGroupCount = 5
     /// How often the CPU temperature is read while fan control follows it, whatever `interval` is.
     static let controlInterval = Duration.seconds(2)
 
@@ -42,6 +40,8 @@ final class HardwareMonitor {
     @ObservationIgnored var essentialGroups: (SensorGroup) -> Bool = { _ in true }
     /// Whether fan control needs fan readings while the panel is closed.
     @ObservationIgnored var needsFans: () -> Bool = { true }
+    @ObservationIgnored var panelGroups: ([SensorGroup]) -> [SensorGroup] = \.panelDefaults
+    @ObservationIgnored var showsPower: () -> Bool = { true }
     @ObservationIgnored var isShowingDetails = false {
         didSet {
             if isShowingDetails, !oldValue { Task { await sample() } }
@@ -65,8 +65,9 @@ final class HardwareMonitor {
         return lower...upper
     }
 
-    var panelTemperatures: ArraySlice<SensorGroupReading> {
-        temperatures.highlights.prefix(Self.panelGroupCount)
+    var panelTemperatures: [SensorGroupReading] {
+        let ids = Set(panelGroups(availableGroups).map(\.id))
+        return temperatures.highlights.filter { ids.contains($0.id) }
     }
 
     init(interval: Duration) {
@@ -132,12 +133,12 @@ final class HardwareMonitor {
         guard let sampler else { return }
         var groupIDs = Set(availableGroups.filter(essentialGroups).map(\.id))
         if isShowingDetails {
-            groupIDs.formUnion(availableGroups.highlights.prefix(Self.panelGroupCount).map(\.id))
+            groupIDs.formUnion(panelGroups(availableGroups).map(\.id))
         }
         let includeFans = isShowingDetails || needsFans()
         guard includeFans || !groupIDs.isEmpty else { return }
 
-        let snapshot = await sampler.sample(groupIDs: groupIDs, includeFans: includeFans, includePower: isShowingDetails)
+        let snapshot = await sampler.sample(groupIDs: groupIDs, includeFans: includeFans, includePower: isShowingDetails && showsPower())
         // Unchanged values aren't reassigned, so observers only hear about real changes.
         if let fans = snapshot.fans, fans != self.fans {
             self.fans = fans

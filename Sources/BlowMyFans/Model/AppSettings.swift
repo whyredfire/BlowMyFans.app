@@ -28,6 +28,15 @@ final class AppSettings {
         didSet { UserDefaults.standard.set(switchesModeWithPower, forKey: "switchesModeWithPower") }
     }
 
+    private(set) var hiddenPanelSections: Set<PanelSection> {
+        didSet { UserDefaults.standard.set(hiddenPanelSections.map(\.rawValue), forKey: "hiddenPanelSections") }
+    }
+
+    /// Sensor group ids the panel lists; nil picks the most useful few.
+    var panelSensors: [String]? {
+        didSet { UserDefaults.standard.set(panelSensors, forKey: "panelSensors") }
+    }
+
     private(set) var modes: [PowerSource: FanMode] {
         didSet {
             for (source, mode) in modes {
@@ -46,9 +55,23 @@ final class AppSettings {
         let interval = defaults.double(forKey: "updateInterval")
         updateInterval = Self.updateIntervals.contains(interval) ? interval : 5
         switchesModeWithPower = defaults.bool(forKey: "switchesModeWithPower")
+        hiddenPanelSections = Set((defaults.stringArray(forKey: "hiddenPanelSections") ?? []).compactMap(PanelSection.init))
+        panelSensors = defaults.stringArray(forKey: "panelSensors")
         modes = Dictionary(uniqueKeysWithValues: PowerSource.allCases.map { source in
             (source, defaults.string(forKey: Self.modeKey(source)).flatMap(FanMode.init(rawValue:)) ?? .automatic)
         })
+    }
+
+    func shows(_ section: PanelSection) -> Bool {
+        !hiddenPanelSections.contains(section)
+    }
+
+    func setShows(_ section: PanelSection, _ isShown: Bool) {
+        if isShown {
+            hiddenPanelSections.remove(section)
+        } else {
+            hiddenPanelSections.insert(section)
+        }
     }
 
     func mode(for source: PowerSource) -> FanMode {

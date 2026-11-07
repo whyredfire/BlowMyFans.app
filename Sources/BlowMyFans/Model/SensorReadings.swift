@@ -15,11 +15,14 @@ extension [SensorGroupReading] {
 
 extension [SensorGroup] {
     var highlights: [SensorGroup] { highlights { $0 } }
+
+    /// What the panel lists unless the user picks.
+    var panelDefaults: [SensorGroup] { Array(highlights.prefix(5)) }
 }
 
 extension Array {
-    /// The most useful entries for a short list: one each of CPU, GPU, SSD and battery,
-    /// followed by the rest in database order.
+    /// The most useful entries first: one each of CPU, GPU, SSD and battery, followed by
+    /// everything else in database order.
     fileprivate func highlights(by group: (Element) -> SensorGroup) -> [Element] {
         func category(_ group: SensorGroup) -> Int? {
             if group.isCPU { return 0 }
@@ -33,7 +36,8 @@ extension Array {
             guard let category = category(group(element)) else { return false }
             return seen.insert(category).inserted
         }
-        let rest = filter { category(group($0)) == nil }
+        let primaryIDs = Set(primary.map { group($0).id })
+        let rest = filter { !primaryIDs.contains(group($0).id) }
         return primary.sorted { category(group($0))! < category(group($1))! } + rest
     }
 }

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct MenuBarContent: View {
+    @Environment(AppSettings.self) private var settings
     @Environment(FanController.self) private var controller
     @Environment(HardwareMonitor.self) private var monitor
     @Environment(\.openSettings) private var openSettings
@@ -18,23 +19,28 @@ struct MenuBarContent: View {
                 ModeControls()
                 StatusMessage()
 
-                Divider()
-
-                VStack(spacing: 12) {
-                    ForEach(monitor.visibleFans) { FanRow(fan: $0) }
+                if settings.shows(.fans) {
+                    Divider()
+                    VStack(spacing: 12) {
+                        ForEach(monitor.visibleFans) { FanRow(fan: $0) }
+                    }
                 }
             }
 
-            if let power = monitor.power {
+            if settings.shows(.power), let power = monitor.power {
                 Divider()
                 PowerFlowRow(flow: power)
             }
 
-            Divider()
-
-            VStack(spacing: 10) {
-                ThermalPressureRow(state: monitor.thermalState)
-                ForEach(monitor.panelTemperatures) { TemperatureRow(reading: $0) }
+            let temperatures = monitor.panelTemperatures
+            if settings.shows(.thermalPressure) || !temperatures.isEmpty {
+                Divider()
+                VStack(spacing: 10) {
+                    if settings.shows(.thermalPressure) {
+                        ThermalPressureRow(state: monitor.thermalState)
+                    }
+                    ForEach(temperatures) { TemperatureRow(reading: $0) }
+                }
             }
 
             Divider()
