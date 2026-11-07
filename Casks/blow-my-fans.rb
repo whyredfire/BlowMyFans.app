@@ -1,6 +1,6 @@
 cask "blow-my-fans" do
-  version "0.1.5"
-  sha256 "177c1d1bfc8f8a191a77d8912bf4dc93672416eca4aee80215c942c554fdf41d"
+  version "0.2.0"
+  sha256 "05ba54964542ea0ec74b394293e54ff60e47795b9c75ee133a0a7ab6481ff97a"
 
   url "https://github.com/whyredfire/BlowMyFans.app/releases/download/v#{version}/BlowMyFans.zip"
   name "Blow My Fans"
