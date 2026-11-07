@@ -25,6 +25,11 @@ struct MenuBarContent: View {
                 }
             }
 
+            if let power = monitor.power {
+                Divider()
+                PowerFlowRow(flow: power)
+            }
+
             Divider()
 
             VStack(spacing: 10) {

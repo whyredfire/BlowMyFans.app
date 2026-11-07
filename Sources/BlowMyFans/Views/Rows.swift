@@ -95,3 +95,62 @@ struct ThermalPressureRow: View {
         }
     }
 }
+
+/// Where the power comes from, on the left, and where it goes, on the right.
+struct PowerFlowRow: View {
+    let flow: PowerFlow
+
+    var body: some View {
+        HStack(spacing: 10) {
+            column(sources)
+            Image(systemName: "arrow.right")
+                .fontWeight(.semibold)
+                .foregroundStyle(.tertiary)
+            column(destinations)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel((sources + destinations).map { "\($0.title) \($0.watts.wattsText)" }.joined(separator: ", "))
+    }
+
+    private var sources: [PowerNode] {
+        [
+            flow.adapter > 0 ? PowerNode(symbol: "bolt.fill", title: String(localized: "Power adapter"), watts: flow.adapter) : nil,
+            flow.battery > 0 ? PowerNode(symbol: "battery.75percent", title: String(localized: "Battery"), watts: flow.battery) : nil,
+        ].compactMap(\.self)
+    }
+
+    private var destinations: [PowerNode] {
+        [
+            PowerNode(symbol: flow.hasBattery ? "laptopcomputer" : "desktopcomputer", title: String(localized: "This Mac"), watts: flow.system),
+            flow.battery < 0 ? PowerNode(symbol: "battery.100percent.bolt", title: String(localized: "Charging"), watts: -flow.battery) : nil,
+        ].compactMap(\.self)
+    }
+
+    private func column(_ nodes: [PowerNode]) -> some View {
+        VStack(spacing: 6) {
+            ForEach(nodes, id: \.symbol) { $0 }
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+/// Icons have no fixed width, so a narrow glyph like the bolt stays centred.
+private struct PowerNode: View {
+    let symbol: String
+    let title: String
+    let watts: Double
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: symbol)
+            Text(watts.wattsText)
+                .monospacedDigit()
+        }
+        .lineLimit(1)
+        .foregroundStyle(.secondary)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 9)
+        .background(.quaternary.opacity(0.6), in: .rect(cornerRadius: 10))
+        .help(title)
+    }
+}

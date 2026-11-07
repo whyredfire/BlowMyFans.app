@@ -17,6 +17,8 @@ final class HardwareMonitor {
     /// Sensor groups present on this Mac, whether or not they currently report a value.
     private(set) var availableGroups: [SensorGroup] = []
     private(set) var thermalState = ProcessInfo.processInfo.thermalState
+    /// Read only while the panel is open.
+    private(set) var power: PowerFlow?
     private(set) var errorMessage: String?
 
     /// Called after every reading. `didRefresh` is false for the CPU-only readings taken between updates.
@@ -123,7 +125,7 @@ final class HardwareMonitor {
     private func sampleCPU() async {
         guard let sampler else { return }
         let groupIDs = Set(availableGroups.filter(\.isCPU).map(\.id))
-        cpuTemperature = await sampler.sample(groupIDs: groupIDs, includeFans: false).temperatures.hottestCPU
+        cpuTemperature = await sampler.sample(groupIDs: groupIDs, includeFans: false, includePower: false).temperatures.hottestCPU
     }
 
     private func sample() async {
@@ -135,10 +137,13 @@ final class HardwareMonitor {
         let includeFans = isShowingDetails || needsFans()
         guard includeFans || !groupIDs.isEmpty else { return }
 
-        let snapshot = await sampler.sample(groupIDs: groupIDs, includeFans: includeFans)
+        let snapshot = await sampler.sample(groupIDs: groupIDs, includeFans: includeFans, includePower: isShowingDetails)
         // Unchanged values aren't reassigned, so observers only hear about real changes.
         if let fans = snapshot.fans, fans != self.fans {
             self.fans = fans
+        }
+        if isShowingDetails, snapshot.power != power {
+            power = snapshot.power
         }
         // While the panel is closed, groups that weren't read keep their last reading so it has
         // something to show the moment it opens; it reads them again straight away.
@@ -156,6 +161,7 @@ private struct HardwareSnapshot: Sendable {
     /// Nil when fans weren't read.
     let fans: [Fan]?
     let temperatures: [SensorGroupReading]
+    let power: PowerFlow?
 }
 
 /// Keeps blocking SMC reads off the main actor.
@@ -176,8 +182,12 @@ private actor HardwareSampler {
 
     var availableGroups: [SensorGroup] { sensors.availableGroups }
 
-    func sample(groupIDs: Set<String>, includeFans: Bool) -> HardwareSnapshot {
-        HardwareSnapshot(fans: includeFans ? readFans() : nil, temperatures: sensors.read(groupIDs: groupIDs))
+    func sample(groupIDs: Set<String>, includeFans: Bool, includePower: Bool) -> HardwareSnapshot {
+        HardwareSnapshot(
+            fans: includeFans ? readFans() : nil,
+            temperatures: sensors.read(groupIDs: groupIDs),
+            power: includePower ? smc.powerFlow() : nil
+        )
     }
 
     private func readFans() -> [Fan] {

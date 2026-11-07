@@ -1,3 +1,4 @@
+import Foundation
 import SMCKit
 
 extension SensorGroup {
@@ -12,4 +13,11 @@ extension SensorGroup {
 
 extension Double {
     var rpmText: String { "\(formatted(.number.precision(.fractionLength(0)))) RPM" }
+
+    /// One decimal below 10 W.
+    var wattsText: String {
+        Measurement(value: self, unit: UnitPower.watts)
+            .formatted(.measurement(width: .abbreviated, usage: .asProvided,
+                                    numberFormatStyle: .number.precision(.fractionLength(abs(self) < 10 ? 1 : 0))))
+    }
 }
