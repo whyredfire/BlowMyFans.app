@@ -76,6 +76,9 @@
 /* PanelSection.swift */
 "Fan speeds" = "Fan speeds";
 
+/* PanelSection.swift */
+"Footer" = "Footer";
+
 /* Fan mode, one of four in a narrow segmented control. Keep it to one short word. FanMode.swift */
 "Full Blast" = "Full Blast";
 
@@ -222,4 +225,7 @@
 
 /* SettingsView.swift */
 "Version %@" = "Version %@";
+
+/* SettingsView.swift */
+"Without the footer, press ⌘, in the panel to open Settings and ⌘Q to quit." = "Without the footer, press ⌘, in the panel to open Settings and ⌘Q to quit.";
 

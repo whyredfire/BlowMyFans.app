@@ -57,12 +57,21 @@ private struct PanelSettings: View {
 
     var body: some View {
         Form {
-            Section("Show in the panel") {
+            Section {
                 ForEach(PanelSection.allCases) { section in
                     Toggle(section.title, isOn: Binding(
                         get: { settings.shows(section) },
                         set: { settings.setShows(section, $0) }
                     ))
+                }
+            } header: {
+                Text("Show in the panel")
+            } footer: {
+                if !settings.shows(.footer) {
+                    Label("Without the footer, press ⌘, in the panel to open Settings and ⌘Q to quit.",
+                          systemImage: "exclamationmark.triangle.fill")
+                        .symbolRenderingMode(.multicolor)
+                        .foregroundStyle(.secondary)
                 }
             }
 

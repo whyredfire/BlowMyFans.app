@@ -43,26 +43,52 @@ struct MenuBarContent: View {
                 }
             }
 
-            Divider()
-
-            HStack {
-                Button("Settings", systemImage: "gearshape") {
-                    openSettings()
-                    NSApp.activate()
+            if settings.shows(.footer) {
+                Divider()
+                HStack {
+                    Button("Settings", systemImage: "gearshape", action: showSettings)
+                        .footerIcon()
+                        .keyboardShortcut(",")
+                    Spacer()
+                    ApplyButtons()
+                        .buttonBorderShape(.capsule)
+                    Spacer()
+                    Button("Quit", systemImage: "power", action: quit)
+                        .footerIcon()
+                        .keyboardShortcut("q")
                 }
-                .footerIcon()
-                Spacer()
-                ApplyButtons()
-                    .buttonBorderShape(.capsule)
-                Spacer()
-                Button("Quit", systemImage: "power") { NSApp.terminate(nil) }
-                    .footerIcon()
+                .setsPanelWidth()
+            } else if controller.hasUnappliedChanges {
+                Divider()
+                HStack {
+                    ApplyButtons()
+                        .buttonBorderShape(.capsule)
+                }
             }
-            .setsPanelWidth()
         }
         .padding(16)
+        .background {
+            // The footer's shortcuts, kept while it's hidden.
+            if !settings.shows(.footer) {
+                Group {
+                    Button("Settings", action: showSettings).keyboardShortcut(",")
+                    Button("Quit", action: quit).keyboardShortcut("q")
+                }
+                .opacity(0)
+                .accessibilityHidden(true)
+            }
+        }
         .animation(.easeInOut(duration: MenuBarPanel.animationDuration), value: controller.draft.mode)
         .animation(.easeInOut(duration: MenuBarPanel.animationDuration), value: controller.hasUnappliedChanges)
+    }
+
+    private func showSettings() {
+        openSettings()
+        NSApp.activate()
+    }
+
+    private func quit() {
+        NSApp.terminate(nil)
     }
 }
 
