@@ -76,25 +76,12 @@ jobs:
           codesign --force --options runtime --sign - --entitlements Support/BlowMyFans.entitlements "$app"
           codesign --verify --deep --strict "$app"
 
-      # Shown in the app's update window: every release's features and fixes to the app, newest first,
-      # so updating from any older version shows everything since. Website and tooling changes are left out.
+      # Shown in the app's update window: every release's changes, newest first, so updating from
+      # any older version shows everything since
       - name: Write the update notes
         run: |
           mkdir dist
-          section() {
-            changes=$(git log --no-merges --pretty=%s "$3" -- Sources Support \
-              | sed -nE 's/^(feat|fix)(\([^)]*\))?!?: (.*)/- \3/p')
-            printf '# %s (%s)\n\n%s\n\n' "$1" "$2" "${changes:-- Small improvements behind the scenes.}"
-          }
-          set -- $(git tag --list 'v[0-9]*' --sort=-version:refname)
-          {
-            section "$VERSION" "$(date '+%-d %b %Y')" "${1:+$1..}HEAD~1"
-            while [ $# -gt 0 ]; do
-              tag=$1
-              shift
-              section "${tag#v}" "$(git log -1 --format=%cd --date=format:'%-d %b %Y' "$tag")" "${1:+$1..}$tag"
-            done
-          } > dist/BlowMyFans.md
+          scripts/changelog.sh --all "$VERSION" > dist/BlowMyFans.md
           cat dist/BlowMyFans.md
 
       # Installed copies only accept updates signed with the key behind SUPublicEDKey
@@ -117,7 +104,7 @@ jobs:
           sed -i '' -e "s/^  version .*/  version \"${VERSION}\"/" -e "s/^  sha256 .*/  sha256 \"${checksum}\"/" Casks/blow-my-fans.rb
           git commit --amend --no-edit -- Casks/blow-my-fans.rb
 
-      # Notes list the commits since the previous release; GitHub adds the compare link
+      # The same changes as the update window; GitHub adds the compare link
       - name: Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -127,5 +114,5 @@ jobs:
           git push --atomic origin HEAD "v${VERSION}"
           gh release create "v${VERSION}" dist/BlowMyFans.zip dist/appcast.xml \
             --title "Blow My Fans ${VERSION}" \
-            --notes "$(git log --no-merges --pretty='- %s (%h)' "${previous:+$previous..}HEAD~1")" \
+            --notes "$(scripts/changelog.sh "${previous:+$previous..}HEAD")" \
             --generate-notes

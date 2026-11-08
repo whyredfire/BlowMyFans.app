@@ -4,20 +4,19 @@ export type ChangeKind = "new" | "fixed" | "improved";
 export type Change = { kind: ChangeKind; text: string };
 export type Release = { version: string; date: Date; url: string; changes: Change[] };
 
-/** Commit types that matter to people using the app; everything else is left out. */
-const kinds: Record<string, ChangeKind> = { feat: "new", fix: "fixed", perf: "improved" };
-/** Scopes about the project rather than the app. */
-const hiddenScopes = new Set(["site", "ci"]);
+const headings: Record<string, ChangeKind> = { New: "new", Improved: "improved", Fixed: "fixed" };
 
-/** Turns release notes like "- fix(curve): Stop the fans … (9c44c4d)" into user-facing changes. */
+/** Reads the "## New", "## Improved" and "## Fixed" lists that scripts/changelog.sh writes into release notes. */
 export function parseChanges(notes: string): Change[] {
+  let kind: ChangeKind | undefined;
   return notes.split("\n").flatMap((line) => {
-    const match = /^[-*] (\w+)(?:\(([^)]+)\))?!?: (.+?)(?: \([0-9a-f]{7,}\))?$/.exec(line.trim());
-    if (!match) return [];
-    const [, type, scope, text] = match;
-    const kind = kinds[type!];
-    if (!kind || (scope && hiddenScopes.has(scope))) return [];
-    return [{ kind, text: text!.charAt(0).toUpperCase() + text!.slice(1) }];
+    const heading = /^#+ (.+)$/.exec(line.trim());
+    if (heading) {
+      kind = headings[heading[1]!.trim()];
+      return [];
+    }
+    const item = /^[-*] (.+)$/.exec(line.trim());
+    return kind && item ? [{ kind, text: item[1]! }] : [];
   });
 }
 
