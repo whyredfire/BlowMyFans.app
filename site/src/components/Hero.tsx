@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { brewCommands } from "../links.ts";
-import type { Workload } from "../simulation.ts";
+import type { Conditions } from "../simulation.ts";
 import { CopyCommand } from "./CopyCommand.tsx";
 import { Panel } from "./panel/Panel.tsx";
 
@@ -31,7 +31,7 @@ export function Hero() {
 
 /** The app's panel, live, over a wallpaper. */
 function Desktop() {
-  const [workload, setWorkload] = useState<Workload>("normal");
+  const [conditions, setConditions] = useState<Conditions>({ workload: "normal", isPluggedIn: true });
   return (
     <div className="relative mt-16 overflow-hidden rounded-2xl border border-white/10 sm:mt-20 sm:rounded-3xl">
       <div
@@ -49,37 +49,67 @@ function Desktop() {
             This is the real panel, running on a simulated Mac. Switch modes, drag the slider or the curve, then press
             Apply and watch the fans respond.
           </p>
-          <WorkloadPicker workload={workload} onChange={setWorkload} />
+          <div className="mt-8 space-y-5">
+            <Choices
+              title="Simulated workload"
+              options={workloads}
+              value={conditions.workload}
+              onChange={(workload) => setConditions({ ...conditions, workload })}
+            />
+            <Choices
+              title="Power"
+              options={powerSources}
+              value={conditions.isPluggedIn}
+              onChange={(isPluggedIn) => setConditions({ ...conditions, isPluggedIn })}
+            />
+          </div>
         </div>
-        <Panel workload={workload} />
+        <Panel conditions={conditions} />
       </div>
     </div>
   );
 }
 
-const workloads: { id: Workload; title: string }[] = [
-  { id: "light", title: "Light" },
-  { id: "normal", title: "Normal" },
-  { id: "stress", title: "Stress test" },
+type Option<Value> = { value: Value; title: string };
+
+const workloads: Option<Conditions["workload"]>[] = [
+  { value: "light", title: "Light" },
+  { value: "normal", title: "Normal" },
+  { value: "stress", title: "Stress test" },
 ];
 
-/** Sets what the simulated Mac is doing; styled as part of the page, not the app. */
-function WorkloadPicker({ workload, onChange }: { workload: Workload; onChange: (workload: Workload) => void }) {
+const powerSources: Option<boolean>[] = [
+  { value: true, title: "Plugged in" },
+  { value: false, title: "On battery" },
+];
+
+/** Sets something about the simulated Mac; styled as part of the page, not the app. */
+function Choices<Value>({
+  title,
+  options,
+  value,
+  onChange,
+}: {
+  title: string;
+  options: Option<Value>[];
+  value: Value;
+  onChange: (value: Value) => void;
+}) {
   return (
-    <div className="mt-8">
-      <p className="text-xs font-medium tracking-wide text-white/50 uppercase">Simulated workload</p>
-      <div role="radiogroup" aria-label="Simulated workload" className="mt-3 flex flex-wrap gap-2">
-        {workloads.map(({ id, title }) => (
+    <div>
+      <p className="text-xs font-medium tracking-wide text-white/50 uppercase">{title}</p>
+      <div role="radiogroup" aria-label={title} className="mt-3 flex flex-wrap gap-2">
+        {options.map((option) => (
           <button
-            key={id}
+            key={option.title}
             role="radio"
-            aria-checked={id === workload}
-            onClick={() => onChange(id)}
+            aria-checked={option.value === value}
+            onClick={() => onChange(option.value)}
             className={`rounded-full px-3.5 py-1.5 text-sm font-medium transition-colors ${
-              id === workload ? "bg-white text-neutral-900" : "border border-white/20 text-white/80 hover:bg-white/10"
+              option.value === value ? "bg-white text-neutral-900" : "border border-white/20 text-white/80 hover:bg-white/10"
             }`}
           >
-            {title}
+            {option.title}
           </button>
         ))}
       </div>

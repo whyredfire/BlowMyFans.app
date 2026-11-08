@@ -26,6 +26,9 @@
   the fans surge.
 - **Temperatures:** CPU, GPU, SSD, battery and more, with readable names for each Mac model. The menu
   bar can show the hottest CPU, any sensor, or just the icon.
+- **Power:** see whether the Mac is running on the adapter or the battery, how many watts it draws,
+  and how fast the battery charges.
+- **Your panel:** hide the sections you don't need and choose which temperatures it lists.
 - **Plugged in or on battery:** give each its own mode, for example Curve at your desk and Auto on the
   go. It switches as you plug in or unplug.
 - **Thermal pressure:** shown in the panel, with a coloured dot on the menu bar icon when macOS starts
@@ -39,7 +42,9 @@
   Polish, Portuguese, Russian and Spanish. [Help translate](https://translate-blowmyfans.whyredfire.dev).
 
 <p align="center">
-  <img src="site/public/screenshots/settings.webp" width="572" alt="The Settings window">
+  <img src="site/public/screenshots/settings-general.webp" width="270" align="top" alt="General settings">
+  <img src="site/public/screenshots/settings-panel.webp" width="270" align="top" alt="Choosing what the panel shows">
+  <img src="site/public/screenshots/settings-advanced.webp" width="270" align="top" alt="The helper and updates">
 </p>
 
 ## Install

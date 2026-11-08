@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { defaultPoints } from "../../curve.ts";
-import { initialMachine, isUnderThermalPressure, step, type Configuration, type Workload } from "../../simulation.ts";
+import { initialMachine, isUnderThermalPressure, step, type Conditions, type Configuration } from "../../simulation.ts";
 import { CurveEditor, ModePicker, SpeedSlider } from "./Controls.tsx";
-import { FanRow, TemperatureRow, ThermalPressureRow } from "./Rows.tsx";
+import { FanRow, PowerFlowRow, TemperatureRow, ThermalPressureRow } from "./Rows.tsx";
 import { Symbol } from "./Symbol.tsx";
 
 const initialConfiguration: Configuration = { mode: "curve", manualRPM: 3900, curve: defaultPoints };
@@ -22,15 +22,15 @@ const isSame = (a: Configuration, b: Configuration) =>
   a.mode === b.mode && a.manualRPM === b.manualRPM && JSON.stringify(a.curve) === JSON.stringify(b.curve);
 
 /** The menu bar panel, running against a simulated Mac. */
-export function Panel({ workload }: { workload: Workload }) {
+export function Panel({ conditions }: { conditions: Conditions }) {
   const [applied, setApplied] = useState(initialConfiguration);
   const [draft, setDraft] = useState(initialConfiguration);
   const [machine, setMachine] = useState(initialMachine);
   // The timer reads these through refs so it never restarts.
   const appliedRef = useRef(applied);
   appliedRef.current = applied;
-  const workloadRef = useRef(workload);
-  workloadRef.current = workload;
+  const conditionsRef = useRef(conditions);
+  conditionsRef.current = conditions;
 
   useEffect(() => {
     let last = performance.now();
@@ -39,7 +39,7 @@ export function Panel({ workload }: { workload: Workload }) {
       const dt = Math.min((now - last) / 1000, 2);
       last = now;
       // Nothing to show while the tab is hidden.
-      if (!document.hidden) setMachine((machine) => step(machine, appliedRef.current, workloadRef.current, dt));
+      if (!document.hidden) setMachine((machine) => step(machine, appliedRef.current, conditionsRef.current, dt));
     }, tick);
     return () => clearInterval(timer);
   }, []);
@@ -62,6 +62,9 @@ export function Panel({ workload }: { workload: Workload }) {
         <FanRow name="Left side" rpm={machine.fans[0]} />
         <FanRow name="Right side" rpm={machine.fans[1]} />
       </div>
+
+      <hr className="border-white/10" />
+      <PowerFlowRow watts={machine.watts} chargingWatts={machine.chargingWatts} isPluggedIn={conditions.isPluggedIn} />
 
       <hr className="border-white/10" />
       <div className="space-y-2.5">
@@ -110,7 +113,7 @@ function FooterButton({ label, className = "", children }: { label: string; clas
   return (
     <span
       title={label}
-      className={`flex h-8 w-11 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] shadow-[inset_0_1px_0_rgb(255_255_255/0.1)] ${className}`}
+      className={`flex size-8 items-center justify-center rounded-full border border-white/10 bg-white/[0.08] shadow-[inset_0_1px_0_rgb(255_255_255/0.1)] ${className}`}
     >
       {children}
     </span>

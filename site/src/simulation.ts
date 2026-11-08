@@ -13,6 +13,8 @@ export type Mode = "automatic" | "manual" | "curve" | "fullBlast";
 export type Configuration = { mode: Mode; manualRPM: number; curve: CurvePoint[] };
 /** What the simulated Mac is busy with: light stays cool, normal has bursts of load, stress never lets up. */
 export type Workload = "light" | "normal" | "stress";
+/** What the page lets you change about the simulated Mac. */
+export type Conditions = { workload: Workload; isPluggedIn: boolean };
 
 /** The speed range a 14-inch MacBook Pro with an M4 Pro reports for its fans. */
 export const fanRange = { min: 2317, max: 7826 } as const;
@@ -42,6 +44,11 @@ const heatCapacity = 10;
 const conductance = { passive: 0.23, fans: 0.66 };
 /** Watts each workload draws; normal alternates between idle and bursts. */
 const power = { light: 4, idle: 5, burst: 28, stress: 45 };
+/**
+ * A 70 W adapter: the battery takes what the Mac leaves, up to 60 W, easing off past 80% as real ones do.
+ * Its capacity, in joules, is a fraction of a real battery's so the demo charges and drains in minutes.
+ */
+const charging = { adapterWatts: 70, maxWatts: 60, taperFrom: 0.8, capacity: 36_000 };
 
 export type Machine = {
   /** Hottest CPU core. */
@@ -50,6 +57,12 @@ export type Machine = {
   ssd: number;
   battery: number;
   powerSupply: number;
+  /** What the whole Mac draws, in watts, not counting the battery charging. */
+  watts: number;
+  /** How full the battery is, from 0 to 1. */
+  batteryLevel: number;
+  /** Watts going into the battery; 0 once it's full or while unplugged. */
+  chargingWatts: number;
   /** The CPU temperature Curve mode follows, smoothed as in the app. */
   smoothedTemperature: number;
   /** The slower-moving CPU temperature macOS's Auto curve follows. */
@@ -68,6 +81,9 @@ export const initialMachine: Machine = {
   ssd: 35,
   battery: 32,
   powerSupply: 42,
+  watts: 9,
+  batteryLevel: 0.7,
+  chargingWatts: 0,
   smoothedTemperature: 47,
   autoTemperature: 47,
   fans: [0, 0],
@@ -125,8 +141,8 @@ function holdCurveSpeed(machine: Machine, curve: CurvePoint[], celsius: number, 
   return lowerFor >= holdLimits.slowDownDelay ? { rpm: wanted, curve, lowerFor: null } : { ...held, lowerFor };
 }
 
-/** Advances the machine by `dt` seconds with `configuration` applied while running `workload`. */
-export function step(machine: Machine, configuration: Configuration, workload: Workload, dt: number): Machine {
+/** Advances the machine by `dt` seconds with `configuration` applied under `conditions`. */
+export function step(machine: Machine, configuration: Configuration, { workload, isPluggedIn }: Conditions, dt: number): Machine {
   let { isUnderLoad, phaseLeft } = machine;
   phaseLeft -= dt;
   if (phaseLeft <= 0) {
@@ -161,12 +177,22 @@ export function step(machine: Machine, configuration: Configuration, workload: W
     return approach(rpm === 0 ? 600 : rpm, target, 1.2, dt) + random(-12, 12);
   }) as [number, number];
 
+  const systemWatts = approach(machine.watts, 5 + watts * throttle + airflow * 3, 2, dt) + random(-0.3, 0.3);
+  // Down to a trickle just before full.
+  const taper = clamp((1 - machine.batteryLevel) / (1 - charging.taperFrom), 0.05, 1);
+  const chargingWatts =
+    isPluggedIn && machine.batteryLevel < 1 ? clamp(charging.adapterWatts - systemWatts, 0, charging.maxWatts * taper) : 0;
+
   return {
     cpu,
     gpu: approach(machine.gpu, cpu - 1.5 + random(-1, 1), 5, dt),
     ssd: approach(machine.ssd, 34 + (cpu - 45) * 0.15, 20, dt),
     battery: approach(machine.battery, 32 + (cpu - 45) * 0.05, 40, dt),
     powerSupply: approach(machine.powerSupply, 41 + (cpu - 45) * 0.1, 15, dt),
+    // The chip plus the display and the rest of the Mac, and a little for the fans.
+    watts: systemWatts,
+    batteryLevel: clamp(machine.batteryLevel + ((isPluggedIn ? chargingWatts : -systemWatts) * dt) / charging.capacity, 0, 1),
+    chargingWatts,
     smoothedTemperature,
     autoTemperature,
     fans,

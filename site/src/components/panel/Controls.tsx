@@ -1,6 +1,7 @@
 import { Fragment, useRef, useState, type MouseEvent, type PointerEvent } from "react";
 import { addPoint, movePoint, removePoint, speedAt, temperatureRange, type CurvePoint } from "../../curve.ts";
 import { curveRPM, fanRange, type Mode } from "../../simulation.ts";
+import { Symbol } from "./Symbol.tsx";
 
 const accent = "#b06cb8";
 const modes: { id: Mode; title: string }[] = [
@@ -62,8 +63,11 @@ export function SpeedSlider({ rpm, onChange }: { rpm: number; onChange: (rpm: nu
 
   return (
     <div className="space-y-1">
-      <div className="flex items-baseline">
-        <span className="text-white/50">All fans</span>
+      <div className="flex items-center gap-2">
+        <span className="flex w-[18px] shrink-0 justify-center">
+          <Symbol name="fan.fill" className="opacity-55" />
+        </span>
+        <span>All fans</span>
         <span className="ml-auto font-medium tabular-nums">{rpm < fanRange.min ? "Off" : `${rpm.toLocaleString("en-US")} RPM`}</span>
       </div>
       <div
@@ -75,7 +79,7 @@ export function SpeedSlider({ rpm, onChange }: { rpm: number; onChange: (rpm: nu
         aria-valuemax={fanRange.max}
         aria-valuenow={rpm}
         aria-valuetext={rpm < fanRange.min ? "Off" : `${rpm} RPM`}
-        className="relative flex h-5 cursor-pointer touch-none items-center outline-none"
+        className="relative ml-[26px] flex h-5 cursor-pointer touch-none items-center outline-none"
         onPointerDown={(event) => {
           event.currentTarget.setPointerCapture(event.pointerId);
           drag(event);
