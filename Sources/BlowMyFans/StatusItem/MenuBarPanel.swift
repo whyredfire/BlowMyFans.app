@@ -2,16 +2,21 @@ import AppKit
 import Observation
 import SwiftUI
 
-/// The window is transparent down to the bottom of the screen and SwiftUI draws the panel, so its size
-/// animates without the window resizing, which makes the content jump.
+/// SwiftUI draws the panel in a transparent window that fits it with room for its shadow. The window grows
+/// before the panel animates to a larger size and shrinks after it animates to a smaller one, so the
+/// panel is never cut off.
 final class MenuBarPanel: NSPanel {
     static let animationDuration = 0.2
     static let shadowMargin: CGFloat = 24
 
     var onClose: (() -> Void)?
-    var placement: ((CGFloat) -> NSRect)?
+    /// The window's frame for a panel of the given size.
+    var placement: ((CGSize) -> NSRect)?
     private let presence = Presence()
-    private var panelWidth: CGFloat = 0
+    private var panelSize = CGSize.zero
+    /// The panel height the window has room for, which lags `panelSize` while the panel shrinks.
+    private var placedHeight: CGFloat = 0
+    private var pendingShrink: DispatchWorkItem?
 
     init(rootView: some View) {
         super.init(contentRect: .zero, styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: true)
@@ -30,8 +35,8 @@ final class MenuBarPanel: NSPanel {
         // Resizing the window mid-layout makes AppKit throw.
         let content = OnScreen(presence: presence, content: panel)
             .fixedSize()
-            .onGeometryChange(for: CGFloat.self, of: \.size.width) { [weak self] width in
-                DispatchQueue.main.async { self?.fit(width) }
+            .onGeometryChange(for: CGSize.self, of: \.size) { [weak self] size in
+                DispatchQueue.main.async { self?.fit(size) }
             }
             .padding([.horizontal, .bottom], Self.shadowMargin)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -50,8 +55,13 @@ final class MenuBarPanel: NSPanel {
     }
 
     func place() {
-        guard panelWidth > 0, let placement else { return }
-        setFrame(placement(panelWidth), display: true)
+        place(height: panelSize.height)
+    }
+
+    private func place(height: CGFloat) {
+        guard panelSize.width > 0, let placement else { return }
+        placedHeight = height
+        setFrame(placement(CGSize(width: panelSize.width, height: height)), display: true)
     }
 
     override func orderOut(_ sender: Any?) {
@@ -69,10 +79,15 @@ final class MenuBarPanel: NSPanel {
         onClose?()
     }
 
-    private func fit(_ width: CGFloat) {
-        guard width > 0, width != panelWidth else { return }
-        panelWidth = width
-        place()
+    private func fit(_ size: CGSize) {
+        guard size.width > 0, size != panelSize else { return }
+        panelSize = size
+        pendingShrink?.cancel()
+        guard isVisible, size.height < placedHeight else { return place() }
+        place(height: placedHeight)
+        let shrink = DispatchWorkItem { [weak self] in self?.place() }
+        pendingShrink = shrink
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.animationDuration, execute: shrink)
     }
 }
 

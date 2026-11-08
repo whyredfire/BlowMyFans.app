@@ -24,7 +24,7 @@ final class StatusItemController: NSObject {
         super.init()
 
         panel.onClose = { [weak self] in self?.close() }
-        panel.placement = { [weak self] width in self?.frame(forPanelWidth: width) ?? .zero }
+        panel.placement = { [weak self] size in self?.frame(forPanel: size) ?? .zero }
         // Items shift as others are added or removed; keep the panel beneath this one.
         if let itemWindow = statusItem.button?.window {
             NotificationCenter.default.addObserver(
@@ -112,14 +112,15 @@ final class StatusItemController: NSObject {
         clickMonitor = nil
     }
 
-    private func frame(forPanelWidth width: CGFloat) -> NSRect {
+    private func frame(forPanel size: CGSize) -> NSRect {
         guard let itemFrame = statusItem.button?.window?.frame,
               let screen = statusItem.button?.window?.screen ?? NSScreen.main else { return panel.frame }
         let visible = screen.visibleFrame
         let margin = MenuBarPanel.shadowMargin
-        let x = min(max(itemFrame.midX - width / 2, visible.minX + 8), visible.maxX - width - 8)
+        let x = min(max(itemFrame.midX - size.width / 2, visible.minX + 8), visible.maxX - size.width - 8)
         let top = itemFrame.minY - 6
-        return NSRect(x: x - margin, y: visible.minY, width: width + 2 * margin, height: top - visible.minY)
+        let height = min(size.height + margin, top - visible.minY)
+        return NSRect(x: x - margin, y: top - height, width: size.width + 2 * margin, height: height)
     }
 }
 
