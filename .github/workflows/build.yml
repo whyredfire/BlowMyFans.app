@@ -1,0 +1,40 @@
+name: build
+
+on:
+  push:
+    paths-ignore:
+      - site/**
+      - "**.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: xcode-27
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Build
+        run: scripts/build.sh
+
+      # Zipped with ditto to keep the framework's symlinks, which the artifact upload would flatten
+      - name: Package
+        id: package
+        run: |
+          version=$(plutil -extract CFBundleShortVersionString raw "build/Blow My Fans.app/Contents/Info.plist")
+          zip="BlowMyFans-${version}.zip"
+          ditto -c -k --sequesterRsrc --keepParent "build/Blow My Fans.app" "$zip"
+          echo "zip=$zip" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          path: ${{ steps.package.outputs.zip }}
+          archive: false

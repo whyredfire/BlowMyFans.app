@@ -44,37 +44,7 @@ jobs:
           git commit --allow-empty -am "chore: Release v${VERSION}"
 
       - name: Build
-        run: |
-          swift build -c release --arch arm64
-          bin=$(swift build -c release --arch arm64 --show-bin-path)
-          helper=dev.whyredfire.blowmyfans.helper
-          app="build/Blow My Fans.app"
-
-          mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources" "$app/Contents/Library/LaunchServices" "$app/Contents/Frameworks"
-          cp Support/Info.plist "$app/Contents/"
-          plutil -replace CFBundleVersion -string "$(git rev-list --count HEAD)" "$app/Contents/Info.plist"
-          cp "$bin/BlowMyFans" "$app/Contents/MacOS/"
-          cp "$bin/BlowMyFansHelper" "$app/Contents/Library/LaunchServices/$helper"
-          cp "Support/$helper.plist" Support/helper-tool.sh Support/AppIcon.icns "$app/Contents/Resources/"
-          cp -R Support/Database Support/Localization/*.lproj "$app/Contents/Resources/"
-          ditto .build/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework \
-            "$app/Contents/Frameworks/Sparkle.framework"
-
-          # Sparkle ships universal; keep only the Apple silicon half of each binary
-          framework="$app/Contents/Frameworks/Sparkle.framework/Versions/B"
-          for binary in Sparkle Autoupdate Updater.app/Contents/MacOS/Updater \
-            XPCServices/Downloader.xpc/Contents/MacOS/Downloader XPCServices/Installer.xpc/Contents/MacOS/Installer; do
-            lipo "$framework/$binary" -thin arm64 -output "$framework/$binary"
-          done
-
-          # Ad-hoc signed inside-out: Sparkle's nested executables, the framework, the helper, then the app
-          for item in XPCServices/Installer.xpc XPCServices/Downloader.xpc Autoupdate Updater.app; do
-            codesign --force --options runtime --sign - "$framework/$item"
-          done
-          codesign --force --options runtime --sign - "$app/Contents/Frameworks/Sparkle.framework"
-          codesign --force --options runtime --sign - --identifier "$helper" "$app/Contents/Library/LaunchServices/$helper"
-          codesign --force --options runtime --sign - --entitlements Support/BlowMyFans.entitlements "$app"
-          codesign --verify --deep --strict "$app"
+        run: scripts/build.sh
 
       # Shown in the app's update window: every release's changes, newest first, so updating from
       # any older version shows everything since

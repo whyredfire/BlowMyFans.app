@@ -7,6 +7,8 @@ HELPER_LABEL="dev.whyredfire.blowmyfans.helper"
 APP="build/Blow My Fans.app"
 ARCHS="--arch arm64"
 BUILD="$(git rev-list --count HEAD)"
+# Releases pass their version; other builds are named after the commit, e.g. 0.2.0-3-gabc1234-dirty.
+VERSION="${VERSION:-$(git describe --tags --dirty --always --match 'v[0-9]*' | sed 's/^v//')}"
 SPARKLE=".build/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework"
 
 swift build -c release $ARCHS
@@ -16,7 +18,7 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources" "$APP/Contents/Library/LaunchServices" "$APP/Contents/Frameworks"
 
 cp Support/Info.plist "$APP/Contents/"
-/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" "$APP/Contents/Info.plist"
+/usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD" -c "Set :CFBundleShortVersionString $VERSION" "$APP/Contents/Info.plist"
 cp "$BIN/BlowMyFans" "$APP/Contents/MacOS/"
 cp "$BIN/BlowMyFansHelper" "$APP/Contents/Library/LaunchServices/$HELPER_LABEL"
 cp "Support/$HELPER_LABEL.plist" Support/helper-tool.sh Support/AppIcon.icns "$APP/Contents/Resources/"
@@ -38,5 +40,6 @@ codesign --force --options runtime --sign - "$APP/Contents/Frameworks/Sparkle.fr
 codesign --force --options runtime --sign - --identifier "$HELPER_LABEL" \
     "$APP/Contents/Library/LaunchServices/$HELPER_LABEL"
 codesign --force --options runtime --sign - --entitlements Support/BlowMyFans.entitlements "$APP"
+codesign --verify --deep --strict "$APP"
 
-echo "Built $APP $(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" Support/Info.plist) ($BUILD)"
+echo "Built $APP $VERSION ($BUILD)"
