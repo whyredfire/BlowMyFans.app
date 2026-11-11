@@ -5,12 +5,14 @@ enum HelperInstallerError: LocalizedError {
     case missingResource(String)
     case cancelled
     case failed(String)
+    case removalFailed(String)
 
     var errorDescription: String? {
         switch self {
         case .missingResource(let name): String(localized: "The app bundle is missing \(name).")
         case .cancelled: String(localized: "Helper installation was cancelled.")
         case .failed(let output): String(localized: "Helper installation failed: \(output)")
+        case .removalFailed(let output): String(localized: "Helper removal failed: \(output)")
         }
     }
 }
@@ -26,19 +28,28 @@ enum HelperInstaller {
         guard let plist = bundle.url(forResource: HelperIdentity.label, withExtension: "plist") else {
             throw HelperInstallerError.missingResource("\(HelperIdentity.label).plist")
         }
-        try await runPrivileged("install", tool.path, plist.path)
+        try await runPrivileged(
+            ["install", tool.path, plist.path],
+            prompt: String(localized: "Blow My Fans needs to install a helper to change fan speeds."),
+            failure: HelperInstallerError.failed
+        )
     }
 
     static func uninstall() async throws {
-        try await runPrivileged("uninstall")
+        try await runPrivileged(
+            ["uninstall"],
+            prompt: String(localized: "Blow My Fans needs to remove its helper."),
+            failure: HelperInstallerError.removalFailed
+        )
     }
 
-    private static func runPrivileged(_ arguments: String...) async throws {
+    private static func runPrivileged(
+        _ arguments: [String], prompt: String, failure: (String) -> HelperInstallerError
+    ) async throws {
         guard let script = Bundle.main.url(forResource: "helper-tool", withExtension: "sh") else {
             throw HelperInstallerError.missingResource("helper-tool.sh")
         }
         let command = (["/bin/sh", script.path] + arguments).map(\.shellQuoted).joined(separator: " ")
-        let prompt = String(localized: "Blow My Fans needs to install a helper to change fan speeds.")
 
         let process = Process()
         process.executableURL = URL(filePath: "/usr/bin/osascript")
@@ -52,7 +63,7 @@ enum HelperInstaller {
         try await process.runUntilExit()
         guard process.terminationStatus == 0 else {
             let output = String(decoding: errorPipe.fileHandleForReading.readDataToEndOfFile(), as: UTF8.self)
-            throw output.contains("-128") ? HelperInstallerError.cancelled : HelperInstallerError.failed(output)
+            throw output.contains("-128") ? HelperInstallerError.cancelled : failure(output)
         }
     }
 }

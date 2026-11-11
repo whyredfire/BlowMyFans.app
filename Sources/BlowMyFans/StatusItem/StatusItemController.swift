@@ -32,6 +32,7 @@ final class StatusItemController: NSObject {
             ) { [weak self] _ in
                 MainActor.assumeIsolated {
                     guard let self, self.panel.isVisible else { return }
+                    self.panel.maximumPanelHeight = self.maximumPanelHeight
                     self.panel.place()
                 }
             }
@@ -84,6 +85,7 @@ final class StatusItemController: NSObject {
     private func open() {
         controller.discardDraft()
         monitor.isShowingDetails = true
+        panel.maximumPanelHeight = maximumPanelHeight
         panel.prepareContent()
         panel.place()
         panel.makeKeyAndOrderFront(nil)
@@ -112,13 +114,25 @@ final class StatusItemController: NSObject {
         clickMonitor = nil
     }
 
+    /// Gap between the menu bar item and the panel, and between the panel and the screen's edges.
+    private static let itemGap: CGFloat = 6
+    private static let screenInset: CGFloat = 8
+
+    /// The room between the menu bar item and the bottom of the screen.
+    private var maximumPanelHeight: CGFloat {
+        guard let itemFrame = statusItem.button?.window?.frame,
+              let screen = statusItem.button?.window?.screen ?? NSScreen.main else { return .infinity }
+        return max(itemFrame.minY - Self.itemGap - screen.visibleFrame.minY - Self.screenInset, 0)
+    }
+
     private func frame(forPanel size: CGSize) -> NSRect {
         guard let itemFrame = statusItem.button?.window?.frame,
               let screen = statusItem.button?.window?.screen ?? NSScreen.main else { return panel.frame }
         let visible = screen.visibleFrame
         let margin = MenuBarPanel.shadowMargin
-        let x = min(max(itemFrame.midX - size.width / 2, visible.minX + 8), visible.maxX - size.width - 8)
-        let top = itemFrame.minY - 6
+        let inset = Self.screenInset
+        let x = min(max(itemFrame.midX - size.width / 2, visible.minX + inset), visible.maxX - size.width - inset)
+        let top = itemFrame.minY - Self.itemGap
         let height = min(size.height + margin, top - visible.minY)
         return NSRect(x: x - margin, y: top - height, width: size.width + 2 * margin, height: height)
     }

@@ -133,7 +133,10 @@ final class HardwareMonitor {
             groupIDs.formUnion(panelGroups(availableGroups).map(\.id))
         }
         let includeFans = isShowingDetails || needsFans()
-        guard includeFans || !groupIDs.isEmpty else { return }
+        guard includeFans || !groupIDs.isEmpty else {
+            cpuTemperature = nil
+            return
+        }
 
         let snapshot = await sampler.sample(groupIDs: groupIDs, includeFans: includeFans, includePower: isShowingDetails && showsPower())
         // Unchanged values aren't reassigned, so observers only hear about real changes.
@@ -151,7 +154,8 @@ final class HardwareMonitor {
         if temperatures != self.temperatures {
             self.temperatures = temperatures
         }
-        cpuTemperature = temperatures.hottestCPU
+        // Only what was just read: a reading kept for the panel may be hours old.
+        cpuTemperature = snapshot.temperatures.hottestCPU
     }
 }
 

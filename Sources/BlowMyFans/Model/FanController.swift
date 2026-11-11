@@ -21,6 +21,10 @@ final class FanController {
             // A new curve or mode applies straight away rather than waiting out the hold.
             curveHold.reset()
             monitor.followsCPUTemperature = configuration.mode == .curve
+            if configuration.mode == .curve, oldValue.mode != .curve, smoothedCPUTemperature == nil {
+                // The CPU may not have been read until now; the wait for a reading starts here.
+                smoothedCPUTemperatureDate = .now
+            }
             // A change the user made gives a paused mode another try; a switch for the power source doesn't.
             if !isSwitchingForPowerSource { resume() }
             sync()
@@ -76,6 +80,12 @@ final class FanController {
     @ObservationIgnored private var appliedGeneration = 0
     @ObservationIgnored private var isAsleep = false
     @ObservationIgnored private var isUninstalling = false
+    /// Handing the fans back to macOS failed. It's asked for again until it works, so the error
+    /// doesn't stay after the helper has managed it on its own.
+    @ObservationIgnored private var isRestorePending = false
+    /// The installation under way, shared by everything that needs the helper so the password is
+    /// only asked for once.
+    @ObservationIgnored private var helperInstallation: Task<Void, Error>?
     @ObservationIgnored private var syncTask: Task<Void, Never>?
     @ObservationIgnored private var needsAnotherSync = false
     /// When the fans were first seen out of manual mode while speeds are applied.
@@ -85,7 +95,8 @@ final class FanController {
     /// and falls slowly, so short load spikes don't make the fans surge up and back down.
     @ObservationIgnored private var smoothedCPUTemperature: Double?
     @ObservationIgnored private var smoothedCPUTemperatureDate = ContinuousClock.now
-    /// How long a missing CPU reading keeps the last temperature before Curve mode runs flat out.
+    /// How long Curve mode goes without a CPU reading before it runs flat out: it keeps following
+    /// the last temperature, or waits for the first one.
     private static let cpuReadingGrace = Duration.seconds(10)
     @ObservationIgnored private var curveHold = CurveSpeedHold()
 
@@ -154,9 +165,12 @@ final class FanController {
         guard settings.switchesModeWithPower else { return }
         let mode = settings.mode(for: source)
         guard mode != configuration.mode else { return }
+        // Edits the user is in the middle of outlast the switch.
+        let edits = hasUnappliedChanges ? draft : nil
         isSwitchingForPowerSource = true
         configuration.mode = mode
         isSwitchingForPowerSource = false
+        if let edits { draft = edits }
         // Unplugging must not pop up a password prompt; wait for the user to act.
         suspendIfHelperMissing()
     }
@@ -181,6 +195,8 @@ final class FanController {
 
     func refreshHelperStatus() async {
         let version = await helper.installedVersion()
+        // An installation under way reports its own outcome.
+        guard helperStatus != .installing else { return }
         helperStatus = version == HelperIdentity.version ? .installed : .notInstalled
     }
 
@@ -221,8 +237,13 @@ final class FanController {
         isUninstalling = false
 
         if didUninstall, helperStatus != .installed {
-            // Fans are back with macOS; reflect that rather than offering to reinstall on the next sync.
+            // Fans are back with macOS; reflect that rather than offering to reinstall on the next sync,
+            // or when the power source next changes.
             isSuspended = false
+            isRestorePending = false
+            for source in PowerSource.allCases {
+                settings.setMode(.automatic, for: source)
+            }
             configuration.mode = .automatic
         }
         sync()
@@ -238,11 +259,10 @@ final class FanController {
         case speeds([Double])
     }
 
-    /// Clears a suspension so the saved mode is applied again on the next sync.
+    /// Clears a suspension, so the saved mode is applied again on the next sync, and any earlier error.
     private func resume() {
-        guard isSuspended else { return }
-        isSuspended = false
-        errorMessage = nil
+        if isSuspended { isSuspended = false }
+        if errorMessage != nil { errorMessage = nil }
     }
 
     private func monitorDidUpdate(didRefresh: Bool) {
@@ -254,7 +274,7 @@ final class FanController {
         }
         // With macOS in charge and nothing applied there's nothing to send.
         let isLeftToMacOS = isSuspended || configuration.mode == .automatic
-        if !isLeftToMacOS || appliedRPMs != nil {
+        if !isLeftToMacOS || appliedRPMs != nil || isRestorePending {
             sync()
         }
     }
@@ -328,6 +348,12 @@ final class FanController {
         let fans = monitor.fans
         // A failed SMC read reports 0 RPM limits; never turn that into a speed (0 would stop the fan).
         guard !fans.isEmpty, fans.allSatisfy(\.hasUsableSpeedRange) else { return .hold }
+        if configuration.mode == .curve, smoothedCPUTemperature == nil,
+           ContinuousClock.now - smoothedCPUTemperatureDate <= Self.cpuReadingGrace {
+            // No reading yet, e.g. the CPU wasn't being read until Curve was applied. That's no reason
+            // to run flat out, and the fans would then take a while to slow down again.
+            return .hold
+        }
         guard var target = configuration.targetRPMs(
             for: fans,
             cpuTemperature: smoothedCPUTemperature,
@@ -366,10 +392,12 @@ final class FanController {
                 }
                 appliedRPMs = target
                 lastHeartbeat = .now
+                isRestorePending = false
             case .automatic:
-                guard appliedRPMs != nil else { return }
+                guard appliedRPMs != nil || isRestorePending else { return }
                 appliedRPMs = nil
                 try await helper.restoreAutomatic()
+                isRestorePending = false
             }
             if !isSuspended { errorMessage = nil }
         } catch {
@@ -407,6 +435,7 @@ final class FanController {
             errorMessage = String(localized: "\(error.localizedDescription) \(mode.title) is paused until you choose a mode.")
         } else {
             errorMessage = error.localizedDescription
+            isRestorePending = true
         }
         // Anything but an error reported by the helper itself means it may be gone; re-check so
         // the UI offers to install it again.
@@ -414,9 +443,19 @@ final class FanController {
         case HelperClientError.failed, is HelperInstallerError: break
         default: await refreshHelperStatus()
         }
+        // Without a helper there's nobody left to ask.
+        if helperStatus != .installed { isRestorePending = false }
     }
 
     private func ensureHelper() async throws {
+        if let helperInstallation { return try await helperInstallation.value }
+        let installation = Task { try await installHelperIfNeeded() }
+        helperInstallation = installation
+        defer { helperInstallation = nil }
+        try await installation.value
+    }
+
+    private func installHelperIfNeeded() async throws {
         if helperStatus != .installed { await refreshHelperStatus() }
         guard helperStatus != .installed else { return }
 

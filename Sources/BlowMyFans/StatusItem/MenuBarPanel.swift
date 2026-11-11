@@ -4,12 +4,20 @@ import SwiftUI
 
 /// SwiftUI draws the panel in a transparent window that fits it with room for its shadow. The window grows
 /// before the panel animates to a larger size and shrinks after it animates to a smaller one, so the
-/// panel is never cut off.
+/// panel is never cut off. A panel taller than `maximumPanelHeight` scrolls.
 final class MenuBarPanel: NSPanel {
     static let animationDuration = 0.2
     static let shadowMargin: CGFloat = 24
+    fileprivate static let cornerRadius: CGFloat = 22
 
     var onClose: (() -> Void)?
+    /// How tall the panel may be on its screen; set before it's shown.
+    var maximumPanelHeight: CGFloat {
+        get { presence.maximumHeight }
+        set {
+            if newValue != presence.maximumHeight { presence.maximumHeight = newValue }
+        }
+    }
     /// The window's frame for a panel of the given size.
     var placement: ((CGSize) -> NSRect)?
     private let presence = Presence()
@@ -29,8 +37,8 @@ final class MenuBarPanel: NSPanel {
         hasShadow = false
         collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .transient]
 
-        let panel = rootView
-            .glassEffect(.regular, in: .rect(cornerRadius: 22))
+        let panel = FittedToScreen(presence: presence, content: rootView)
+            .glassEffect(.regular, in: .rect(cornerRadius: Self.cornerRadius))
             .shadow(color: .black.opacity(0.3), radius: 16, y: 8)
         // Resizing the window mid-layout makes AppKit throw.
         let content = OnScreen(presence: presence, content: panel)
@@ -94,6 +102,37 @@ final class MenuBarPanel: NSPanel {
 @MainActor @Observable
 private final class Presence {
     var isOnScreen = false
+    var maximumHeight = CGFloat.infinity
+}
+
+/// The content as it is while it fits the screen, and in a scroll view once it doesn't, e.g. with
+/// every sensor chosen on a small display, so the footer stays within reach.
+private struct FittedToScreen<Content: View>: View {
+    let presence: Presence
+    let content: Content
+
+    var body: some View {
+        HeightLimit(maximum: presence.maximumHeight) {
+            ViewThatFits(in: .vertical) {
+                content
+                ScrollView { content }
+                    .clipShape(.rect(cornerRadius: MenuBarPanel.cornerRadius))
+            }
+        }
+    }
+}
+
+/// Offers its content at most `maximum` in height, whatever it is offered itself.
+private struct HeightLimit: Layout {
+    var maximum: CGFloat
+
+    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
+        subviews.first?.sizeThatFits(ProposedViewSize(width: proposal.width, height: maximum)) ?? .zero
+    }
+
+    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
+        subviews.first?.place(at: bounds.origin, proposal: ProposedViewSize(bounds.size))
+    }
 }
 
 /// Drops the content while the panel is hidden, so its animations and updates stop.

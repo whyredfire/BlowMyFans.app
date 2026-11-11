@@ -48,6 +48,7 @@ private struct GeneralSettings: View {
             }
         }
         .settingsPage()
+        .onAppear { settings.refreshLaunchAtLogin() }
     }
 }
 

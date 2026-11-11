@@ -100,6 +100,12 @@ final class AppSettings {
         launchAtLogin = SMAppService.mainApp.status == .enabled
     }
 
+    /// Login items can also be switched off in System Settings.
+    func refreshLaunchAtLogin() {
+        let isEnabled = SMAppService.mainApp.status == .enabled
+        if isEnabled != launchAtLogin { launchAtLogin = isEnabled }
+    }
+
     func format(_ celsius: Double) -> String {
         let value = useFahrenheit ? celsius * 9 / 5 + 32 : celsius
         return "\(Int(value.rounded()))°"

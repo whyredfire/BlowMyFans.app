@@ -35,7 +35,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         monitor.essentialGroups = { [settings, controller] group in
             group.id == settings.menuBarItem
-                || group.isCPU && (settings.menuBarItem == AppSettings.hottestCPU || controller.mode == .curve)
+                || group.isCPU && (settings.menuBarItem == AppSettings.hottestCPU || controller.mode == .curve
+                    || controller.draft.mode == .curve)
         }
         monitor.needsFans = { [controller] in controller.mode != .automatic }
         monitor.panelGroups = { [settings] groups in
