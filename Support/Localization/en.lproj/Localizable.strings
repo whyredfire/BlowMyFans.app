@@ -34,6 +34,9 @@
 /* HelperInstaller.swift */
 "Blow My Fans needs to install a helper to change fan speeds." = "Blow My Fans needs to install a helper to change fan speeds.";
 
+/* HelperInstaller.swift */
+"Blow My Fans needs to remove its helper." = "Blow My Fans needs to remove its helper.";
+
 /* ModeControls.swift */
 "Cancel" = "Cancel";
 
@@ -93,6 +96,9 @@
 
 /* HelperInstaller.swift */
 "Helper installation was cancelled." = "Helper installation was cancelled.";
+
+/* HelperInstaller.swift */
+"Helper removal failed: %@" = "Helper removal failed: %@";
 
 /* SettingsView.swift */
 "Hottest CPU" = "Hottest CPU";
@@ -228,4 +234,7 @@
 
 /* SettingsView.swift */
 "Without the footer, press ⌘, in the panel to open Settings and ⌘Q to quit." = "Without the footer, press ⌘, in the panel to open Settings and ⌘Q to quit.";
+
+/* StatusMessage.swift */
+"Your Mac is too hot, so the fans are at full speed until it cools down." = "Your Mac is too hot, so the fans are at full speed until it cools down.";
 
