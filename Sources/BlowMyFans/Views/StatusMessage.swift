@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// Helper installation progress, or the latest error with a way to resume a paused mode.
+/// Helper installation progress, the latest error with a way to resume a paused mode, or why the
+/// fans aren't at the speed that was asked for.
 struct StatusMessage: View {
     @Environment(FanController.self) private var controller
     @Environment(HardwareMonitor.self) private var monitor
@@ -23,6 +24,10 @@ struct StatusMessage: View {
                         .controlSize(.small)
                     }
                 }
+            } else if controller.isCoolingDown {
+                Label("Your Mac is too hot, so the fans are at full speed until it cools down.", systemImage: "thermometer.high")
+                    .foregroundStyle(.orange)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .font(.callout)

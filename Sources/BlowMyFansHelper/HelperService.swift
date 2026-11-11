@@ -23,6 +23,10 @@ final class HelperService: NSObject, FanHelperProtocol, Sendable {
         reply(perform { try session.restoreAutomatic() })
     }
 
+    func keepAlive(reply: @escaping @Sendable (Int) -> Void) {
+        reply(session.keepAlive(for: client).rawValue)
+    }
+
     private func perform(_ body: () throws -> Void) -> String? {
         do {
             try body()

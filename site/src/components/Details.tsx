@@ -7,7 +7,7 @@ const details: { title: string; text: ReactNode }[] = [
   { title: "Your panel", text: "Hide the sections you don't need and pick which temperatures it lists." },
   { title: "Plugged in or on battery", text: "Give each its own mode, like Curve at your desk and Auto on the go. It switches as you plug in or unplug." },
   { title: "Thermal pressure", text: "A coloured dot on the icon when macOS starts slowing your Mac down to cool it." },
-  { title: "Hands back cleanly", text: "Fans return to macOS when the app quits, crashes or your Mac sleeps. If macOS isn't ready, they run at full speed until it is." },
+  { title: "Hands back cleanly", text: "Fans return to macOS when the app quits, crashes, hangs or your Mac sleeps. If macOS isn't ready, or your Mac gets too hot, they run at full speed." },
   { title: "Barely there", text: "It reads only what's on screen: well under 1% CPU, and its helper sleeps when there's nothing to do." },
   { title: "Keeps itself current", text: "Signed updates install in the background, without stealing focus." },
   {

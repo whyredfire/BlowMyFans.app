@@ -33,8 +33,9 @@
   go. It switches as you plug in or unplug.
 - **Thermal pressure:** shown in the panel, with a coloured dot on the menu bar icon when macOS starts
   throttling.
-- **Safe:** fans go back to macOS when the app quits, crashes or the Mac sleeps. If macOS won't take
-  them back yet, they run at full speed until it does.
+- **Safe:** fans go back to macOS when the app quits, crashes, stops responding or the Mac sleeps. If
+  macOS won't take them back yet, they run at full speed until it does, and they do the same while the
+  Mac is too hot, whatever speed you chose.
 - **Light:** reads only what's on screen; well under 1% CPU in the background, and the helper sleeps
   while it has nothing to do.
 - **Updates itself** with signed [Sparkle](https://sparkle-project.org) updates.

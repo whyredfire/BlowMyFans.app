@@ -51,6 +51,8 @@ final class FanController {
     private(set) var isSuspended = false
     /// The CPU temperature Curve mode follows, as of the last update, for display.
     private(set) var curveTemperature: Double?
+    /// The Mac got too hot, so the helper runs the fans at full speed until it has cooled down.
+    private(set) var isCoolingDown = false
 
     var mode: FanMode { configuration.mode }
 
@@ -60,7 +62,15 @@ final class FanController {
     @ObservationIgnored private var isSwitchingForPowerSource = false
     @ObservationIgnored private let helper = HelperClient()
     /// Speeds last confirmed by the helper; nil while macOS controls the fans.
-    @ObservationIgnored private var appliedRPMs: [Double]?
+    @ObservationIgnored private var appliedRPMs: [Double]? {
+        didSet {
+            if appliedRPMs == nil, isCoolingDown { isCoolingDown = false }
+        }
+    }
+    /// How often the helper hears from the app while speeds are applied. It hands the fans back to
+    /// macOS when it stops hearing, so a hung app can't leave them at a speed that follows nothing.
+    private static let heartbeatInterval = Duration.seconds(5)
+    @ObservationIgnored private var lastHeartbeat = ContinuousClock.now
     /// Bumped whenever the helper may have dropped applied speeds, so replies to calls made
     /// before that point aren't recorded as applied.
     @ObservationIgnored private var appliedGeneration = 0
@@ -338,9 +348,13 @@ final class FanController {
         do {
             switch desiredTarget() {
             case .hold:
+                await sendHeartbeat(generation)
                 return
             case .speeds(let target):
-                guard target != appliedRPMs else { return }
+                guard target != appliedRPMs else {
+                    await sendHeartbeat(generation)
+                    return
+                }
                 isTakingControl = appliedRPMs == nil
                 defer { isTakingControl = false }
                 try await ensureHelper()
@@ -351,6 +365,7 @@ final class FanController {
                     return
                 }
                 appliedRPMs = target
+                lastHeartbeat = .now
             case .automatic:
                 guard appliedRPMs != nil else { return }
                 appliedRPMs = nil
@@ -359,6 +374,27 @@ final class FanController {
             if !isSuspended { errorMessage = nil }
         } catch {
             await handleSyncFailure(error)
+        }
+    }
+
+    /// Lets the helper know the app is still running, and learns what it's doing with the applied speeds.
+    private func sendHeartbeat(_ generation: Int) async {
+        let now = ContinuousClock.now
+        guard appliedRPMs != nil, now - lastHeartbeat >= Self.heartbeatInterval else { return }
+        lastHeartbeat = now
+        let state = try? await helper.keepAlive()
+        // A connection lost meanwhile has already forgotten the applied speeds and asked for another sync.
+        guard generation == appliedGeneration, appliedRPMs != nil else { return }
+        switch state {
+        case .applied:
+            if isCoolingDown { isCoolingDown = false }
+        case .cooling:
+            if !isCoolingDown { isCoolingDown = true }
+        case .released, nil:
+            // The helper dropped the speeds or can't be reached. Sending them again either takes the
+            // fans back or fails, which pauses the mode and says why.
+            appliedRPMs = nil
+            needsAnotherSync = true
         }
     }
 

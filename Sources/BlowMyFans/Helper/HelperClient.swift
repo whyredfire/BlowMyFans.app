@@ -42,6 +42,13 @@ final class HelperClient {
         }
     }
 
+    /// Tells the helper the app is still running and learns what became of the speeds it was sent.
+    func keepAlive() async throws -> FanHelperState {
+        try await call { helper, reply in
+            helper.keepAlive { reply(.success(FanHelperState(rawValue: $0) ?? .released)) }
+        }
+    }
+
     func disconnect() {
         connection?.invalidate()
         connection = nil

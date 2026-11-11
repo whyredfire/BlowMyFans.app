@@ -1,5 +1,7 @@
 #!/bin/sh
-# Builds an Apple silicon, ad-hoc signed "Blow My Fans.app" into ./build.
+# Builds an Apple silicon "Blow My Fans.app" into ./build, ad-hoc signed unless SIGN_IDENTITY names a
+# Developer ID, e.g. SIGN_IDENTITY="Developer ID Application: Jane Doe (ABCDE12345)". Only a Developer ID
+# lets the helper and the app verify each other; an ad-hoc signature is one anybody can make.
 set -eu
 cd "$(dirname "$0")/.."
 
@@ -10,6 +12,7 @@ BUILD="$(git rev-list --count HEAD)"
 # Releases pass their version; other builds are named after the commit, e.g. 0.2.0-3-gabc1234-dirty.
 VERSION="${VERSION:-$(git describe --tags --dirty --always --match 'v[0-9]*' | sed 's/^v//')}"
 SPARKLE=".build/artifacts/sparkle/Sparkle/Sparkle.xcframework/macos-arm64_x86_64/Sparkle.framework"
+IDENTITY="${SIGN_IDENTITY:--}"
 
 swift build -c release $ARCHS
 BIN="$(swift build -c release $ARCHS --show-bin-path)"
@@ -34,12 +37,17 @@ done
 
 # Sign inside-out: Sparkle's nested executables, the framework, the helper, then the app.
 for item in XPCServices/Installer.xpc XPCServices/Downloader.xpc Autoupdate Updater.app; do
-    codesign --force --options runtime --sign - "$FRAMEWORK/$item"
+    codesign --force --options runtime --sign "$IDENTITY" "$FRAMEWORK/$item"
 done
-codesign --force --options runtime --sign - "$APP/Contents/Frameworks/Sparkle.framework"
-codesign --force --options runtime --sign - --identifier "$HELPER_LABEL" \
+codesign --force --options runtime --sign "$IDENTITY" "$APP/Contents/Frameworks/Sparkle.framework"
+codesign --force --options runtime --sign "$IDENTITY" --identifier "$HELPER_LABEL" \
     "$APP/Contents/Library/LaunchServices/$HELPER_LABEL"
-codesign --force --options runtime --sign - --entitlements Support/BlowMyFans.entitlements "$APP"
+if [ "$IDENTITY" = "-" ]; then
+    # The entitlement lets the app load Sparkle, which an ad-hoc signature can't tie to it.
+    codesign --force --options runtime --sign - --entitlements Support/BlowMyFans.entitlements "$APP"
+else
+    codesign --force --options runtime --sign "$IDENTITY" "$APP"
+fi
 codesign --verify --deep --strict "$APP"
 
 echo "Built $APP $VERSION ($BUILD)"
